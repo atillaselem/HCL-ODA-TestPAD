@@ -1,0 +1,234 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <RootNamespace>HCL_ODA_TestPAD</RootNamespace>
+    <Nullable>disable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>odaAppIcon.ico</ApplicationIcon>
+    <BaseOutputPath>$(SolutionDir)Build\$(Configuration)\</BaseOutputPath>
+	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <OutputPath>$(SolutionDir)Build\$(Configuration)\</OutputPath>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseWindowsForms>True</UseWindowsForms>
+    <AssemblyVersion>2023.2.27</AssemblyVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DefineConstants>$(DefineConstants)TRACE;x64</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DefineConstants>$(DefineConstants)TRACE;x64</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="appsettings.json" />
+    <None Remove="Images\Construct\circle_radius.png" />
+    <None Remove="Images\Construct\line.png" />
+    <None Remove="Images\Construct\ray.png" />
+    <None Remove="Images\Construct\xline.png" />
+    <None Remove="Images\Help\about.png" />
+    <None Remove="Images\Icon-ODA.ico" />
+    <None Remove="Images\Markups\circ.png" />
+    <None Remove="Images\Markups\cloud.png" />
+    <None Remove="Images\Markups\handle.png" />
+    <None Remove="Images\Markups\loadview.png" />
+    <None Remove="Images\Markups\rect.png" />
+    <None Remove="Images\Markups\saveview.png" />
+    <None Remove="Images\Markups\txt.png" />
+    <None Remove="Images\menu.png" />
+    <None Remove="Images\Menu\3dpdf.png" />
+    <None Remove="Images\Menu\open.png" />
+    <None Remove="Images\Menu\pdf.png" />
+    <None Remove="Images\Menu\save.png" />
+    <None Remove="Images\Menu\saveAs.png" />
+    <None Remove="Images\ModelBrowser\downAll.png" />
+    <None Remove="Images\ModelBrowser\expandArrow.png" />
+    <None Remove="Images\ModelBrowser\properties.png" />
+    <None Remove="Images\ModelBrowser\refresh.ico" />
+    <None Remove="Images\ModelBrowser\tree.png" />
+    <None Remove="Images\Navigation\orbit.png" />
+    <None Remove="Images\Navigation\pan.png" />
+    <None Remove="Images\Navigation\zoom_ext.png" />
+    <None Remove="Images\Navigation\zoom_in.png" />
+    <None Remove="Images\Navigation\zoom_out.png" />
+    <None Remove="Images\odaBgImg.png" />
+    <None Remove="Images\Regen\regenAll.png" />
+    <None Remove="Images\Regen\regenVisible.png" />
+    <None Remove="Images\Regen\regenVp.png" />
+    <None Remove="Images\RenderMode\2dwireframe.png" />
+    <None Remove="Images\RenderMode\3dwireframe.png" />
+    <None Remove="Images\RenderMode\gouraudshaded.png" />
+    <None Remove="Images\RenderMode\gouraudshaded_edges.png" />
+    <None Remove="Images\RenderMode\hiddenline.png" />
+    <None Remove="Images\RenderMode\shaded.png" />
+    <None Remove="Images\RenderMode\shaded_edges.png" />
+    <None Remove="Images\Sectioning\AddCuttingPlaneX.png" />
+    <None Remove="Images\Sectioning\AddCuttingPlaneY.png" />
+    <None Remove="Images\Sectioning\AddCuttingPlaneZ.png" />
+    <None Remove="Images\Sectioning\CuttingPlane.png" />
+    <None Remove="Images\Sectioning\CuttingPlaneColor.png" />
+    <None Remove="Images\Sectioning\CuttingPlaneOff.png" />
+    <None Remove="Images\Sectioning\FillCuttingPlane.png" />
+    <None Remove="Images\Sectioning\FillCuttingPlaneOff.png" />
+    <None Remove="Images\Sectioning\RemoveCuttingPlane.png" />
+    <None Remove="Images\TabItem\CloseTabItem.png" />
+    <None Remove="Images\Views\back.png" />
+    <None Remove="Images\Views\bottom.png" />
+    <None Remove="Images\Views\front.png" />
+    <None Remove="Images\Views\isometric.PNG" />
+    <None Remove="Images\Views\left.png" />
+    <None Remove="Images\Views\neIsometric.png" />
+    <None Remove="Images\Views\nwIsometric.png" />
+    <None Remove="Images\Views\perspective.png" />
+    <None Remove="Images\Views\right.png" />
+    <None Remove="Images\Views\seIsometric.png" />
+    <None Remove="Images\Views\swIsometric.png" />
+    <None Remove="Images\Views\top.png" />
+    <None Remove="Resources\Images\DockPanel\ContactSupport_32x32.png" />
+    <None Remove="Resources\Images\DockPanel\OnlineHelp_32x32.png" />
+    <None Remove="Resources\Images\DockPanel\UseCasePanel_32x32.png" />
+    <None Remove="Resources\Images\TabItemHeader\CloseTabItem.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="odaAppIcon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="6.5.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="Prism.Wpf" Version="8.1.97" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="5.0.1" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.4.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\Construct\circle_radius.png" />
+    <Resource Include="Images\Construct\line.png" />
+    <Resource Include="Images\Construct\ray.png" />
+    <Resource Include="Images\Construct\xline.png" />
+    <Resource Include="Images\Help\about.png" />
+    <Resource Include="Images\Icon-ODA.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="TD_SwigCoreMgd">
+      <HintPath>ThirdParty\TeighaLibraries\x64\TD_SwigCoreMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TV_SwigDbMgd">
+      <HintPath>ThirdParty\TeighaLibraries\x64\TV_SwigDbMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Wpf.TabControl">
+      <HintPath>common\lib\ExtendedTab\Wpf.TabControl.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock">
+      <HintPath>common\lib\Xceed\Xceed.Wpf.AvalonDock.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Aero">
+      <HintPath>common\lib\Xceed\Xceed.Wpf.AvalonDock.Themes.Aero.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Metro">
+      <HintPath>common\lib\Xceed\Xceed.Wpf.AvalonDock.Themes.Metro.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.VS2010">
+      <HintPath>common\lib\Xceed\Xceed.Wpf.AvalonDock.Themes.VS2010.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.Toolkit">
+      <HintPath>common\lib\Xceed\Xceed.Wpf.Toolkit.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\Markups\circ.png" />
+    <Resource Include="Images\Markups\cloud.png" />
+    <Resource Include="Images\Markups\handle.png" />
+    <Resource Include="Images\Markups\loadview.png" />
+    <Resource Include="Images\Markups\rect.png" />
+    <Resource Include="Images\Markups\saveview.png" />
+    <Resource Include="Images\Markups\txt.png" />
+    <Resource Include="Images\menu.png" />
+    <Resource Include="Images\Menu\3dpdf.png" />
+    <Resource Include="Images\Menu\open.png" />
+    <Resource Include="Images\Menu\pdf.png" />
+    <Resource Include="Images\Menu\save.png" />
+    <Resource Include="Images\Menu\saveAs.png" />
+    <Resource Include="Images\ModelBrowser\downAll.png" />
+    <Resource Include="Images\ModelBrowser\expandArrow.png" />
+    <Resource Include="Images\ModelBrowser\properties.png" />
+    <Resource Include="Images\ModelBrowser\refresh.ico" />
+    <Resource Include="Images\ModelBrowser\tree.png" />
+    <Resource Include="Images\Navigation\orbit.png" />
+    <Resource Include="Images\Navigation\pan.png" />
+    <Resource Include="Images\Navigation\zoom_ext.png" />
+    <Resource Include="Images\Navigation\zoom_in.png" />
+    <Resource Include="Images\Navigation\zoom_out.png" />
+    <Resource Include="Images\odaBgImg.png" />
+    <Resource Include="Images\Regen\regenAll.png" />
+    <Resource Include="Images\Regen\regenVisible.png" />
+    <Resource Include="Images\Regen\regenVp.png" />
+    <Resource Include="Images\RenderMode\2dwireframe.png" />
+    <Resource Include="Images\RenderMode\3dwireframe.png" />
+    <Resource Include="Images\RenderMode\gouraudshaded.png" />
+    <Resource Include="Images\RenderMode\gouraudshaded_edges.png" />
+    <Resource Include="Images\RenderMode\hiddenline.png" />
+    <Resource Include="Images\RenderMode\shaded.png" />
+    <Resource Include="Images\RenderMode\shaded_edges.png" />
+    <Resource Include="Images\Sectioning\AddCuttingPlaneX.png" />
+    <Resource Include="Images\Sectioning\AddCuttingPlaneY.png" />
+    <Resource Include="Images\Sectioning\AddCuttingPlaneZ.png" />
+    <Resource Include="Images\Sectioning\CuttingPlane.png" />
+    <Resource Include="Images\Sectioning\CuttingPlaneColor.png" />
+    <Resource Include="Images\Sectioning\CuttingPlaneOff.png" />
+    <Resource Include="Images\Sectioning\FillCuttingPlane.png" />
+    <Resource Include="Images\Sectioning\FillCuttingPlaneOff.png" />
+    <Resource Include="Images\Sectioning\RemoveCuttingPlane.png" />
+    <Resource Include="Images\TabItem\CloseTabItem.png" />
+    <Resource Include="Images\Views\back.png" />
+    <Resource Include="Images\Views\bottom.png" />
+    <Resource Include="Images\Views\front.png" />
+    <Resource Include="Images\Views\isometric.PNG" />
+    <Resource Include="Images\Views\left.png" />
+    <Resource Include="Images\Views\neIsometric.png" />
+    <Resource Include="Images\Views\nwIsometric.png" />
+    <Resource Include="Images\Views\perspective.png" />
+    <Resource Include="Images\Views\right.png" />
+    <Resource Include="Images\Views\seIsometric.png" />
+    <Resource Include="Images\Views\swIsometric.png" />
+    <Resource Include="Images\Views\top.png" />
+    <Resource Include="Resources\Images\DockPanel\ContactSupport_32x32.png" />
+    <Resource Include="Resources\Images\DockPanel\OnlineHelp_32x32.png" />
+    <Resource Include="Resources\Images\DockPanel\UseCasePanel_32x32.png" />
+    <Resource Include="Resources\Images\TabItemHeader\CloseTabItem.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Infrastructure\" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="XCOPY &quot;$(SolutionDir)\ThirdParty\TeighaLibraries\x64\*.*&quot; &quot;$(TargetDir)\libs&quot; /F /R /Y /I /D /Q" />
+  </Target>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="del &quot;$(TargetDir)\*.*&quot; /Q&#xD;&#xA;del &quot;$(TargetDir)\libs&quot; /Q" />
+  </Target>
+
+</Project>

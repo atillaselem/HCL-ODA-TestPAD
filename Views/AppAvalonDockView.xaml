@@ -1,0 +1,100 @@
+﻿<UserControl
+    x:Class="HCL_ODA_TestPAD.Views.AppAvalonDockView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <Grid>
+        <xcad:DockingManager
+            x:Name="_dockingManager"
+            AllowMixedOrientation="True"
+            BorderBrush="Black"
+            BorderThickness="1">
+
+            <xcad:DockingManager.DocumentHeaderTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Margin="0,0,4,0" Source="{Binding IconSource}" />
+                        <TextBlock Text="{Binding Title}" />
+                    </StackPanel>
+                </DataTemplate>
+            </xcad:DockingManager.DocumentHeaderTemplate>
+
+            <xcad:LayoutRoot x:Name="_layoutRoot">
+
+                <xcad:LayoutPanel Orientation="Horizontal">
+                    <!--  Fibex Tree Panel  -->
+                    <xcad:LayoutAnchorablePane DockWidth="400">
+                        <xcad:LayoutAnchorable
+                            x:Name="OdaMenuPanel"
+                            Title="ODA Menu"
+                            CanAutoHide="True"
+                            CanClose="False"
+                            CanHide="True"
+                            ContentId="OdaMenuPanelId"
+                            IconSource="{StaticResource UseCasePanel}">
+                            <ContentControl Content="{Binding OdaMenuViewModel}" />
+                        </xcad:LayoutAnchorable>
+                    </xcad:LayoutAnchorablePane>
+                    <!--  Fibex Tree Panel  -->
+                    <xcad:LayoutAnchorablePane DockWidth="400">
+                        <xcad:LayoutAnchorable
+                            x:Name="OdaDatabaseExplorerPanel"
+                            Title="Database Explorer"
+                            CanAutoHide="True"
+                            CanClose="False"
+                            CanHide="True"
+                            ContentId="OdaDatabaseExplorerPanelId"
+                            IconSource="{StaticResource UseCasePanel}">
+                            <ContentControl Content="{Binding OdaDatabaseExplorerViewModel}" />
+                        </xcad:LayoutAnchorable>
+                    </xcad:LayoutAnchorablePane>
+                    <!--  Fibex Catalog Panel  -->
+                    <xcad:LayoutAnchorablePane DockWidth="400">
+                        <xcad:LayoutAnchorable
+                            x:Name="TestPADSettingsPanel"
+                            Title="HCL-ODA-TestPAD Settings"
+                            CanAutoHide="True"
+                            CanClose="False"
+                            CanHide="True"
+                            ContentId="TestPADSettingsPanelId"
+                            IconSource="{StaticResource ContactSupport}">
+                            <ContentControl Content="{Binding TestPADSettingsViewModel}" />
+                        </xcad:LayoutAnchorable>
+                    </xcad:LayoutAnchorablePane>
+                    <!--  CAD Model Tab View Panel  -->
+                    <xcad:LayoutAnchorablePane DockWidth="400">
+                        <xcad:LayoutAnchorable
+                            x:Name="TabbedCadModelViewPanel"
+                            Title="CAD Model Tab View"
+                            CanAutoHide="True"
+                            CanClose="False"
+                            CanHide="True"
+                            ContentId="TabbedCadModelViewPanelId"
+                            IconSource="{StaticResource OnlineHelpPanel}">
+                            <ContentControl Content="{Binding TabbedCadModelViewModel}" />
+                        </xcad:LayoutAnchorable>
+                    </xcad:LayoutAnchorablePane>
+                    <!--  AppMonitor Panel  -->
+                    <xcad:LayoutAnchorablePane DockWidth="400">
+                        <xcad:LayoutAnchorable
+                            x:Name="AppMonitorPanel"
+                            Title="AppMonitor Panel"
+                            CanAutoHide="True"
+                            CanClose="False"
+                            CanHide="True"
+                            ContentId="AppMonitorPanelId"
+                            IconSource="{StaticResource OnlineHelpPanel}">
+                            <ContentControl Content="{Binding AppMonitorViewModel}" />
+                        </xcad:LayoutAnchorable>
+                    </xcad:LayoutAnchorablePane>
+                </xcad:LayoutPanel>
+            </xcad:LayoutRoot>
+        </xcad:DockingManager>
+    </Grid>
+</UserControl>

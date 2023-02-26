@@ -1,0 +1,10 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:HCL_ODA_TestPAD.Resources.Converters">
+    <!--  Bool to Visibility Converter  -->
+    <BooleanToVisibilityConverter x:Key="boolToVisiConverter" />
+    <!--  String to Visibility Converter  -->
+    <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+
+</ResourceDictionary>

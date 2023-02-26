@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "HCL-ODA-TestPAD": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

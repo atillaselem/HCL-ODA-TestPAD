@@ -1,0 +1,24 @@
+﻿namespace HCL_ODA_TestPAD.Mvvm.Events
+{
+    //Application Event Types published/subscribed during Application Life Cycle
+    public enum AET
+    {
+        EVENT_TRACEDATA_LOADED,
+        EVENT_BUS_TraceTx_DELAY_TABLE_CREATED,
+        EVENT_BUS_ActiveTx_DELAY_TABLE_CREATED,
+        EVENT_BUS_Rx_DELAY_TABLE_CREATED,
+        EVENT_SHOW_TAB_TRACE_REPLAY,
+        EVENT_ACTIVE_BUS_ALIAS,
+        EVENT_USE_CASE_IDENTITY,
+        EVENT_CLIPBOARD_HAS_IMAGE,
+        EVENT_UPDATE_DATACONTEXT,
+        EVENT_USECASE_RUN_COMPLETED,
+        EVENT_USECASE_TX_TABLES,
+        EVENT_TRACEDATA_FILTERED,
+        EVENT_TRACEFILE_SELECTED,
+        EVENT_UPDATE_SETTINGS_UI,
+        EVENT_CATALOGS_LOADED,
+        EVENT_TRACEDATA_DUTFILTERING,
+        EVENT_CATALOG_LOADED
+    }
+}

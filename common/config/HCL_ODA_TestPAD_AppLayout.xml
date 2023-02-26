@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LayoutRoot>
+  <RootPanel Orientation="Vertical">
+    <LayoutAnchorablePaneGroup Orientation="Horizontal" DockWidth="400" DockHeight="0.24740549068273773*" FloatingWidth="410" FloatingHeight="999" FloatingLeft="962" FloatingTop="31">
+      <LayoutAnchorablePane FloatingWidth="410" FloatingHeight="999" FloatingLeft="962" FloatingTop="31">
+        <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Menu" IsSelected="True" ContentId="OdaMenuPanelId" FloatingLeft="962" FloatingTop="31" FloatingWidth="410" FloatingHeight="999" CanClose="False" LastActivationTimeStamp="02/25/2023 23:29:19" />
+      </LayoutAnchorablePane>
+    </LayoutAnchorablePaneGroup>
+    <LayoutPanel Orientation="Horizontal" DockHeight="1.7525945093172624*">
+      <LayoutAnchorablePane DockWidth="0.1422489228362094*" FloatingWidth="960" FloatingHeight="1032">
+        <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Database Explorer" IsSelected="True" ContentId="OdaDatabaseExplorerPanelId" FloatingWidth="960" FloatingHeight="1032" CanClose="False" LastActivationTimeStamp="02/19/2023 23:30:53" />
+      </LayoutAnchorablePane>
+      <LayoutAnchorablePaneGroup Orientation="Vertical" DockWidth="1367">
+        <LayoutAnchorablePane DockWidth="400" DockHeight="1.5131259804046278*">
+          <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="CAD Model Tab View" IsSelected="True" ContentId="TabbedCadModelViewPanelId" CanClose="False" LastActivationTimeStamp="02/25/2023 23:28:37" />
+        </LayoutAnchorablePane>
+        <LayoutAnchorablePaneGroup Orientation="Horizontal" DockWidth="400" DockHeight="0.48687401959537235*" FloatingWidth="410" FloatingHeight="999" FloatingLeft="1151" FloatingTop="562">
+          <LayoutAnchorablePane FloatingWidth="410" FloatingHeight="999" FloatingLeft="1151" FloatingTop="562">
+            <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="AppMonitor Panel" IsSelected="True" ContentId="AppMonitorPanelId" FloatingLeft="1151" FloatingTop="562" FloatingWidth="410" FloatingHeight="999" CanClose="False" LastActivationTimeStamp="02/25/2023 14:27:46" />
+          </LayoutAnchorablePane>
+        </LayoutAnchorablePaneGroup>
+      </LayoutAnchorablePaneGroup>
+      <LayoutAnchorablePane DockWidth="0.17256508574288223*" FloatingWidth="960" FloatingHeight="1032" FloatingLeft="960">
+        <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="HCL-ODA-TestPAD Settings" IsSelected="True" ContentId="TestPADSettingsPanelId" FloatingLeft="960" FloatingWidth="960" FloatingHeight="1032" CanClose="False" LastActivationTimeStamp="02/25/2023 23:29:16" />
+      </LayoutAnchorablePane>
+    </LayoutPanel>
+  </RootPanel>
+  <TopSide />
+  <RightSide />
+  <LeftSide />
+  <BottomSide />
+  <FloatingWindows />
+  <Hidden />
+</LayoutRoot>

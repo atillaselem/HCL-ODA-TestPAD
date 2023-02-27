@@ -58,13 +58,7 @@ public partial class MainWindow : Window
         {
             Background = new SolidColorBrush(Colors.White)
         };
-        //MenuItem addViewItm = new MenuItem() { Header = "AddView", Height = 30 };
-        //menu.Items.Add(addViewItm);
-        //addViewItm.Command = ViewModel.AddViewCommand;
 
-        //MenuItem clearViewItm = new MenuItem() { Header = "ClearView", Height = 30 };
-        //menu.Items.Add(clearViewItm);
-        //clearViewItm.Command = ViewModel.ClearViewCommand;
         menu.Items.Add(new Separator());
         MenuItem openItm = new MenuItem() { Header = "Open", Height = 30 };
         openItm.Icon = new Image
@@ -148,7 +142,7 @@ public partial class MainWindow : Window
             e.Cancel = !IsClosing;
             return;
         }
-
+        ViewModel.SaveSettings();
         ViewModel.ClearRenderArea();
         UnInitializeOdVisualize();
         e.Cancel = false;
@@ -176,7 +170,6 @@ public partial class MainWindow : Window
     private void Exit_Click(object sender, RoutedEventArgs e)
     {       
         Close();
-        ViewModel.SaveSettings();
     }
 
     private void PropertiesSplitter_OnMouseMove(object sender, MouseEventArgs e)

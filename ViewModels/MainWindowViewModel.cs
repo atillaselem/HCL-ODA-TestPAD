@@ -226,11 +226,6 @@ public class MainWindowViewModel
     internal void ClearRenderArea()
     {
         if (_hclGLES2_Control == null) return;
-        //_hclGLES2_Control.Adapter.ClearDevices();
-        //OdTvFactoryId factId = TV_Globals.odTvGetFactory();
-        //factId.clearDatabases();
-        //MainWindow.PropertiesPalette.PropertiesPaletteList.Children.Clear();
-        //MainWindow.ModelBrowser.ModelBrowser.Items.Clear();
         if (AppMainWindow.RenderArea.Children.Count > 0)
         {
             AppMainWindow.RenderArea.Children.RemoveAt(AppMainWindow.RenderArea.Children.Count - 1);

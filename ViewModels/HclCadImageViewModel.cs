@@ -1900,6 +1900,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     {
         ClearDevices();
         ClearDatabases();
+        ViewControl?.SetFileLoaded(false, null);
     }
     private void ClearDatabases()
     {

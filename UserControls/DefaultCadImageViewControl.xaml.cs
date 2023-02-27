@@ -69,8 +69,15 @@ public partial class DefaultCadImageViewControl : ICadImageViewControl
     public void SetFileLoaded(bool isFileLoaded, string filePath)
     {
         VM.FileIsExist = isFileLoaded;
-        VM.AppMainWindow.Title = AssemblyHelper.GetAppTitle() + $" - File Loaded : {filePath}";
-        VM.PanCommand_Clicked();
+        if (isFileLoaded)
+        {
+            VM.AppMainWindow.Title = AssemblyHelper.GetAppTitle() + $" - File Loaded : {filePath}";
+            VM.PanCommand_Clicked();
+        }
+        else
+        {
+            VM.AppMainWindow.Title = AssemblyHelper.GetAppTitle();
+        }
     }
 
     public void InvalidateControl()

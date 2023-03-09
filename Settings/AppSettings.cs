@@ -96,7 +96,7 @@ public record AppSettings : IAppSettings
     [Category("User Interface")]
     [DisplayName("UI Layout")]
     [Description("User Interface Layout")]
-    //[ReadOnly(true)]
+    [ReadOnly(true)]
     public AppLayout AppLayout { get; set; }
 
     #endregion

@@ -6,9 +6,73 @@
              xmlns:local="clr-namespace:HCL_ODA_TestPAD.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <StackPanel Background="LightGray" Orientation="Horizontal">
-            <Label Content="{Binding AppStatus}" FontSize="16"/>
-        </StackPanel>
-    </Grid>
+    <UserControl.Resources>
+        <Style TargetType="ProgressBar">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar" >
+                        <Grid>
+                            <Rectangle x:Name="PART_Track" Fill="{TemplateBinding Background}" />
+                            <Rectangle x:Name="PART_Indicator" Stroke="Black" StrokeThickness="1" HorizontalAlignment="Left">
+                                <Rectangle.Fill>
+                                    <RadialGradientBrush>
+                                        <GradientStop Offset="0" Color="Yellow" />
+                                        <GradientStop Offset="1" Color="LightGreen" />
+                                    </RadialGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <TextBlock Text="{Binding ProgressPercentage, StringFormat={}{0:0.#} %}"
+                                   Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsIndeterminate" Value="True">
+                                <Setter Property="Fill" TargetName="PART_Indicator">
+                                    <Setter.Value>
+                                        <LinearGradientBrush EndPoint=".1,1" SpreadMethod="Repeat">
+                                            <GradientStop Offset="0" Color="Orange" />
+                                            <GradientStop Offset="1" Color="Red" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush EndPoint="1,0">
+                        <GradientStop Color="DarkBlue" Offset="0" />
+                        <GradientStop Color="LightBlue" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="Black" />
+        </Style>
+    </UserControl.Resources>
+
+    <StatusBar x:Name="TestPAD_StatusBar"  Background="{Binding Path=MessageStatusColor}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="300"/>
+            </Grid.ColumnDefinitions>
+            <Label FontWeight="Bold"  Content="{Binding Path=StatusMessage}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalAlignment="Center"/>
+            <ProgressBar Grid.Column="1" Margin="0,3,0,3" Value="{Binding Path=ProgressValue}" 
+                         Maximum="{Binding ProgressMax}" 
+                         Visibility="{Binding ProgressBarVisibility}"
+                         VerticalAlignment="Stretch" Foreground="DarkRed" FontSize="14" FontWeight="Bold">
+                <ProgressBar.Background>
+                    <LinearGradientBrush EndPoint=".5,0" SpreadMethod="Reflect">
+                        <GradientStop Offset="0" Color="LightYellow" />
+                        <GradientStop Offset="0.5" Color="RosyBrown" />
+                    </LinearGradientBrush>
+                </ProgressBar.Background>
+            </ProgressBar>
+        </Grid>
+    </StatusBar>
+
 </UserControl>

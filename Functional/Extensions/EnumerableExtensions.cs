@@ -120,5 +120,10 @@ namespace HCL_ODA_TestPAD.Functional.Extensions
             sequence.Select(map)
                 .OfType<Some<TResult>>()
                 .Select(x => (TResult)x);
+
+        public static Dictionary<K, V> Filter<K, V>(this Dictionary<K, V> dict, Predicate<KeyValuePair<K, V>> pred)
+        {
+            return dict.Where(it => pred(it)).ToDictionary(it => it.Key, it => it.Value);
+        }
     }
 }

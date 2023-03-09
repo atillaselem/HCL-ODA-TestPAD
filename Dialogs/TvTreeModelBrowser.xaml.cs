@@ -289,7 +289,7 @@ public partial class TvTreeModelBrowser : UserControl
             OdTvEntity en = enId.openObject();
             string name = en.getName();
             TvTreeItem child = new TvTreeItem("Entity<" + (name.Length > 0 ? name : _entityNum++.ToString()) + ">",
-                Resource["MbEntityImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Entity, enId, _wpfView.TvDeviceId), _wpfView.VM);
+                Resource["MbEntityImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Entity, enId, _wpfView.TvGsDeviceId), _wpfView.VM);
             ulong hndl = enId.openObject().getDatabaseHandle();
             if(!parent.NodeData.EntitiesDictionary.ContainsKey(hndl))
                 parent.NodeData.EntitiesDictionary.Add(hndl, child);
@@ -342,7 +342,7 @@ public partial class TvTreeModelBrowser : UserControl
         {
             OdTvEntity en = id.openAsSubEntity();
             TvTreeItem child = new TvTreeItem("SubEntity<" + en.getName() + ">",
-                Resource["MbGeomImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Geometry, id, _wpfView.TvDeviceId), _wpfView.VM);
+                Resource["MbGeomImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Geometry, id, _wpfView.TvGsDeviceId), _wpfView.VM);
             if (!en.getGeometryDataIterator().done())
             {
                 child.Expanded += TvTreeItem_Expanded;
@@ -352,7 +352,7 @@ public partial class TvTreeModelBrowser : UserControl
         else
         {
             new TvTreeItem("<" + GetGeomNameFromType(id.getType()) + ">",
-                Resource["MbGeomImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Geometry, id, _wpfView.TvDeviceId), _wpfView.VM);
+                Resource["MbGeomImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Geometry, id, _wpfView.TvGsDeviceId), _wpfView.VM);
         }
         MM.StopTransaction(mtr);
     }
@@ -657,7 +657,7 @@ public partial class TvTreeModelBrowser : UserControl
                     OdTvModelsIterator it = _tvDbId.openObject().getModelsIterator();
                     while (!it.done())
                     {
-                        TvNodeData nData = new TvNodeData(TvBrowserItemType.Models, it.getModel(), _wpfView.TvDeviceId);
+                        TvNodeData nData = new TvNodeData(TvBrowserItemType.Models, it.getModel(), _wpfView.TvGsDeviceId);
 
                         OdTvModel model = it.getModel().openObject();
                         TvTreeItem child = new TvTreeItem("Model<" + model.getName() + ">", Resource["MbModelFoldImg"] as BitmapImage, itm, nData, _wpfView.VM);

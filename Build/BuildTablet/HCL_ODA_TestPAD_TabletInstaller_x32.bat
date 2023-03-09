@@ -9,7 +9,6 @@ REM set VERSION_BUILD=0.%date:~10,4%.%date:~4,2%.%date:~7,2%
 FOR /F "TOKENS=1 eol=/ DELIMS=/ " %%A IN ('DATE/T') DO SET dd=%%A
 FOR /F "TOKENS=1,2 eol=/ DELIMS=/ " %%A IN ('DATE/T') DO SET mm=%%B
 FOR /F "TOKENS=1,2,3 eol=/ DELIMS=/ " %%A IN ('DATE/T') DO SET yyyy=%%C
-
 set VERSION_BUILD=0.%yyyy%.%dd%.%mm%
 
 echo *** Creating the HCL-ODA-TestPAD installer ... ***

@@ -9,6 +9,6 @@ namespace HCL_ODA_TestPAD.Mvvm.Events
     public class OpenCadModelTabViewEventArgs
     {
         public string ViewModelFilePath { get; set; }
-        public string ViewModelKey { get; set; }
+        public string ViewModelKey { get; set; } 
     }
 }

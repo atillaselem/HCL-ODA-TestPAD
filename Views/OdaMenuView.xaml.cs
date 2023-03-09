@@ -1,7 +1,10 @@
 ﻿using HCL_ODA_TestPAD.ViewModels;
+using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
@@ -54,6 +57,18 @@ namespace HCL_ODA_TestPAD.Views
             if (ViewModel.OdaMenuView == null)
             {
                 ViewModel.OdaMenuView = this;
+                ViewModel.ButtonFactory = new Dictionary<ButtonName, Func<ToggleButton>>
+                {
+                    { ButtonName.PanBtn, () => PanBtn },
+                    { ButtonName.OrbitBtn, () => OrbitBtn },
+                    { ButtonName.IsometricBtn, () => IsometricBtn },
+                    { ButtonName.PerspectiveBtn, () => PerspectiveBtn },
+                    { ButtonName.Wireframe2DBtn, () => Wireframe2DBtn },
+                    { ButtonName.Wireframe3DBtn, () => Wireframe3DBtn },
+                    { ButtonName.HiddenLineBtn, () => HiddenLineBtn },
+                    { ButtonName.ShadedBtn, () => ShadedBtn },
+                    { ButtonName.ShadedWithEdgesBtn, () => ShadedWithEdgesBtn }
+                };
             }
             else return;
             var menu = sender as ContextMenu;

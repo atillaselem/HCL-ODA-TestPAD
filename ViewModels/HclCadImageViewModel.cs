@@ -12,7 +12,6 @@ using HCL_ODA_TestPAD.Performance;
 using HCL_ODA_TestPAD.Services;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels.Base;
-using HCL_ODA_TestPAD.Views;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
@@ -25,25 +24,25 @@ using System.Windows.Media;
 using System.Windows;
 using Teigha.Core;
 using Teigha.Visualize;
-using static HCL_ODA_TestPAD.ViewModels.MainWindowViewModel;
 using HCL_ODA_TestPAD.HCL.CadUnits;
 using MessageBox = System.Windows.Forms.MessageBox;
 using System.Windows.Forms;
+using System.Windows.Documents;
+using static Teigha.Core.OdGsCullingVolume;
 
 namespace HCL_ODA_TestPAD.ViewModels;
 
 public class HclCadImageViewModel : CadImageTabViewModelBase,
-    IOdaSectioning, ICadOdaMenuView
+    IOdaSectioning
 {
     public ICadImageViewControl ViewControl { get; set; }
     private readonly IEventAggregator _eventAggregator;
     private readonly IAppSettings _appSettings;
-
     #region App Specific Variables
     public MainWindowViewModel VM { get; set; }
     public string FilePath { get; private set; }
-    public double Width { get; set; }
-    public double Height { get; set; }
+    //public double Width { get; set; }
+    //public double Height { get; set; }
     public bool AddDefaultViewOnLoad { get; set; }
     #endregion
 
@@ -67,7 +66,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         get { return _dbId; }
         set { _dbId = value; }
     }
-    public OdTvGsDeviceId TvDeviceId { get; set; }
+    public OdTvGsDeviceId TvGsDeviceId { get; set; }
 
     // current active dragger
     private ODA.Draggers.OdTvDragger _dragger = null;
@@ -108,7 +107,6 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     {
         _eventAggregator = eventAggregator;
         _appSettings = settingsProvider.AppSettings;
-        _eventAggregator.GetEvent<CadModelLoadedEvent>().Publish();
     }
 
     public override async Task LoadCadModelViewAsync()
@@ -245,7 +243,8 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             
             SetCadDbUnitAsCadFileUnit(odTvDatabase);
             CreateDefaultBitmapDevice(width, height, odTvDatabase, odTvModelId);
-            ViewControl?.SetFileLoaded(true, "HILTI-HCL-GL_Control");
+            FilePath = "HILTI-HCL-GL_Control";
+            ViewControl?.SetFileLoaded(true, FilePath, (statusText) => _eventAggregator.GetEvent<AppStatusTextChanged>().Publish(statusText));
         }
         catch
         {
@@ -263,10 +262,10 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         try
         {
             //1-Create device
-            TvDeviceId = TvDatabaseId?.openObject().createBitmapDevice("TV_BitmapDevice_Default");
-            _cadModel.TvGsDeviceId = TvDeviceId;
+            TvGsDeviceId = TvDatabaseId?.openObject().createBitmapDevice("TV_BitmapDevice_Default");
+            _cadModel.TvGsDeviceId = TvGsDeviceId;
             //2-Open device
-            using var odTvGsDevice = TvDeviceId?.openObject(OpenMode.kForWrite);
+            using var odTvGsDevice = TvGsDeviceId?.openObject(OpenMode.kForWrite);
 
             //3-Create view
             using var odTvGsViewId = odTvGsDevice?.createView("TV_View_Default");
@@ -334,7 +333,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             SetCadDbUnitAsCadFileUnit(odTvDatabase);
 
             //1-Create bitmap device
-            TvDeviceId = odTvDatabase.createBitmapDevice("TV_BitmapDevice_DEVICE");
+            TvGsDeviceId = odTvDatabase.createBitmapDevice("TV_BitmapDevice_DEVICE");
 
             OdTvDevicesIterator importedDevIt = odTvDatabase.getDevicesIterator();
             OdTvGsDeviceId importedDeviceId = importedDevIt.getDevice();
@@ -342,20 +341,25 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             OdTvGsViewId activeViewId = importedDevice.viewAt(0);
             importedDevice.removeView(activeViewId);
 
-            using var odTvGsDevice = TvDeviceId.openObject(OpenMode.kForWrite);
+            using var odTvGsDevice = TvGsDeviceId.openObject(OpenMode.kForWrite);
             /*Remove Old View*/
             odTvGsDevice.addView(activeViewId);
             odTvGsDevice.setActive(true);
             //2-Setup Bitmap Gs for OpenGLES2
             odTvGsDevice.setupGsBitmap(0, 0, OdTvGsDevice.Name.kOpenGLES2);
-            odTvGsDevice.setForbidImageHighlight(true);
+            odTvGsDevice.setForbidImageHighlight(_appSettings.SetForbidImageHighlight);
+
 
             if (!isIfc)
             {
                 odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _appSettings.UseSceneGraph);
-                odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _appSettings.UseForcePartialUpdate);
             }
-            OdTvDCRect rect = new OdTvDCRect(0, _widthResized, _heightResized, 0);
+            else
+            {
+                odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _appSettings.IfcUseSceneGraph);
+            }
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _appSettings.UseForcePartialUpdate);
+            OdTvDCRect rect = new OdTvDCRect(0, 800, 600, 0);
             odTvGsDevice.onSize(rect);
             odTvGsDevice.update();
 
@@ -365,12 +369,19 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             SetFrozenLayersVisible(odTvDatabase);
 
             FilePath = filepath;
-            ViewControl?.SetFileLoaded(true, filepath);
+            //ViewControl?.SetFileLoaded(true, filepath);
+            EmitFileLoadedEvents();
         }
         _isFileLoading = true;
-        _cadModel.TvGsDeviceId = TvDeviceId;
+        _cadModel.TvGsDeviceId = TvGsDeviceId;
 
         Zoom(ZoomType.ZoomExtents);
+    }
+
+    private void EmitFileLoadedEvents()
+    {
+        ViewControl?.SetFileLoaded(true, FilePath, (statusText) => _eventAggregator.GetEvent<AppStatusTextChanged>().Publish(statusText));
+        _eventAggregator.GetEvent<CadModelLoadedEvent>().Publish(FilePath);
     }
 
     private void SetCadDbUnitAsCadFileUnit(OdTvDatabase odTvDatabase)
@@ -445,7 +456,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         if (ext != null)
         {
             ext = ext.ToLower();
-            if (ext == ".dwg")
+            if (ext == ".dwg" || ext == ".dxf")
             {
                 importParams = new OdTvDwgImportParams();
                 OdTvDwgImportParams dwgPmtrs = importParams as OdTvDwgImportParams;
@@ -501,46 +512,45 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     }
     private void ClearDevices()
     {
-        //if (!_isInitialized) return;
         _cadImageViewModel.OnVisibilityChanged(false);
-        //IsVisibleChanged -= VisibilityChanged;
 
         MemoryTransaction mtr = MM.StartTransaction();
 
-        if (TvDeviceId != null)
+        if (TvGsDeviceId != null)
         {
             foreach (var extendedView in _extendedViewDict.Values)
             {
                 extendedView.Dispose();
             }
             _extendedViewDict.Clear();
-            OdTvGsDevice dev = TvDeviceId.openObject(OpenMode.kForWrite);
-            for (int i = 0; i < dev.numViews(); i++)
-            {
-                dev.viewAt(i).openObject().Dispose();
+            OdTvGsDevice dev = TvGsDeviceId.openObject(OpenMode.kForWrite);
+            if(dev != null) { 
+                for (int i = 0; i < dev.numViews(); i++)
+                {
+                    dev.viewAt(i).openObject().Dispose();
+                }
             }
-
             if (TvDatabaseId != null && !TvDatabaseId.isNull() && TvDatabaseId.isValid())
                 TvDatabaseId
                     .openObject(OpenMode.kForWrite)
                     .clearDevices();
 
-            TvDeviceId.Dispose();
-            TvDeviceId = null;
+            TvGsDeviceId.Dispose();
+            TvGsDeviceId = null;
         }
         MM.StopTransaction(mtr);
 
         _cadModel.Dispose();
-        Debug.WriteLine("CloseTabView : ClearDevices");
+        Debug.WriteLine($"ClearDevices : {TabItemTitle}");
     }
     private void Init()
     {
-        if (TvDatabaseId == null || TvDeviceId == null)
+        if (TvDatabaseId == null || TvGsDeviceId == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvDatabase pDb = TvDatabaseId.openObject(OpenMode.kForWrite);
         _tvDraggersModelId = pDb.createModel("Draggers", OdTvModel.Type.kDirect, false);
-        OdTvSelectDragger selectDragger = new OdTvSelectDragger(this, _tvActiveModelId, TvDeviceId, _tvDraggersModelId);
+        OdTvSelectDragger selectDragger = new OdTvSelectDragger(this, _tvActiveModelId, TvGsDeviceId, _tvDraggersModelId);
         _dragger = selectDragger;
         DraggerResult res = _dragger.Start(null, TvActiveViewport, null, WCS);
         ActionAfterDragger(res);
@@ -550,7 +560,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         rc = OdTvResult.tvOk;
 
         // set projection button
-        OdTvGsView view = TvDeviceId.openObject().viewAt(TvActiveViewport).openObject();
+        OdTvGsView view = TvGsDeviceId.openObject().viewAt(TvActiveViewport).openObject();
 
         MM.StopTransaction(mtr);
     }
@@ -561,6 +571,10 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     public void MouseDown(MouseButtonEventArgs e, Point position)
     {
+        if (_dragger is OdTvOrbitDragger)
+        {
+            OnOffViewCube(false);
+        }
         _mouseDown = e.MouseDevice.LeftButton == MouseButtonState.Pressed ? MouseButtonState.Pressed :
             e.MouseDevice.RightButton == MouseButtonState.Pressed ? MouseButtonState.Pressed : MouseButtonState.Released;
 
@@ -612,7 +626,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     {
         OdTvExtendedView exView = null;
         //MemoryTransaction mtr = MM.StartTransaction();
-        using var odTvGsDevice = TvDeviceId.openObject();
+        using var odTvGsDevice = TvGsDeviceId.openObject();
         OdTvGsViewId viewId = odTvGsDevice.viewAt(TvActiveViewport);
         if (viewId.isNull())
             return null;
@@ -659,7 +673,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     public void Zoom(ZoomType type)
     {
-        if (TvDatabaseId == null || TvDeviceId == null)
+        if (TvDatabaseId == null || TvGsDeviceId == null)
             return;
 
         //VM.UncheckDraggersBtns();
@@ -706,20 +720,20 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     }
     public void Pan()
     {
-        if (TvDatabaseId == null || TvDeviceId == null)
+        if (TvDatabaseId == null || TvGsDeviceId == null)
             return;
-        ODA.Draggers.OdTvDragger newDragger = new OdTvPanDragger(TvDeviceId, _tvDraggersModelId);
+        ODA.Draggers.OdTvDragger newDragger = new OdTvPanDragger(TvGsDeviceId, _tvDraggersModelId);
         StartDragger(newDragger, true);
     }
     public void Orbit()
     {
-        if (TvDatabaseId == null || TvDeviceId == null)
+        if (TvDatabaseId == null || TvGsDeviceId == null)
             return;
 
         //             if (_dragger != null && (_dragger as OdTvSelectDragger) == null)
         //                 FinishDragger();
 
-        ODA.Draggers.OdTvDragger newDragger = new OdTvOrbitDragger(TvDeviceId, _tvDraggersModelId);
+        ODA.Draggers.OdTvDragger newDragger = new OdTvOrbitDragger(TvGsDeviceId, _tvDraggersModelId);
         StartDragger(newDragger, true);
         Debug.WriteLine("1-Orbit");
         //DisableMarkups();
@@ -747,15 +761,41 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             if (view.getLastViewExtents(lastExt))
                 exView.setViewExtentsForCaching(lastExt);
         }
-
         //check existance of the animation
         //SetAnimation(exView.getAnimation());
         //DisableMarkups();
         //Invalidate();
-        UpdateCadView();
+        //UpdateCadView();
 
+        UpdateWCSView();
         //MM.StopTransaction(mtr);
+        if (_appSettings.ShowCube)
+        {
+            OnOffViewCube(true);
+        }
     }
+
+    private void UpdateWCSView()
+    { 
+        using var parentView = WCS.GetParentView(OpenMode.kForRead);
+        var parentViewPosition = parentView.position();
+        var targetTranslation = OdGeMatrix3d.translation(-parentView.target().asVector());
+
+        using var wcsView = WCS.GetWcsView(OpenMode.kForWrite);
+
+        wcsView.setView(parentViewPosition.transformBy(targetTranslation),
+                            OdGePoint3d.kOrigin, parentView.upVector(), 1, 1);
+        wcsView.setMode(OdTvGsView.RenderMode.kGouraudShaded);
+        wcsView.zoom(4.2);
+        OdGePoint2d lowerLeft = new OdGePoint2d();
+        OdGePoint2d upperRight = new OdGePoint2d();
+        parentView.getViewport(lowerLeft, upperRight);
+        upperRight.x = lowerLeft.x + 1.9;
+        upperRight.y = lowerLeft.y + 0.23;
+        wcsView.setViewport(lowerLeft, upperRight);
+        UpdateCadView();
+    }
+
     public OdGeVector3d GetEyeDirection()
     {
         OdGeVector3d eyeDir = new OdGeVector3d(OdGeVector3d.kIdentity);
@@ -771,17 +811,16 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     public void SetRenderMode(OdTvGsView.RenderMode renderMode)
     {
         //MemoryTransaction mtr = MM.StartTransaction();
-        if (TvDeviceId != null && !TvDeviceId.isNull())
+        if (TvGsDeviceId != null && !TvGsDeviceId.isNull())
         {
-            using var view = TvDeviceId.openObject().viewAt(TvActiveViewport).openObject(OpenMode.kForWrite);
+            using var view = TvGsDeviceId.openObject().viewAt(TvActiveViewport).openObject(OpenMode.kForWrite);
             OdTvGsView.RenderMode oldMode = view.mode();
             if (oldMode != renderMode)
             {
                 view.setMode(renderMode);
 
                 // set mode for WCS
-                //if (WCS != null && (VM.AppearanceOpt & MainWindowViewModel.AppearanceOptions.WCSEnabled) == MainWindowViewModel.AppearanceOptions.WCSEnabled
-                //                && WCS.IsNeedUpdateWCS(oldMode, renderMode))
+                //if (WCS != null && _appSettings.ShowWCS && WCS.IsNeedUpdateWCS(oldMode, renderMode))
                 //    WCS.UpdateWCS();
 
                 //TvDeviceId.openObject().update();
@@ -794,9 +833,9 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     public void SetProjectionType(OdTvGsView.Projection projection)
     {
         MemoryTransaction mtr = MM.StartTransaction();
-        if (TvDeviceId != null && !TvDeviceId.isNull())
+        if (TvGsDeviceId != null && !TvGsDeviceId.isNull())
         {
-            OdTvGsView view = TvDeviceId.openObject().viewAt(TvActiveViewport).openObject(OpenMode.kForWrite);
+            OdTvGsView view = TvGsDeviceId.openObject().viewAt(TvActiveViewport).openObject(OpenMode.kForWrite);
             view.setView(view.position(), view.target(), view.upVector(), view.fieldWidth(), view.fieldHeight(), projection);
             //TvDeviceId.openObject().update();
             UpdateCadView();
@@ -808,9 +847,9 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     {
         MemoryTransaction mtr = MM.StartTransaction();
         uint iColor = ((uint)(color.R | color.G << 8 | ((color.B) << 16)));
-        if (TvDeviceId != null && !TvDeviceId.isNull())
+        if (TvGsDeviceId != null && !TvGsDeviceId.isNull())
         {
-            OdTvGsDevice dev = TvDeviceId.openObject(OpenMode.kForWrite);
+            OdTvGsDevice dev = TvGsDeviceId.openObject(OpenMode.kForWrite);
             dev.setBackgroundColor(iColor);
             dev.update();
         }
@@ -821,10 +860,10 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     #region Regen
     public void Regen(OdTvGsDevice.RegenMode rm)
     {
-        if (TvDeviceId == null)
+        if (TvGsDeviceId == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsDevice dev = TvDeviceId.openObject();
+        OdTvGsDevice dev = TvGsDeviceId.openObject();
         dev.regen(rm);
         dev.invalidate();
         //dev.update();
@@ -834,10 +873,10 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     public void Regen()
     {
-        if (TvDeviceId == null)
+        if (TvGsDeviceId == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsDevice dev = TvDeviceId.openObject();
+        OdTvGsDevice dev = TvGsDeviceId.openObject();
         if (TvActiveViewport > 0)
             dev.viewAt(TvActiveViewport).openObject().regen();
         dev.invalidate();
@@ -1021,7 +1060,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         timer.Stop();
         DatabaseInfo.TvCreationTime = timer.ElapsedMilliseconds;
 
-        TvDeviceId = CreateNewDevice();
+        TvGsDeviceId = CreateNewDevice();
         Init();
 
         timer.Restart();
@@ -1045,7 +1084,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         try
         {
             //IntPtr wndHndl = new IntPtr(Handle.ToInt32());
-            OdTvDCRect rect = new OdTvDCRect(0, (int)this.Width, (int)this.Height, 0);
+            OdTvDCRect rect = new OdTvDCRect(0, _widthResized, _heightResized, 0);
             //newDevId = _dbId.openObject().createDevice("TV_Device", wndHndl, rect, OdTvGsDevice.Name.kOpenGLES2);
             // Open device
             OdTvGsDevice pDevice = newDevId.openObject(OpenMode.kForWrite);
@@ -1139,16 +1178,16 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         switch (type)
         {
             case "Polyline":
-                newDragger = new OdTvPolylineDragger(TvDeviceId, _tvDraggersModelId, _tvActiveModelId);
+                newDragger = new OdTvPolylineDragger(TvGsDeviceId, _tvDraggersModelId, _tvActiveModelId);
                 break;
             case "Ray":
-                newDragger = new OdTvRayDragger(TvDeviceId, _tvDraggersModelId, _tvActiveModelId);
+                newDragger = new OdTvRayDragger(TvGsDeviceId, _tvDraggersModelId, _tvActiveModelId);
                 break;
             case "XLine":
-                newDragger = new OdTvXLineDragger(TvDeviceId, _tvDraggersModelId, _tvActiveModelId);
+                newDragger = new OdTvXLineDragger(TvGsDeviceId, _tvDraggersModelId, _tvActiveModelId);
                 break;
             case "Circle":
-                newDragger = new OdTvCircleDragger(TvDeviceId, _tvDraggersModelId, _tvActiveModelId);
+                newDragger = new OdTvCircleDragger(TvGsDeviceId, _tvDraggersModelId, _tvActiveModelId);
                 break;
         }
 
@@ -1173,35 +1212,35 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     public void DrawRectMarkup()
     {
         CreateMarkupModel();
-        ODA.Draggers.OdTvDragger newDragger = new ODA.Draggers.Markups.OdTvRectMarkupDragger(TvDeviceId, _tvMarkupModelId);
+        ODA.Draggers.OdTvDragger newDragger = new ODA.Draggers.Markups.OdTvRectMarkupDragger(TvGsDeviceId, _tvMarkupModelId);
         StartDragger(newDragger);
     }
 
     public void DrawCircMarkup()
     {
         CreateMarkupModel();
-        ODA.Draggers.OdTvDragger newDragger = new ODA.Draggers.Markups.OdTvCircleMarkupDragger(TvDeviceId, _tvMarkupModelId);
+        ODA.Draggers.OdTvDragger newDragger = new ODA.Draggers.Markups.OdTvCircleMarkupDragger(TvGsDeviceId, _tvMarkupModelId);
         StartDragger(newDragger);
     }
 
     public void DrawHandleMarkup()
     {
         CreateMarkupModel();
-        ODA.Draggers.OdTvDragger newDragger = new ODA.Draggers.Markups.OdTvHandleMarkupDragger(TvDeviceId, _tvMarkupModelId);
+        ODA.Draggers.OdTvDragger newDragger = new ODA.Draggers.Markups.OdTvHandleMarkupDragger(TvGsDeviceId, _tvMarkupModelId);
         StartDragger(newDragger);
     }
 
     public void DrawCloudMarkup()
     {
         CreateMarkupModel();
-        ODA.Draggers.OdTvDragger newDragger = new ODA.Draggers.Markups.OdTvCloudMarkupDragger(TvDeviceId, _tvMarkupModelId);
+        ODA.Draggers.OdTvDragger newDragger = new ODA.Draggers.Markups.OdTvCloudMarkupDragger(TvGsDeviceId, _tvMarkupModelId);
         StartDragger(newDragger);
     }
 
     public void DrawTextMarkup()
     {
         CreateMarkupModel();
-        ODA.Draggers.OdTvDragger newDragger = new ODA.Draggers.Markups.OdTvTextMarkupDragger(TvDeviceId, _tvMarkupModelId);
+        ODA.Draggers.OdTvDragger newDragger = new ODA.Draggers.Markups.OdTvTextMarkupDragger(TvGsDeviceId, _tvMarkupModelId);
         StartDragger(newDragger);
     }
 
@@ -1245,7 +1284,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
         FinishDragger();
 
-        SaveMarkupDialog dlg = new SaveMarkupDialog(_tvMarkupModelId, activeEntityId, TvDeviceId.openObject().viewAt(TvActiveViewport));
+        SaveMarkupDialog dlg = new SaveMarkupDialog(_tvMarkupModelId, activeEntityId, TvGsDeviceId.openObject().viewAt(TvActiveViewport));
         dlg.ShowDialog();
 
         MM.StopTransaction(mtr);
@@ -1263,7 +1302,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
         FinishDragger();
 
-        LoadMarkupDialog dlg = new LoadMarkupDialog(_tvMarkupModelId, TvDeviceId.openObject().viewAt(TvActiveViewport), this);
+        LoadMarkupDialog dlg = new LoadMarkupDialog(_tvMarkupModelId, TvGsDeviceId.openObject().viewAt(TvActiveViewport), this);
         if (dlg.ShowDialog() == true)
             //Invalidate();
             UpdateCadView();
@@ -1277,7 +1316,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     public void OnOffWCS(bool bEnable)
     {
-        if (TvDeviceId == null)
+        if (TvGsDeviceId == null)
             return;
 
         if (bEnable)
@@ -1304,20 +1343,24 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             WCS.removeWCS();
 
         MemoryTransaction mtr = MM.StartTransaction();
-        WCS = new TvWpfViewWCS(_dbId, TvDeviceId.openObject().viewAt(TvActiveViewport));
+        WCS = new TvWpfViewWCS(TvDatabaseId, TvGsDeviceId.openObject().viewAt(TvActiveViewport));
         OdTvGsView pWcsView = WCS.GetWcsViewId().openObject(OpenMode.kForWrite);
-        OdTvGsView view = WCS.GetParentView().openObject();
-        OdGePoint3d newPos = view.position();
-        OdGeMatrix3d matr = new OdGeMatrix3d();
-        matr.setTranslation(-view.target().asVector());
-        pWcsView.setView(newPos.transformBy(matr), OdGePoint3d.kOrigin, view.upVector(), 1, 1);
-        pWcsView.setMode(view.mode());
+        OdTvGsView activeView = WCS.GetParentViewId().openObject();
+        OdGePoint3d activeViewPos = activeView.position();
+        //Identity Matrix
+        OdGeMatrix3d wcsMatrix = new OdGeMatrix3d();
+        //World matrix translated to active Camera's target position.
+        wcsMatrix.setTranslation(-activeView.target().asVector());
+        //Create a camera view for WCS
+        pWcsView.setView(activeViewPos.transformBy(wcsMatrix), OdGePoint3d.kOrigin, activeView.upVector(), 1, 1);
+        //pWcsView.setMode(activeView.mode());
+        pWcsView.setMode(OdTvGsView.RenderMode.kGouraudShaded);
         pWcsView.zoom(4.2);
         OdGePoint2d lowerLeft = new OdGePoint2d();
         OdGePoint2d upperRight = new OdGePoint2d();
-        view.getViewport(lowerLeft, upperRight);
-        upperRight.x = lowerLeft.x + 0.15;
-        upperRight.y = lowerLeft.y + 0.18;
+        activeView.getViewport(lowerLeft, upperRight);
+        upperRight.x = lowerLeft.x + 1.9;
+        upperRight.y = lowerLeft.y + 0.23;
         pWcsView.setViewport(lowerLeft, upperRight);
         WCS.UpdateWCS();
 
@@ -1326,7 +1369,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     public void OnOffViewCube(bool bEnable)
     {
-        if (TvDeviceId == null)
+        if (TvGsDeviceId == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvExtendedView extView = GetActiveTvExtendedView();
@@ -1341,10 +1384,10 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     public void OnOffFPS(bool bEnable)
     {
-        if (TvDeviceId == null)
+        if (TvGsDeviceId == null)
             return;
         //MemoryTransaction mtr = MM.StartTransaction();
-        using var dev = TvDeviceId.openObject(OpenMode.kForWrite);
+        using var dev = TvGsDeviceId.openObject(OpenMode.kForWrite);
         if (dev.getShowFPS() != bEnable)
         {
             dev.setShowFPS(bEnable);
@@ -1357,7 +1400,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     public void OnOffAnimation(bool bEnable)
     {
-        if (TvDeviceId == null)
+        if (TvGsDeviceId == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvExtendedView exView = GetActiveTvExtendedView();
@@ -1368,7 +1411,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     public void SetZoomStep(double dValue)
     {
-        if (TvDeviceId == null || dValue < 1)
+        if (TvGsDeviceId == null || dValue < 1)
             return;
         OdTvExtendedView exView = GetActiveTvExtendedView();
         if (exView != null)
@@ -1398,7 +1441,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     public void ClearSelectionSet()
     {
-        if (SelectionSet == null || TvDeviceId == null || TvDeviceId.isNull())
+        if (SelectionSet == null || TvGsDeviceId == null || TvGsDeviceId.isNull())
             return;
         OdTvExtendedView exView = GetActiveTvExtendedView();
         if (exView == null)
@@ -1482,7 +1525,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     public void ApplySectioningOptions()
     {
-        if (TvDeviceId == null || TvDeviceId.isNull())
+        if (TvGsDeviceId == null || TvGsDeviceId.isNull())
             return;
         MemoryTransaction mtr = MM.StartTransaction();
 
@@ -1515,7 +1558,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
           || iNewFillingPatternColor != iOldPatternColor)
             pView.setCuttingPlaneFillPatternEnabled(bNewFillingPatternEnabled, newFillingPatternStyle, iNewFillingPatternColor);
 
-        OdTvGsDevice pDevice = TvDeviceId.openObject();
+        OdTvGsDevice pDevice = TvGsDeviceId.openObject();
         if (pDevice != null)
         {
             //pDevice.invalidate();
@@ -1534,7 +1577,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             {
                 if (!(_dragger is OdTvCuttingPlaneDragger))
                 {
-                    ODA.Draggers.OdTvDragger pNewDragger = new ODA.Draggers.OdTvCuttingPlaneDragger(TvDeviceId, _tvDraggersModelId, this);
+                    ODA.Draggers.OdTvDragger pNewDragger = new ODA.Draggers.OdTvCuttingPlaneDragger(TvGsDeviceId, _tvDraggersModelId, this);
                     if (pNewDragger != null)
                         StartDragger(pNewDragger, true);
                     //Invalidate();
@@ -1566,7 +1609,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         bool bRet = false;
 
         OdTvGsView pActiveView = GetActiveTvExtendedView().getViewId().openObject(OpenMode.kForWrite);
-        OdTvGsDevice pDevice = TvDeviceId.openObject(OpenMode.kForWrite);
+        OdTvGsDevice pDevice = TvGsDeviceId.openObject(OpenMode.kForWrite);
         if (pActiveView == null || pDevice == null)
         {
             MM.StopTransaction(mtr);
@@ -1585,7 +1628,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
                 DrawCuttingPlane(i, pActiveView);
             }
             // create and start new dragger
-            ODA.Draggers.OdTvDragger pNewDragger = new ODA.Draggers.OdTvCuttingPlaneDragger(TvDeviceId, _tvDraggersModelId, this);
+            ODA.Draggers.OdTvDragger pNewDragger = new ODA.Draggers.OdTvCuttingPlaneDragger(TvGsDeviceId, _tvDraggersModelId, this);
             if (pNewDragger != null)
                 StartDragger(pNewDragger, true);
 
@@ -1816,7 +1859,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         try
         {
             MemoryTransaction mtrDev = MM.StartTransaction();
-            OdTvGsDevice pDevice = TvDeviceId.openObject(OpenMode.kForWrite);
+            OdTvGsDevice pDevice = TvGsDeviceId.openObject(OpenMode.kForWrite);
             if (SectioningOptions.IsShown)
             {
                 // if it is the first added object
@@ -1857,7 +1900,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
         try
         {
-            OdTvGsDevice pDevice = TvDeviceId.openObject(OpenMode.kForWrite);
+            OdTvGsDevice pDevice = TvGsDeviceId.openObject(OpenMode.kForWrite);
             if (SectioningOptions.IsShown)
             {
                 //notify dragger
@@ -1900,13 +1943,13 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     {
         ClearDevices();
         ClearDatabases();
-        ViewControl?.SetFileLoaded(false, null);
+        ViewControl?.SetFileLoaded(false, FilePath, (statusText) => _eventAggregator.GetEvent<AppStatusTextChanged>().Publish(statusText));
     }
     private void ClearDatabases()
     {
         OdTvFactoryId factId = TV_Globals.odTvGetFactory();
         factId.clearDatabases();
-        Debug.WriteLine("HclCadImageViewModel : OdTvFactoryId.clearDatabases");
+        Debug.WriteLine($"ClearDatabases : {TabItemTitle}");
     }
 
     public override void CloseTabView()
@@ -1914,5 +1957,17 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         ClearODA();
     }
 
+    public void ShowFPS()
+    {
+        OnOffFPS(_appSettings.ShowFPS);
+    }
+    public void ShowWCS()
+    {
+        OnOffWCS(_appSettings.ShowWCS);
+    }
+    public void ShowCube()
+    {
+        OnOffViewCube(_appSettings.ShowCube);
+    }
     #endregion
 }

@@ -1,4 +1,5 @@
-﻿using HCL_ODA_TestPAD.ViewModels;
+﻿using HCL_ODA_TestPAD.Settings;
+using HCL_ODA_TestPAD.ViewModels;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
 using System.Windows;
@@ -9,43 +10,40 @@ using Teigha.Visualize;
 
 namespace HCL_ODA_TestPAD.Views
 {
-    public interface ICadOdaMenuView
-    {
-        void Pan();
-        void Orbit();
-        void Set3DView(OdTvExtendedView.e3DViewType type);
-        void SetRenderMode(OdTvGsView.RenderMode renderMode);
-        void SetProjectionType(OdTvGsView.Projection projection);
-        void Regen(OdTvGsDevice.RegenMode rm);
-    }
     public partial class HclCadImageView : ICadImageViewControl, ICadOdaMenuView
     {
         public HclCadImageViewModel VM { get; set; }
-
+        public Func<AppSettings> AppSettingsFactory { get; set; }
         public HclCadImageView()
         {
             InitializeComponent();
-            Loaded += HclCadImageView_Loaded;
+            //Loaded += UserControl_Loaded;
             IsVisibleChanged += VisibilityChanged;
         }
-        private void HclCadImageView_Loaded(object sender, RoutedEventArgs e)
-        {
-            VM.LoadFile(VM.CadImageFilePath);
-        }
-        private void SetControlViewModelLink()
-        {
-            VM = DataContext as HclCadImageViewModel;
-            if (VM != null)
-            {
-                VM.CadOdaMenuView = this;
-                VM.ViewControl = this;
-                VM.InitViewModel();                
-            }
-        }
+        //private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        //{
+        //    //VM.ShowFPS();
+        //    //VM.ShowWCS();
+        //}
+
         private void VisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            SetControlViewModelLink();
-            VM?.VisibilityChanged((bool)e.NewValue);
+            var visible = (bool)e.NewValue;
+            if (visible && VM == null)
+            {
+                VM = DataContext as HclCadImageViewModel;
+                if (VM != null)
+                {
+                    //VM.AddDefaultViewOnLoad = true;
+                    VM.CadOdaMenuView = this;
+                    VM.ViewControl = this;
+                    VM.InitViewModel();
+                }
+                VM?.VisibilityChanged((bool)e.NewValue);
+                VM.LoadFile(VM.CadImageFilePath);
+                VM.ShowFPS();
+                VM.ShowWCS();
+            }
         }
         public void InvalidateControl()
         {
@@ -59,10 +57,18 @@ namespace HCL_ODA_TestPAD.Views
         {
             VM.Update();
         }
-        public void SetFileLoaded(bool isFileLoaded, string filePath)
+        public void SetFileLoaded(bool isFileLoaded, string filePath, Action<string> emitEvent)
         {
-            //VM.FileIsExist = isFileLoaded;
+            if (isFileLoaded)
+            {
+                emitEvent?.Invoke($"File : [{filePath}] loaded successfully.");
+            }
+            else
+            {
+                emitEvent?.Invoke($"File : [{filePath}] unloaded.");
+            }
         }
+
         #region Update GL_Device & Image Buffer
 
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
@@ -99,28 +105,33 @@ namespace HCL_ODA_TestPAD.Views
             VM.Orbit();
         }
 
+        public void SetZoom(ZoomType type)
+        {
+            VM.Zoom(type);
+        }
+
         public void Set3DView(OdTvExtendedView.e3DViewType type)
         {
-            throw new NotImplementedException();
+            VM.Set3DView(type);
         }
 
         public void SetRenderMode(OdTvGsView.RenderMode renderMode)
         {
-            throw new NotImplementedException();
+            VM.SetRenderMode(renderMode);
         }
 
         public void SetProjectionType(OdTvGsView.Projection projection)
         {
-            throw new NotImplementedException();
+            VM.SetProjectionType(projection);
         }
 
         public void Regen(OdTvGsDevice.RegenMode rm)
         {
-            throw new NotImplementedException();
+            VM.Regen(rm);
         }
-        public void SetRenderModeButton(OdTvGsView.RenderMode mode)
+        public void RegenView()
         {
-            //VM.SetRenderModeButton(mode);
+            VM.Regen();
         }
     }
 

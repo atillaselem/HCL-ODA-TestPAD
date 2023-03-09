@@ -8,6 +8,6 @@ namespace HCL_ODA_TestPAD.Settings
         void SaveSettings();
         IAppSettings AppSettings { get; }
         event Action<string, object> OneOfTheSettingsChanged;
-        void OnDispatchChange(string itemName, object itemValue);
+        void OnDispatchChange(string itemName, string itemValue);
     }
 }

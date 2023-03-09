@@ -31,7 +31,7 @@ public class TvWpfViewWCS
     private OdTvModelId _tvWcsModelId;
 
     // View, in which this WCS is located
-    private OdTvGsViewId _viewId;
+    private OdTvGsViewId _activeViewId;
 
     // View, associated with this view
     private OdTvGsViewId _wcsViewId;
@@ -42,16 +42,16 @@ public class TvWpfViewWCS
 
     public TvWpfViewWCS(OdTvDatabaseId tvDbId, OdTvGsViewId tvViewId)
     {
-        _viewId = tvViewId;
+        _activeViewId = tvViewId;
 
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsDevice dev = _viewId.openObject().device().openObject(OpenMode.kForWrite);
+        OdTvGsDevice odTvGsDevice = _activeViewId.openObject().device().openObject(OpenMode.kForWrite);
 
         // add wcs view
         OdTvResult rc = new OdTvResult();
         rc = OdTvResult.tvOk;
-        _wcsViewId = dev.createView("WcsView_" + wcsViewNumber, false, ref rc);
-        dev.addView(_wcsViewId);
+        _wcsViewId = odTvGsDevice.createView("WcsView_" + wcsViewNumber, false, ref rc);
+        odTvGsDevice.addView(_wcsViewId);
 
         _tvWcsModelId = tvDbId.openObject(OpenMode.kForWrite).createModel("$ODA_TVVIEWER_WCS_" + wcsViewNumber++);
         OdTvGsView wcsView = _wcsViewId.openObject(OpenMode.kForWrite);
@@ -64,41 +64,38 @@ public class TvWpfViewWCS
     {
         MemoryTransaction mtr = MM.StartTransaction();
 
-        OdTvGsView view = _viewId.openObject();
+        OdTvGsView view = _activeViewId.openObject();
 
         // remove old wcs entities
         OdTvModel wcsModel = _tvWcsModelId.openObject(OpenMode.kForWrite);
         wcsModel.clearEntities();
 
         //1.1 Add wcs entity
-        OdTvEntityId wcsObjId = wcsModel.appendEntity("WCS");
-        OdTvEntity wcsObj = wcsObjId.openObject(OpenMode.kForWrite);
+        OdTvEntityId wcsEntityId = wcsModel.appendEntity("WCS");
+        OdTvEntity wcsEntity = wcsEntityId.openObject(OpenMode.kForWrite);
 
         // define the start point for the WCS
         OdGePoint3d start = new OdGePoint3d(0d, 0d, 0d);
 
         // caculate axis lines length in wireframe and shaded modes
-        double lineLength = 0.09;
+        double lineLength = 0.07;
         if ((int)view.mode() != (int)OdGsView.RenderMode.kWireframe && (int)view.mode() != (int)OdGsView.RenderMode.k2DOptimized)
             lineLength = 0.07;
 
         // create X axis and label
-        OdTvGeometryDataId wcsX = wcsObj.appendSubEntity("wcs_x");
-        OdTvEntity pWcsX = wcsX.openAsSubEntity(OpenMode.kForWrite);
+        OdTvGeometryDataId wcsX = wcsEntity.appendSubEntity("wcs_x");
         OdGePoint3d endx = new OdGePoint3d(start);
         endx.x += lineLength;
         CreateWcsAxis(wcsX, new OdTvColorDef(189, 19, 19), start, endx, "X");
 
         // create Y axis and label
-        OdTvGeometryDataId wcsY = wcsObj.appendSubEntity("wcs_y");
-        OdTvEntity pWcsY = wcsY.openAsSubEntity(OpenMode.kForWrite);
+        OdTvGeometryDataId wcsY = wcsEntity.appendSubEntity("wcs_y");
         OdGePoint3d endy = new OdGePoint3d(start);
         endy.y += lineLength;
         CreateWcsAxis(wcsY, new OdTvColorDef(12, 171, 20), start, endy, "Y");
 
         // create Z axis and label
-        OdTvGeometryDataId wcsZ = wcsObj.appendSubEntity("wcs_z");
-        OdTvEntity pWcsZ = wcsZ.openAsSubEntity(OpenMode.kForWrite);
+        OdTvGeometryDataId wcsZ = wcsEntity.appendSubEntity("wcs_z");
         OdGePoint3d endz = new OdGePoint3d(start);
         endz.z += lineLength;
         CreateWcsAxis(wcsZ, new OdTvColorDef(20, 57, 245), start, endz, "Z");
@@ -222,8 +219,18 @@ public class TvWpfViewWCS
         return _wcsViewId;
     }
 
-    public OdTvGsViewId GetParentView()
+    public OdTvGsViewId GetParentViewId()
     {
-        return _viewId;
+        return _activeViewId;
+    }
+
+    public OdTvGsView GetWcsView(OpenMode mode)
+    {
+        return _wcsViewId.openObject(mode);
+    }
+
+    public OdTvGsView GetParentView(OpenMode mode)
+    {
+        return _activeViewId.openObject(mode);
     }
 }

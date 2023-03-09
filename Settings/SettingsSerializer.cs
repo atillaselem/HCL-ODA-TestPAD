@@ -32,9 +32,12 @@ public class SettingsSerializer<T> where T : new()
     /// <returns></returns>
     public static T Load(string fileName)
     {
-        T t = new T();
+        T t = default;
         if (File.Exists(fileName))
+        {
+            t = new T();
             t = JsonConvert.DeserializeObject<T>(File.ReadAllText(fileName));
+        }
         return t;
     }
 }

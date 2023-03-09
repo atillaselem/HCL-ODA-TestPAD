@@ -17,14 +17,14 @@ namespace HCL_ODA_TestPAD.ViewModels
         public OdaDatabaseExplorerViewModel OdaDatabaseExplorerViewModel { get; }
         public AppMonitorViewModel AppMonitorViewModel { get; }
         public TestPADSettingsViewModel TestPADSettingsViewModel { get; }
-        public TabbedCadModelViewModel TabbedCadModelViewModel { get; }
+        public TabPagedCadImageViewModel TabbedCadModelViewModel { get; }
         public OverlayViewModel OverlayViewModel { get; }
         public OdaMenuViewModel OdaMenuViewModel { get; }
         private readonly ISettingsProvider _settingsProvider;
 
         public AppAvalonDockViewModel(OdaDatabaseExplorerViewModel odaDatabaseExplorerViewModel,
             TestPADSettingsViewModel testPADSettingsViewModel,
-            TabbedCadModelViewModel tabbedCadModelViewModel,   
+            TabPagedCadImageViewModel tabbedCadModelViewModel,   
             AppMonitorViewModel appMonitorViewModel,
             OverlayViewModel overlayViewModel,
             OdaMenuViewModel odaMenuViewModel,

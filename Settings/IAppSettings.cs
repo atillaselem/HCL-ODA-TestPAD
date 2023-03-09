@@ -9,8 +9,14 @@ public enum AppLayout
 }
 public enum RenderDevice
 {
-    OnScreen,
-    Bitmap
+    OpenGL_Bitmap,
+    OpenGL_GPU
+}
+
+public enum SettingsMode
+{
+    HCL,
+    Custom
 }
 public interface IAppSettings
 {
@@ -21,7 +27,6 @@ public interface IAppSettings
     //#region Exit App
     bool SaveSettings { get; set; }
     bool SaveDockLayout { get; set; }
-    void UpdateUserInterface();
     //#region CAD Units
     SurveyUnits CadFileUnit { get; set; }
     //#region UI
@@ -31,14 +36,22 @@ public interface IAppSettings
     bool SetFrozenLayersVisible { get; set; }
     bool UseSceneGraph { get; set; }
     bool UseForcePartialUpdate { get; set; }
-    //#DWG Import Parameters
+    bool SetForbidImageHighlight { get; set; }
+    //#DWG & DXF Import Parameters
     bool DwgSetObjectNaming { get; set; }
     bool DwgSetStoreSourceObjects { get; set; }
     bool DwgSetImportFrozenLayers { get; set; }
     bool DwgSetClearEmptyObjects { get; set; }
     bool DwgSetNeedCDATree { get; set; }
     bool DwgSetNeedCollectPropertiesInCDA { get; set; }
-    //#DWG Import Parameters
+    //#IFC Import Parameters
+    bool IfcUseSceneGraph { get; set; }
     bool IfcSetNeedCDATree { get; set; }
     bool IfcSetNeedCollectPropertiesInCDA { get; set; }
+    //#Show Custom Models
+    bool ShowFPS { get; set; }
+    bool ShowWCS { get; set; }
+    bool ShowCube { get; set; }
+    //#Settings 
+    SettingsMode SettingsMode { get; set; }
 }

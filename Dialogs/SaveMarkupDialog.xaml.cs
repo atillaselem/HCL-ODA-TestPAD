@@ -20,10 +20,8 @@
 // By use of this software, its documentation or related materials, you 
 // acknowledge and accept the above terms.
 ///////////////////////////////////////////////////////////////////////////////
-using HCL_ODA_TestPAD.HCL;
 using HCL_ODA_TestPAD.ODA.Draggers.Markups;
 using HCL_ODA_TestPAD.ViewModels;
-using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;

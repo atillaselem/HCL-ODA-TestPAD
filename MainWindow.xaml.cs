@@ -1,10 +1,8 @@
 ﻿using HCL_ODA_TestPAD.ODA;
-using HCL_ODA_TestPAD.Services;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.Splash;
 using HCL_ODA_TestPAD.Utility;
 using HCL_ODA_TestPAD.ViewModels;
-using Prism.Events;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,12 +24,12 @@ public partial class MainWindow : Window
 
     public static bool IsClosing { get; private set; }
 
-    public MainWindow(IEventAggregator eventAggregator,
-        IMessageDialogService messageDialogService,
-        IConsoleService consoleService,
+    public MainWindow(MainWindowViewModel viewModel,
         ISettingsProvider settingsProvider)
     {
         InitializeComponent();
+        Title = AssemblyHelper.GetAppTitle();
+
         _settingsProvider = settingsProvider;
 
         try
@@ -44,12 +42,10 @@ public partial class MainWindow : Window
             MessageBox.Show("Product Activation Error!\n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
         }
 
-        ViewModel = new MainWindowViewModel(eventAggregator,
-            messageDialogService,
-            consoleService,
-            _settingsProvider);
+        ViewModel = viewModel;
         DataContext = ViewModel;
 
+        ViewModel.AppMainWindow = this;
 
         ViewModel.FileIsExist = false;
         this.Closing += OdTvWpfMainWindow_Closing;
@@ -113,6 +109,11 @@ public partial class MainWindow : Window
         exitItm.Click += Exit_Click;
 
         DropMenuBtn.DropDown = menu;
+
+        if (_settingsProvider.AppSettings.RenderDevice == RenderDevice.OpenGL_Bitmap)
+        {
+            ViewModel.AddView(true);
+        }
     }
     private void WindowInitializing(object sender, EventArgs e)
     {

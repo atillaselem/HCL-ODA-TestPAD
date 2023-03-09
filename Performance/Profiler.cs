@@ -28,8 +28,12 @@ public class Profiler : IDisposable
     {
         _stopWatch = Stopwatch.StartNew();
     }
+    public void Restart()
+    {
+        _stopWatch.Restart();
+    }
 
-    private void Elapsed()
+    private void ElapsedWriteLine()
     {
         long ticks = _stopWatch.ElapsedTicks;
         double ns = _nanoSecPerTick * (double)ticks;
@@ -37,6 +41,38 @@ public class Profiler : IDisposable
         double s = ms / 1000;
         var elapsedText = $"{_title,-50}{string.Format($"[{ms.ToString("000.##0"),5} ms]")}";
         Console.WriteLine("[PROFILER] : " + elapsedText);
+    }
+    public double ElapsedNanoSec(Action<double> writeAction = default)
+    {
+        var (_, ns, _, _) = Elapsed();
+        writeAction?.Invoke(ns);
+        //var elapsedText = $"{_title,-50}{string.Format($"[{ns.ToString("000.##0"),5} ns]")}";
+        //Console.WriteLine("[PROFILER] : " + elapsedText);
+        return ns;
+    }
+    public double ElapsedMiliSec(Action<double> writeAction = default)
+    {
+        var (_, _, ms, _) = Elapsed();
+        writeAction?.Invoke(ms);
+        //var elapsedText = $"{_title,-50}{string.Format($"[{ms.ToString("000.##0"),5} ms]")}";
+        //Console.WriteLine("[PROFILER] : " + elapsedText);
+        return ms;
+    }
+    public double ElapsedSec(Action<double> writeAction = default)
+    {
+        var (_, _, _, sec) = Elapsed();
+        writeAction?.Invoke(sec);
+        //var elapsedText = $"{_title,-50}{string.Format($"[{sec.ToString("000.##0"),5} v]")}";
+        //Console.WriteLine("[PROFILER] : " + elapsedText);
+        return sec;
+    }
+    private (long ticks, double ns, double ms, double s) Elapsed()
+    {
+        long ticks = _stopWatch.ElapsedTicks;
+        double ns = _nanoSecPerTick * (double)ticks;
+        double ms = ns / 1000000.0;
+        double s = ms / 1000;
+        return (ticks, ns, ms, s);  
     }
     private static int GetNanoSecondPerTick()
     {
@@ -59,7 +95,7 @@ public class Profiler : IDisposable
         {
             if (disposing)
             {
-                Elapsed();
+                ElapsedWriteLine();
             }
 
             disposedValue = true;
@@ -81,7 +117,7 @@ public class Profiler : IDisposable
 
     public virtual void Stop()
     {
-        Elapsed();
+        ElapsedWriteLine();
     }
 
     internal static void Enable(bool useProfiler = true)

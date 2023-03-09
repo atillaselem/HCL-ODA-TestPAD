@@ -184,8 +184,8 @@ public class OdTvSelectDragger : OdTvDragger
             return DraggerResult.NothingToDo;
 
         //filter coordinates
-        if (x >= _wpfView.Width || x < 1 || y >= _wpfView.Height || y < 1)
-            return DraggerResult.NothingToDo;
+        //if (x >= _wpfView.Width || x < 1 || y >= _wpfView.Height || y < 1)
+        //    return DraggerResult.NothingToDo;
         MemoryTransaction mtr = MM.StartTransaction();
         // create temporary geometry if need
         OdTvEntity entity = null;

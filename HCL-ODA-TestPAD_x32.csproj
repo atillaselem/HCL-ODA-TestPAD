@@ -13,7 +13,7 @@
     <OutputPath>$(SolutionDir)Build\$(Configuration)\</OutputPath>
     <PlatformTarget>x86</PlatformTarget>
     <UseWindowsForms>True</UseWindowsForms>
-    <AssemblyVersion>2023.2.27</AssemblyVersion>
+    <AssemblyVersion>2023.3.8</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -253,7 +253,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="XCOPY &quot;$(SolutionDir)\ThirdParty\TeighaLibraries\x86\*.*&quot; &quot;$(TargetDir)\libs&quot; /F /R /Y /I /D /Q" />
+    <Exec Command="MKDIR &quot;$(TargetDir)\common\config&quot; /F /R /Y /I /D /Q&#xD;&#xA;XCOPY &quot;$(SolutionDir)\common\config\HCL_ODA_TestPAD_AppSettings_HCL.json&quot; &quot;$(TargetDir)\common\config&quot;&#xD;&#xA;XCOPY &quot;$(SolutionDir)\ThirdParty\TeighaLibraries\x86\*.*&quot; &quot;$(TargetDir)\libs&quot; /F /R /Y /I /D /Q" />
   </Target>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

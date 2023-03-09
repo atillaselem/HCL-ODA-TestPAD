@@ -325,7 +325,6 @@
             <ToggleButton
                 x:Name="PanBtn"
                 Command="{Binding PanCommand}"
-                IsChecked="{Binding IsPanClicked}"
                 Style="{StaticResource ToggleBtnStyle}"
                 ToolTip="Pan">
                 <Image Source="{StaticResource PanImg}" Style="{StaticResource ImageStyle}" />
@@ -334,7 +333,6 @@
             <ToggleButton
                 x:Name="OrbitBtn"
                 Command="{Binding OrbitCommand}"
-                IsChecked="{Binding IsOrbitClicked}"
                 Style="{StaticResource ToggleBtnStyle}"
                 ToolTip="Orbit">
                 <Image Source="{StaticResource OrbitImg}" Style="{StaticResource ImageStyle}" />
@@ -578,19 +576,20 @@
 
             <Button
                 Command="{Binding RegenCommand}"
+                CommandParameter="RegenVisible"
+                Style="{StaticResource ButtonStyle}"
+                ToolTip="RegenVisible">
+                <Image Source="{StaticResource RegenVisibleImg}" Style="{StaticResource ImageStyle}" />
+            </Button>
+
+            <Button
+                Command="{Binding RegenCommand}"
                 CommandParameter="RegenView"
                 Style="{StaticResource ButtonStyle}"
                 ToolTip="RegenView">
                 <Image Source="{StaticResource RegenViewImg}" Style="{StaticResource ImageStyle}" />
             </Button>
 
-            <Button
-                Command="{Binding RegenCommand}"
-                CommandParameter="RegenVisible"
-                Style="{StaticResource ButtonStyle}"
-                ToolTip="RegenVisible">
-                <Image Source="{StaticResource RegenVisibleImg}" Style="{StaticResource ImageStyle}" />
-            </Button>
         </StackPanel>
 
         <!--  About button panel  -->

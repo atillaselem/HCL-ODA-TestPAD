@@ -1,20 +1,21 @@
 ﻿using System.ComponentModel;
-using HCL_ODA_TestPAD.EventBroker;
 using HCL_ODA_TestPAD.HCL.CadUnits;
-using HCL_ODA_TestPAD.Mvvm.Events;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace HCL_ODA_TestPAD.Settings;
 
 [CategoryOrder("OpenGLES2 Device", 1)]
-[CategoryOrder("DWG Import Parameters", 2)]
+[CategoryOrder("DWG & DXF Import Parameters", 2)]
 [CategoryOrder("IFC Import Parameters", 3)] 
 [CategoryOrder("CAD Units", 4)] 
-[CategoryOrder("User Interface", 5)] 
-[CategoryOrder("Start App", 6)]
-[CategoryOrder("Exit App", 7)] 
-[CategoryOrder("About App", 8)] 
-public class AppSettings : IAppSettings
+[CategoryOrder("CAD Custom Models", 5)] 
+[CategoryOrder("User Interface", 6)] 
+[CategoryOrder("Start App", 7)]
+[CategoryOrder("Exit App", 8)] 
+[CategoryOrder("About App", 9)] 
+//[CategoryOrder("Settings Type", 10)] 
+
+public record AppSettings : IAppSettings
 {
     #region Start App
     /// <summary>
@@ -95,7 +96,7 @@ public class AppSettings : IAppSettings
     [Category("User Interface")]
     [DisplayName("UI Layout")]
     [Description("User Interface Layout")]
-    [ReadOnly(true)]
+    //[ReadOnly(true)]
     public AppLayout AppLayout { get; set; }
 
     #endregion
@@ -114,43 +115,51 @@ public class AppSettings : IAppSettings
     [Category("OpenGLES2 Device")]
     [DisplayName("Render Device")]
     [Description("Render device type to render OpenGLES2")]
-    [ReadOnly(true)]
-    public RenderDevice RenderDevice { get; set; } = RenderDevice.Bitmap;
+    public RenderDevice RenderDevice { get; set; }
 
     [Category("OpenGLES2 Device")]
     [DisplayName("Force Partial Update")]
     [Description("Enable ForcePartialUpdate")]
     public bool UseForcePartialUpdate { get; set; }
+
+    [Category("OpenGLES2 Device")]
+    [DisplayName("Forbid Image Highlight")]
+    [Description("Set Forbid Image Highlight")]
+    public bool SetForbidImageHighlight { get; set; }
     #endregion
 
-    #region DWG Import Parameters
-    [Category("DWG Import Parameters")]
+    #region DWG & DXF Import Parameters
+    [Category("DWG & DXF Import Parameters")]
     [DisplayName("Object Naming")]
     [Description("Set Object Naming")]
-    public bool DwgSetObjectNaming { get; set; } = true;
-    [Category("DWG Import Parameters")]
+    public bool DwgSetObjectNaming { get; set; }
+    [Category("DWG & DXF Import Parameters")]
     [DisplayName("Store Source Objects")]
     [Description("Set StoreSourceObjects")]
     public bool DwgSetStoreSourceObjects { get; set; }
-    [Category("DWG Import Parameters")]
+    [Category("DWG & DXF Import Parameters")]
     [DisplayName("Import Frozen Layers")]
     [Description("Set ImportFrozenLayers")]
-    public bool DwgSetImportFrozenLayers { get; set; } = true;
-    [Category("DWG Import Parameters")]
+    public bool DwgSetImportFrozenLayers { get; set; }
+    [Category("DWG & DXF Import Parameters")]
     [DisplayName("Clear Empty Objects")]
     [Description("Set ClearEmptyObjects")]
-    public bool DwgSetClearEmptyObjects { get; set; } = true;
-    [Category("DWG Import Parameters")]
+    public bool DwgSetClearEmptyObjects { get; set; }
+    [Category("DWG & DXF Import Parameters")]
     [DisplayName("Need CDA Tree")]
     [Description("Set Object Naming")]
     public bool DwgSetNeedCDATree { get; set; }
-    [Category("DWG Import Parameters")]
+    [Category("DWG & DXF Import Parameters")]
     [DisplayName("Need Collect Properties In CDA")]
     [Description("Set NeedCollectPropertiesInCDA")]
     public bool DwgSetNeedCollectPropertiesInCDA { get; set; }
     #endregion
 
     #region IFC Import Parameters 
+    [Category("IFC Import Parameters")]
+    [DisplayName("Use Scene Graph")]
+    [Description("Use Scene Graph for IFC Files")]
+    public bool IfcUseSceneGraph { get; set; }
     [Category("IFC Import Parameters")]
     [DisplayName("Need CDA Tree")]
     [Description("Set Object Naming")]
@@ -161,8 +170,26 @@ public class AppSettings : IAppSettings
     public bool IfcSetNeedCollectPropertiesInCDA { get; set; }
     #endregion
 
-    public void UpdateUserInterface()
-    {
-        FxBroker<AET>.Instance.Publish(this, AET.EVENT_UPDATE_SETTINGS_UI, null);
-    }
+    #region CAD Custom Models
+    [Category("CAD Custom Models")]
+    [DisplayName("FPS")]
+    [Description("Show FPS model")]
+    public bool ShowFPS { get; set; }
+    [Category("CAD Custom Models")]
+    [DisplayName("WCS")]
+    [Description("Show World Coordinate System model")]
+    public bool ShowWCS { get; set; }
+    [Category("CAD Custom Models")]
+    [DisplayName("View Cube")]
+    [Description("Show View Cube model")]
+    public bool ShowCube { get; set; }
+    #endregion
+
+    #region Settings Type
+    //#Settings 
+    [Category("Settings Mode")]
+    [DisplayName("Settings Mode")]
+    [Description("Choose HCL to reset custom settings")]
+    public SettingsMode SettingsMode { get; set; }
+    #endregion
 }

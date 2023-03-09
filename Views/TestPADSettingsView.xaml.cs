@@ -1,7 +1,8 @@
-﻿using HCL_ODA_TestPAD.EventBroker;
-using HCL_ODA_TestPAD.Mvvm.Events;
+﻿using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.ViewModels;
+using System.Windows;
 using System.Windows.Controls;
+using HCL_ODA_TestPAD.Settings;
 using Xceed.Wpf.Toolkit.PropertyGrid;
 
 namespace HCL_ODA_TestPAD.Views
@@ -12,20 +13,25 @@ namespace HCL_ODA_TestPAD.Views
     public partial class TestPADSettingsView : UserControl
     {
         //private readonly ISettingsProvider _trSettings;
-
+        public TestPADSettingsViewModel VM { get; set; }
         public TestPADSettingsView()
         {
             InitializeComponent();
-            SubscribeAppEvents();
-            
-        }   
+            Loaded += UserControl_Loaded;
+        }
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            VM = DataContext as TestPADSettingsViewModel;
+            if (VM != null)
+            {
+                SubscribeAppEvents();
+            }
+        }
         private void OnPropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
         {
-            if (e.OriginalSource is PropertyItem propItem)
+            if (e.OriginalSource is PropertyItem propItem && (e.OldValue.ToString() != e.NewValue.ToString()))
             {
-                //MessageBox.Show($"Name : {propItem.PropertyName} - Value : {e.NewValue}");
-                var trSettings = ((TestPADSettingsViewModel)DataContext).TrSettings;
-                trSettings.OnDispatchChange(propItem.PropertyName, e.NewValue);
+                VM.SettingsProvider.OnDispatchChange(propItem.PropertyName, e.NewValue.ToString());
             }
         }
         /// <summary>
@@ -33,16 +39,17 @@ namespace HCL_ODA_TestPAD.Views
         /// </summary>
         public void SubscribeAppEvents()
         {
-            FxBroker<AET>.Instance.Subscribe(AET.EVENT_UPDATE_SETTINGS_UI, OnUpdateSettingUi);
+            VM.EventFactory().GetEvent<SettingsUpdateEvent>().Subscribe(OnSettingsUpdateEvent);
         }
 
-        private void OnUpdateSettingUi(AppEvent<AET, object> obj)
+        private void OnSettingsUpdateEvent(AppSettings updatedAppSettings)
         {
-            _propertyGrid.Update();
+            VM.AppSettings = updatedAppSettings;
         }
+
         public void UnSubscribeAppEvents()
         {
-            FxBroker<AET>.Instance.UnSubscribe(AET.EVENT_UPDATE_SETTINGS_UI, OnUpdateSettingUi);
+
         }
     }
 }

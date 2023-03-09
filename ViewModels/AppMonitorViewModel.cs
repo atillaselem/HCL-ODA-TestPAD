@@ -1,13 +1,19 @@
 ﻿using HCL_ODA_TestPAD.Mvvm;
+using HCL_ODA_TestPAD.Mvvm.Events;
+using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.Utility;
+using Prism.Events;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 
 namespace HCL_ODA_TestPAD.ViewModels
 {
     public class AppMonitorViewModel : BindableBase
     {
+        private readonly IEventAggregator _eventAggregator;
+        private readonly IAppSettings _appSettings;
         private readonly ObservableCollection<ConsoleTabItemViewModel> _consoleTabViewItems;
         private string _appConsoleText;
         private ConsoleTabItemViewModel _activeTabItem;
@@ -31,12 +37,22 @@ namespace HCL_ODA_TestPAD.ViewModels
             set => SetProperty(ref _isBorderVisible, value);
         }
 
-        public AppMonitorViewModel()
+        public AppMonitorViewModel(IEventAggregator eventAggregator,
+        ISettingsProvider settingsProvider)
         {
+            _eventAggregator = eventAggregator;
+            _appSettings = settingsProvider.AppSettings;
             _consoleTabViewItems = new ObservableCollection<ConsoleTabItemViewModel>();
             _isBorderVisible = true;
             SubscribeEvents();
             SetConsoleOutput();
+        }
+
+        private void SubscribeEvents()
+        {
+            _eventAggregator.GetEvent<CadModelLoadedEvent>().Subscribe(OnCadModelLoadedEvent);
+            _eventAggregator.GetEvent<CloseCadModelTabViewEvent>().Subscribe(OnCloseCadModelTabViewEvent);
+            //_eventAggregator.GetEvent<TabPageSelectionChangedEvent>().Subscribe(OnTabPageSelectionChangedEvent);
         }
 
         private void SetConsoleOutput()
@@ -72,56 +88,33 @@ namespace HCL_ODA_TestPAD.ViewModels
 
         private void OnConsoleWriteEvent(object sender, ConsoleWriterEventArgs e)
         {
-            //AppConsoleText += e.Value;
             ForwardLineTextToActiveTab(e.Value);
         }
 
-        /// <summary>
-        /// Subscribes the application events.
-        /// </summary>
-        public void SubscribeEvents()
+        private void OnCadModelLoadedEvent(string filePath)
         {
-            //foreach (var emit in EnumUtil.Enumerate<EMIT>().Where(e => e <= EMIT.FATAL))
-            //{
-            //    FxBroker<EMIT>.Instance.Subscribe(emit, OnEvent_Logging);
-            //}
-            //FxBroker<CREATE>.Instance.Subscribe(CREATE.EVENT_NEW_TESTCASE, OnEvent_NewTestCase);
-            //FxBroker<AET>.Instance.Subscribe(AET.EVENT_USE_CASE_IDENTITY, OnEvent_UseCaseIdentity);
+            var timeStamp = DateTime.Now.ToString("[HH-mm-ss] : ");
+            var newTabItem = new ConsoleTabItemViewModel()
+            {
+                TabItemHeaderText = Path.GetFileName(filePath),
+                TabItemContent = $"{timeStamp}{filePath} loaded." + Environment.NewLine,
+                IsTabItemRunning = true
+            };
+            ConsoleTabViewItems.Add(newTabItem);
+            _activeTabItem = newTabItem;
+            IsBorderVisible = false;
+        }
+        private void OnCloseCadModelTabViewEvent(CloseCadModelTabViewEventArgs args)
+        {
+            var tabItem = ConsoleTabViewItems.SingleOrDefault(item => item.TabItemHeaderText == args.CadModelTabViewKey);
+            if (tabItem != null)
+                ConsoleTabViewItems.Remove(tabItem);
         }
 
-        //private void OnEvent_UseCaseIdentity(AppEvent<AET, object> obj)
-        //{
-        //    var idBuilder = new StringBuilder();
-        //    var timeStamp = obj.When.ToString("[HH-mm-ss] : ");
-        //    var ucIdentity = (UseCaseIdentity)obj.Content;
-        //    idBuilder.AppendLine($"{timeStamp}Completed Successfully.");
-        //    idBuilder.AppendLine("--------------------------------------------");
-        //    idBuilder.AppendLine($"Use Case Name : {ucIdentity.UseCaseName}");
-        //    idBuilder.AppendLine($"Category : {ucIdentity.UseCaseCategory}");
-        //    idBuilder.AppendLine($"Log File : {ucIdentity.LogFile}");
-        //    idBuilder.AppendLine("--------------------------------------------");
-        //    if (_activeTabItem != null)
-        //    {
-        //        _activeTabItem.TabItemContent += idBuilder;
-        //        _activeTabItem.IsTabItemRunning = false;
-        //    }
-        //}
-
-        //private void OnEvent_NewTestCase(AppEvent<CREATE, object> obj)
-        //{
-        //    var timeStamp = obj.When.ToString("[HH-mm-ss] : ");
-        //    var newTabItem = new TestConsoleTabItemViewModel()
-        //    {
-        //        TabItemHeaderText = $"[{ConsoleTabViewItems.Count + 1}]-{obj.Content}",
-        //        TabItemContent = $"{timeStamp}{obj.Content} started.." + Environment.NewLine,
-        //        IsTabItemRunning = true
-        //    };
-        //    ConsoleTabViewItems.Add(newTabItem);
-        //    _activeTabItem = newTabItem;
-        //    IsBorderVisible = false;
-        //    //SetWelcomeText();
-        //}
-
+        private void OnTabPageSelectionChangedEvent(int selectedIndex)
+        {
+            ConsoleTabViewItems.RemoveAt(selectedIndex);
+        }
         private void SetWelcomeText()
         {
             AppConsoleText = string.Concat(Enumerable.Repeat("=", 50)) + Environment.NewLine;

@@ -348,7 +348,8 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             //2-Setup Bitmap Gs for OpenGLES2
             odTvGsDevice.setupGsBitmap(0, 0, OdTvGsDevice.Name.kOpenGLES2);
             odTvGsDevice.setForbidImageHighlight(_appSettings.SetForbidImageHighlight);
-
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _appSettings.UseForcePartialUpdate);
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _appSettings.UseBlocksCache);
 
             if (!isIfc)
             {
@@ -358,7 +359,6 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             {
                 odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _appSettings.IfcUseSceneGraph);
             }
-            odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _appSettings.UseForcePartialUpdate);
             OdTvDCRect rect = new OdTvDCRect(0, 800, 600, 0);
             odTvGsDevice.onSize(rect);
             odTvGsDevice.update();

@@ -125,6 +125,11 @@ public record AppSettings : IAppSettings
     [Category("OpenGLES2 Device")]
     [DisplayName("Forbid Image Highlight")]
     [Description("Set Forbid Image Highlight")]
+    public bool UseBlocksCache { get; set; }
+
+    [Category("OpenGLES2 Device")]
+    [DisplayName("Blocks Cache")]
+    [Description("Enable BlocksCache")]
     public bool SetForbidImageHighlight { get; set; }
     #endregion
 
@@ -187,8 +192,8 @@ public record AppSettings : IAppSettings
 
     #region Settings Type
     //#Settings 
-    [Category("Settings Mode")]
-    [DisplayName("Settings Mode")]
+    [Category("Settings Type")]
+    [DisplayName("Settings Type")]
     [Description("Choose HCL to reset custom settings")]
     public SettingsMode SettingsMode { get; set; }
     #endregion

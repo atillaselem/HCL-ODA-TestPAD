@@ -36,6 +36,7 @@ public interface IAppSettings
     bool SetFrozenLayersVisible { get; set; }
     bool UseSceneGraph { get; set; }
     bool UseForcePartialUpdate { get; set; }
+    bool UseBlocksCache { get; set; }
     bool SetForbidImageHighlight { get; set; }
     //#DWG & DXF Import Parameters
     bool DwgSetObjectNaming { get; set; }

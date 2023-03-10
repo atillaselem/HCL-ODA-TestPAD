@@ -9,6 +9,7 @@
 	"UseSceneGraph": true,
 	"RenderDevice": 0,
 	"UseForcePartialUpdate": true,
+	"UseBlocksCache": true,
 	"SetForbidImageHighlight": true,
 	"DwgSetObjectNaming": true,
 	"DwgSetStoreSourceObjects": true,

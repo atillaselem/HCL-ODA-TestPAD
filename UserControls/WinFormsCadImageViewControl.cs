@@ -808,6 +808,8 @@ namespace HCL_ODA_TestPAD.UserControls
                     OdTvDCRect rect = new OdTvDCRect(0, Width, Height, 0);
                     odTvGsDevice.setupGs(wndHndl, rect, OdTvGsDevice.Name.kOpenGLES2);
                     odTvGsDevice.setForbidImageHighlight(_appSettings.SetForbidImageHighlight);
+                    odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _appSettings.UseForcePartialUpdate);
+                    odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _appSettings.UseBlocksCache);
 
                     if (!isIfc)
                     {
@@ -817,7 +819,6 @@ namespace HCL_ODA_TestPAD.UserControls
                     {
                         odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _appSettings.IfcUseSceneGraph);
                     }
-                    odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _appSettings.UseForcePartialUpdate);
 
                     for (int i = 0; i < odTvGsDevice.numViews(); i++)
                     {

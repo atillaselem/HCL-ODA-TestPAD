@@ -15,7 +15,7 @@ namespace HCL_ODA_TestPAD.ViewModels
         private string _statusMessage;
         private int _progressValue;
         private int _progressMax;
-        private double _progressPercentage;
+        private string _progressInfo;
         private Visibility _progressBarVisibility = Visibility.Collapsed;
 
         private LinearGradientBrush _exceptionBrush = new LinearGradientBrush(Colors.LightPink, Colors.IndianRed, new Point(0.5, 0), new Point(0.5, 1));
@@ -31,7 +31,7 @@ namespace HCL_ODA_TestPAD.ViewModels
 
         private void SubscribeEvents()
         {
-            _eventAggregator.GetEvent<ProgressStepChangedEvent>().Subscribe(OnProgressChangedEvent);
+            _eventAggregator.GetEvent<ProgressStepChangedEvent>().Subscribe(OnProgressStepChangedEvent);
             _eventAggregator.GetEvent<ProgressMaxChangedEvent>().Subscribe(OnProgressMaxEvent);
             _eventAggregator.GetEvent<AppStatusTextChanged>().Subscribe(OnAppStatusTextChanged);
         }
@@ -44,15 +44,20 @@ namespace HCL_ODA_TestPAD.ViewModels
         private void OnProgressMaxEvent(int progressMax)
         {
             ProgressMax = progressMax;
-            ProgressPercentage = (100.0 * ProgressValue) / ProgressMax;
+            ProgressValue = 0;
+            ProgressInfo = String.Empty;
         }
 
-        private void OnProgressChangedEvent(int progressCurrent)
+        private void OnProgressStepChangedEvent(ProgressStepChangedEventArg eventArg)
         {
-            if (Math.Abs(ProgressPercentage - 100.0) > 0.001)
+            if (Math.Abs(ProgressValue - 100.0) > 0.001)
             {
-                ProgressValue = progressCurrent;
-                ProgressPercentage = (100.0 * ProgressValue) / ProgressMax;
+                ProgressValue += eventArg.CurrentProgressStep;
+            }
+            ProgressInfo = $"{eventArg.CurrentDeviceCoefficient}/{eventArg.RegenThreshold}/{eventArg.LastDeviceCoefficientAfterRegen}";
+            if(ProgressValue > 100)
+            {
+                ProgressValue = 0;
             }
         }
 
@@ -76,6 +81,10 @@ namespace HCL_ODA_TestPAD.ViewModels
                 {
                     ProgressBarVisibility = Visibility.Visible;
                 }
+                else
+                {
+                    ProgressBarVisibility = Visibility.Hidden;
+                }
             }
         }
         public int ProgressMax
@@ -83,10 +92,10 @@ namespace HCL_ODA_TestPAD.ViewModels
             get => _progressMax;
             set => SetProperty(ref _progressMax, value);
         }
-        public double ProgressPercentage
+        public string ProgressInfo
         {
-            get => _progressPercentage;
-            set => SetProperty(ref _progressPercentage, value);
+            get => _progressInfo;
+            set => SetProperty(ref _progressInfo, value);
         }
         public Visibility ProgressBarVisibility
         {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HCL_ODA_TestPAD.Utility;
+using System;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using Teigha.Core;
@@ -31,7 +32,7 @@ public class CadModel : ICadModel
     {
         if (WritableBackBuffer != IntPtr.Zero)
         {
-            using var pDev = TvGsDeviceId.openObject(OpenMode.kForWrite);
+            using var pDev = TvGsDeviceId.openObject(OpenMode.kForRead);
             using var pRastImg = pDev?.getRasterImage();
             if (pRastImg != null)
             {
@@ -47,6 +48,12 @@ public class CadModel : ICadModel
 
     public event EventHandler ViewUpdateRequested;
     public RasterImageBuffer _rasterImageBufffer = new();
+    private Func<CadRegenerator> _cadRegenFactory;
+
+    public CadModel(Func<CadRegenerator> cadRegenFactory)
+    {
+        _cadRegenFactory = cadRegenFactory;
+    }
 
     public void UpdateImageBuffer(WriteableBitmap writableBitmap)
     {
@@ -67,7 +74,7 @@ public class CadModel : ICadModel
             using var rect = new OdTvDCRect(0, (int)size.Width, (int)size.Height, 0);
             odTvGsDevice.onSize(rect);
             odTvGsDevice.invalidate();
-            odTvGsDevice.update();
+            odTvGsDevice.TryAutoRegeneration(_cadRegenFactory).update();
         }
 
     }
@@ -87,14 +94,14 @@ public class CadModel : ICadModel
             {
                 odTvGsDevice.invalidate();
             }
-            odTvGsDevice.update();
+
+            odTvGsDevice.TryAutoRegeneration(_cadRegenFactory).update();
             ViewUpdateRequested?.Invoke(this, null);
         }
     }
 
     public void Dispose()
     {
-        TvGsDeviceId = null;
         ViewUpdateRequested = null;
         WritableBackBuffer = IntPtr.Zero;
     }

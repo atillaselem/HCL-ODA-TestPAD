@@ -253,7 +253,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="MKDIR &quot;$(TargetDir)\common\config&quot; /F /R /Y /I /D /Q&#xD;&#xA;XCOPY &quot;$(SolutionDir)\common\config\HCL_ODA_TestPAD_AppSettings_HCL.json&quot; &quot;$(TargetDir)\common\config&quot;&#xD;&#xA;XCOPY &quot;$(SolutionDir)\ThirdParty\TeighaLibraries\x86\*.*&quot; &quot;$(TargetDir)\libs&quot; /F /R /Y /I /D /Q" />
+    <Exec Command="MKDIR &quot;$(TargetDir)\common\config&quot;&#xD;&#xA;XCOPY &quot;$(SolutionDir)\common\config\HCL_ODA_TestPAD_AppSettings_HCL.json&quot; &quot;$(TargetDir)\common\config&quot; /F /R /Y /I /D /Q&#xD;&#xA;XCOPY &quot;$(SolutionDir)\ThirdParty\TeighaLibraries\x86\*.*&quot; &quot;$(TargetDir)\libs&quot; /F /R /Y /I /D /Q" />
   </Target>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

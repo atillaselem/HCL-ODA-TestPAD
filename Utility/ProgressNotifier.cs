@@ -44,7 +44,7 @@ namespace HCL_ODA_TestPAD.Utility
                             //var elapsedText = $"{_title,-50}{string.Format($"[{_totalElapsedTime.ToString("000.##0"),5} ms]")}";
                             //Console.WriteLine("[PROFILER] : " + elapsedText);
 
-                            ProgressStepFactory().Publish((int)_totalElapsedTime);
+                            //ProgressStepFactory().Publish((int)_totalElapsedTime);
                             profiler.Restart();
                         }
                         catch (Exception ex)

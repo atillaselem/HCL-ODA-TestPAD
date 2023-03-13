@@ -1,16 +1,18 @@
 {
 	"ShowSplashScreen": false,
 	"ShowAboutAnimation": true,
-	"SaveSettings": true,
-	"SaveDockLayout": true,
 	"CadFileUnit": 0,
 	"AppLayout": 0,
+	"SaveDockLayout": true,
 	"SetFrozenLayersVisible": true,
 	"UseSceneGraph": true,
 	"RenderDevice": 0,
 	"UseForcePartialUpdate": true,
 	"UseBlocksCache": true,
 	"SetForbidImageHighlight": true,
+	"AutoRegeneration": true,
+	"RegenThreshold": 0.01,
+	"RegenMode": 0,
 	"DwgSetObjectNaming": true,
 	"DwgSetStoreSourceObjects": true,
 	"DwgSetImportFrozenLayers": true,
@@ -23,5 +25,6 @@
 	"ShowFPS": true,
 	"ShowWCS": true,
 	"ShowCube": true,
+	"SaveSettings": true,
 	"SettingsMode": 0
 }

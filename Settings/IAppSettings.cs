@@ -1,4 +1,5 @@
 ﻿using HCL_ODA_TestPAD.HCL.CadUnits;
+using static Teigha.Visualize.OdTvGsDevice;
 
 namespace HCL_ODA_TestPAD.Settings;
 
@@ -24,8 +25,6 @@ public interface IAppSettings
     bool ShowSplashScreen { get; set; }
     //#region About App
     bool ShowAboutAnimation { get; set; }
-    //#region Exit App
-    bool SaveSettings { get; set; }
     bool SaveDockLayout { get; set; }
     //#region CAD Units
     SurveyUnits CadFileUnit { get; set; }
@@ -53,6 +52,12 @@ public interface IAppSettings
     bool ShowFPS { get; set; }
     bool ShowWCS { get; set; }
     bool ShowCube { get; set; }
-    //#Settings 
+    //#Regeneration
+    bool AutoRegeneration { get; set; }
+    double RegenThreshold { get; set; }
+    RegenMode RegenMode { get; set; }
+    //Preferences
+    bool SaveSettings { get; set; }
     SettingsMode SettingsMode { get; set; }
+
 }

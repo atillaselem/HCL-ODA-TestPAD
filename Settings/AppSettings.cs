@@ -1,85 +1,39 @@
 ﻿using System.ComponentModel;
 using HCL_ODA_TestPAD.HCL.CadUnits;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
+using static Teigha.Visualize.OdTvGsDevice;
 
 namespace HCL_ODA_TestPAD.Settings;
 
 [CategoryOrder("OpenGLES2 Device", 1)]
-[CategoryOrder("DWG & DXF Import Parameters", 2)]
-[CategoryOrder("IFC Import Parameters", 3)] 
-[CategoryOrder("CAD Units", 4)] 
-[CategoryOrder("CAD Custom Models", 5)] 
-[CategoryOrder("User Interface", 6)] 
-[CategoryOrder("Start App", 7)]
-[CategoryOrder("Exit App", 8)] 
+[CategoryOrder("Regeneration", 2)]
+[CategoryOrder("DWG & DXF Import Parameters", 3)]
+[CategoryOrder("IFC Import Parameters", 4)] 
+[CategoryOrder("CAD Units", 5)] 
+[CategoryOrder("CAD Custom Models", 6)] 
+[CategoryOrder("User Interface", 7)] 
+[CategoryOrder("On Start", 8)]
 [CategoryOrder("About App", 9)] 
-//[CategoryOrder("Settings Type", 10)] 
+[CategoryOrder("Preferences", 10)] 
 
 public record AppSettings : IAppSettings
 {
-    #region Start App
-    /// <summary>
-    /// Gets or sets a value indicating whether [show splash screen].
-    /// </summary>
-    /// <value>
-    ///   <c>true</c> if [show splash screen]; otherwise, <c>false</c>.
-    /// </value>
-    [Category("Start App")]
-    [DisplayName("Show Splash Screen")]
-    [Description("Shows Splash screen on application startup.")]
+    #region Start
+    [Category("On Start")]
+    [DisplayName("Splash Screen")]
+    [Description("Shows Splash screen on Start")]
     public bool ShowSplashScreen { get; set; }
-
-    #endregion Start App
+    #endregion Start
 
     #region About App
-    /// <summary>
-    /// Gets or sets a value indicating whether [show about].
-    /// </summary>
-    /// <value>
-    ///   <c>true</c> if [show splash screen]; otherwise, <c>false</c>.
-    /// </value>
     [Category("About App")]
-    [DisplayName("Show About Animated")]
-    [Description("Shows About animated")]
+    [DisplayName("About App")]
+    [Description("Shows About Info animated")]
     [ReadOnly(true)]
     public bool ShowAboutAnimation { get; set; }
     #endregion About App
 
-    #region Exit App
-
-    /// <summary>
-    /// Gets or sets a value indicating whether [save settings].
-    /// </summary>
-    /// <value>
-    ///   <c>true</c> if [save settings]; otherwise, <c>false</c>.
-    /// </value>
-    [Category("Exit App")]
-    [DisplayName("Save Settings")]
-    [Description("Saves Settings with current state during Application Closing")]
-    [ReadOnly(true)]
-    public bool SaveSettings { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether [save dock layout].
-    /// </summary>
-    /// <value>
-    ///   <c>true</c> if [save dock layout]; otherwise, <c>false</c>.
-    /// </value>
-    [Category("Exit App")]
-    [DisplayName("Save Dock Layout")]
-    [Description("Saves Dockable Pane Layout during Application Closing")]
-    [ReadOnly(true)]
-    public bool SaveDockLayout { get; set; } = true;
-
-    #endregion Exit App
-
     #region CAD Units
-    /// <summary>
-    /// Gets or sets a value indicating whether [show splash screen].
-    /// </summary>
-    /// <value>
-    ///   <c>true</c> if [show splash screen]; otherwise, <c>false</c>.
-    /// </value>
     [Category("CAD Units")]
     [DisplayName("Cad File Unit")]
     [Description("Survey Units used for Cad File")]
@@ -87,18 +41,17 @@ public record AppSettings : IAppSettings
     #endregion
 
     #region UI Layout
-    /// <summary>
-    /// Gets or sets a value indicating whether [show splash screen].
-    /// </summary>
-    /// <value>
-    ///   <c>true</c> if [show splash screen]; otherwise, <c>false</c>.
-    /// </value>
     [Category("User Interface")]
     [DisplayName("UI Layout")]
-    [Description("User Interface Layout")]
+    [Description("Select User Interface Layout")]
     [ReadOnly(true)]
     public AppLayout AppLayout { get; set; }
 
+    [Category("User Interface")]
+    [DisplayName("Auto Save Layout")]
+    [Description("Auto saves Dockable Pane Layout on Exit")]
+    [ReadOnly(true)]
+    public bool SaveDockLayout { get; set; } = true;
     #endregion
 
     #region OpenGLES2 Device
@@ -131,6 +84,23 @@ public record AppSettings : IAppSettings
     [DisplayName("Blocks Cache")]
     [Description("Enable BlocksCache")]
     public bool SetForbidImageHighlight { get; set; }
+    #endregion
+
+    #region Regeneration
+    [Category("Regeneration")]
+    [DisplayName("Auto Regeneration")]
+    [Description("Enables Auto Regenaration >= Regeneration Threshold")]
+    public bool AutoRegeneration { get; set; }
+
+    [Category("Regeneration")]
+    [DisplayName("Regeneration Threshold")]
+    [Description("Set Regeneration Threshold")]
+    public double RegenThreshold { get; set; }
+
+    [Category("Regeneration")]
+    [DisplayName("RegenMode")]
+    [Description("Set Regeneration Mode")]
+    public RegenMode RegenMode { get; set; }
     #endregion
 
     #region DWG & DXF Import Parameters
@@ -190,11 +160,16 @@ public record AppSettings : IAppSettings
     public bool ShowCube { get; set; }
     #endregion
 
-    #region Settings Type
-    //#Settings 
-    [Category("Settings Type")]
-    [DisplayName("Settings Type")]
-    [Description("Choose HCL to reset custom settings")]
+    #region Preferences
+    [Category("Preferences")]
+    [DisplayName("Auto Save Settings")]
+    [Description("Auto saves setting changes on Exit")]
+    [ReadOnly(true)]
+    public bool SaveSettings { get; set; } = true;
+
+    [Category("Preferences")]
+    [DisplayName("Settings Mode")]
+    [Description("Choose mode as HCL to reset custom settings")]
     public SettingsMode SettingsMode { get; set; }
     #endregion
 }

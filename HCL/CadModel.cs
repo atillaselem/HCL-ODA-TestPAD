@@ -74,7 +74,8 @@ public class CadModel : ICadModel
             using var rect = new OdTvDCRect(0, (int)size.Width, (int)size.Height, 0);
             odTvGsDevice.onSize(rect);
             odTvGsDevice.invalidate();
-            odTvGsDevice.TryAutoRegeneration(_cadRegenFactory).update();
+            odTvGsDevice.regen(OdTvGsDevice.RegenMode.kRegenVisible);
+            odTvGsDevice.update();
         }
 
     }

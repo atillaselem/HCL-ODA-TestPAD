@@ -31,19 +31,17 @@ namespace HCL_ODA_TestPAD.HCL
         {
             var canRegenerate = false;
             var currentCoeff = 0d;
-            if (_appSettings().AutoRegeneration)
+            currentCoeff = GetRegenCoefficient(dev);
+            if (currentCoeff >= _appSettings().RegenThreshold && currentCoeff == _lastRegenCoeff)
             {
-                currentCoeff = GetRegenCoefficient(dev);
-                if (currentCoeff >= _appSettings().RegenThreshold && currentCoeff == _lastRegenCoeff)
-                {
-                    canRegenerate = false;
-                }
-                // regen coeff beyond the threshold, regeneration is mandatory
-                else if (currentCoeff >= _appSettings().RegenThreshold)
-                //else if (currentCoeff >= _appSettings().RegenThreshold && currentCoeff > _lastRegenCoeff)
-                {
-                    canRegenerate = true;
-                }
+                canRegenerate = false;
+            }
+
+            // regen coeff beyond the threshold, regeneration is mandatory
+            //else if (currentCoeff >= _appSettings().RegenThreshold) // HCL Implementation
+            else if (currentCoeff >= _appSettings().RegenThreshold && currentCoeff > _lastRegenCoeff) //TestPAD Fix Perfromance! 
+            {
+                canRegenerate = true;
             }
             return (canRegenerate, currentCoeff);
         }
@@ -55,30 +53,24 @@ namespace HCL_ODA_TestPAD.HCL
 
         public OdTvGsDevice TryAutoRegeneration(OdTvGsDevice dev)
         {
-            var (canRegenerate, currentCoeff) = CheckAutoRegeneration(dev);
-
-            if (canRegenerate)
+            if (_appSettings().AutoRegeneration)
             {
-                dev.regen(_appSettings().RegenMode);
+                var (canRegenerate, currentCoeff) = CheckAutoRegeneration(dev);
 
-                _lastRegenCoeff = currentCoeff;
+                if (canRegenerate)
+                {
+                    dev.regen(_appSettings().RegenMode);
+
+                    _lastRegenCoeff = currentCoeff;
+
+                }
 
                 _eventAggregator().GetEvent<ProgressStepChangedEvent>().Publish(new ProgressStepChangedEventArg()
                 {
                     CurrentDeviceCoefficient = currentCoeff,
                     RegenThreshold = _appSettings().RegenThreshold,
                     LastDeviceCoefficientAfterRegen = _lastRegenCoeff,
-                    CurrentProgressStep = 5
-                }); ;
-            }
-            else
-            {
-                _eventAggregator().GetEvent<ProgressStepChangedEvent>().Publish(new ProgressStepChangedEventArg()
-                {
-                    CurrentDeviceCoefficient = currentCoeff,
-                    RegenThreshold = _appSettings().RegenThreshold,
-                    LastDeviceCoefficientAfterRegen = _lastRegenCoeff,
-                    CurrentProgressStep = 0
+                    CurrentProgressStep = canRegenerate ? 5 : 0
                 }); ;
             }
             return dev;

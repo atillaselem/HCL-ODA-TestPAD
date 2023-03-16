@@ -221,7 +221,7 @@ public class MainWindowViewModel : BindableBase
                 _settingsProvider);
             _hclGLES2_Control.AddDefaultViewOnLoad = addView;
             AppMainWindow.RenderArea.Children.Add((DefaultCadImageViewControl)_hclGLES2_Control);
-            _hclGLES2_Control.ShowCustomModels();
+            //_hclGLES2_Control.ShowCustomModels();
         }
         else
         {
@@ -733,14 +733,14 @@ public class MainWindowViewModel : BindableBase
     public void PanCommand_Clicked()
     {
         AppMainWindow.OrbitBtn.IsChecked = false;
+        AppMainWindow.ZoomToAreaBtn.IsChecked = false;
         AppMainWindow.PanBtn.IsChecked = true;
+        _hclGLES2_Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
         //then raise a click evt
         //MainWindow.PanBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         if (AppMainWindow.PanBtn.IsChecked == true)
-            //WpfView.Pan();
             _hclGLES2_Control.Pan();
         else
-            //WpfView.FinishDragger();
             _hclGLES2_Control.FinishDragger();
 
 
@@ -750,17 +750,17 @@ public class MainWindowViewModel : BindableBase
     private RelayCommand _orbitCommand;
     public RelayCommand OrbitCommand
     {
-        get { return _orbitCommand ?? (_orbitCommand = new RelayCommand(param => OrbitCommand_Clicked(), param => FileIsExist)); }
+        get { return _orbitCommand ??= new RelayCommand(param => OrbitCommand_Clicked(), param => FileIsExist); }
     }
 
     public void OrbitCommand_Clicked()
     {
         AppMainWindow.PanBtn.IsChecked = false;
+        AppMainWindow.ZoomToAreaBtn.IsChecked = false;
+        _hclGLES2_Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
         if (AppMainWindow.OrbitBtn.IsChecked == true)
-            //WpfView.Orbit();
             _hclGLES2_Control.Orbit();
         else
-            //WpfView.FinishDragger();
             _hclGLES2_Control.FinishDragger();
     }
 
@@ -768,7 +768,7 @@ public class MainWindowViewModel : BindableBase
     private RelayCommand _zoomCommand;
     public RelayCommand ZoomCommand
     {
-        get { return _zoomCommand ?? (_zoomCommand = new RelayCommand(param => ZoomCommand_Clicked(param), param => FileIsExist)); }
+        get { return _zoomCommand ??= new RelayCommand(param => ZoomCommand_Clicked(param), param => FileIsExist); }
     }
 
     private void ZoomCommand_Clicked(object param)
@@ -787,6 +787,19 @@ public class MainWindowViewModel : BindableBase
         }
     }
 
+    // orbit command
+    private RelayCommand _zoomToAreaCommand;
+    public RelayCommand ZoomToAreaCommand
+    {
+        get { return _zoomToAreaCommand ??= new RelayCommand(param => ZoomToAreaCommand_Clicked(), param => FileIsExist); }
+    }
+
+    public void ZoomToAreaCommand_Clicked()
+    {
+        AppMainWindow.PanBtn.IsChecked = false;
+        AppMainWindow.OrbitBtn.IsChecked = false;
+        _hclGLES2_Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
+    }
     #endregion
 
     #region Drawing commands
@@ -1149,6 +1162,15 @@ public class MainWindowViewModel : BindableBase
         }
     }
 
+    #endregion
+
+    #region ZoomToArea Link To Dependency Property
+    private bool _zoomToAreaProperty;
+    public bool IsZoomToAreaEnabled
+    {
+        get => _zoomToAreaProperty;
+        set => SetProperty(ref _zoomToAreaProperty, value);
+    }
     #endregion
 
 }

@@ -12,4 +12,5 @@ public interface ICadImageViewControl
     void SetFileLoaded(bool isFileLoaded, string filePath, Action<string> emitEvent);
     void SetRenderMode(OdTvGsView.RenderMode renderMode) { }
     void SetRenderModeButton(OdTvGsView.RenderMode model) { }
+    void UpdateView() {}
 }

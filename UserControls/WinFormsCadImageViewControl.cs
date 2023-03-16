@@ -694,7 +694,12 @@ namespace HCL_ODA_TestPAD.UserControls
             StartDragger(newDragger, true);
 
             DisableMarkups();
-         }
+        }
+
+        public void ZoomToArea(bool enable)
+        {
+
+        }
 
         public void Zoom(ZoomType type)
         {

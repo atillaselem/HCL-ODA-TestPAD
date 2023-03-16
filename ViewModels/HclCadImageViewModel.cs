@@ -30,6 +30,7 @@ using System.Windows.Forms;
 using System.Windows.Documents;
 using static Teigha.Core.OdGsCullingVolume;
 using System.Configuration;
+using System.ComponentModel;
 
 namespace HCL_ODA_TestPAD.ViewModels;
 
@@ -245,7 +246,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             
             SetCadDbUnitAsCadFileUnit(odTvDatabase);
             CreateDefaultBitmapDevice(width, height, odTvDatabase, odTvModelId);
-            FilePath = "HILTI-HCL-GL_Control";
+           
             ViewControl?.SetFileLoaded(true, FilePath, (statusText) => _eventAggregator.GetEvent<AppStatusTextChanged>().Publish(statusText));
         }
         catch
@@ -271,7 +272,6 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
             //3-Create view
             using var odTvGsViewId = odTvGsDevice?.createView("TV_View_Default");
-            TvActiveViewport = 0;
 
             //4-Add view to device
             odTvGsDevice?.addView(odTvGsViewId);
@@ -280,7 +280,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             using var viewRef = odTvGsViewId?.openObject(OpenMode.kForWrite);
 
             //6-Setup view to make it contr directional with the WCS normal
-            viewRef?.setView(new OdGePoint3d(0, 0, 1), new OdGePoint3d(0, 0, 0), new OdGeVector3d(0, 1, 0), 1, 1);
+            //viewRef?.setView(new OdGePoint3d(0, 0, 1), new OdGePoint3d(0, 0, 0), new OdGeVector3d(0, 1, 0), 1, 1);
 
             //7-Add main model to the view
             viewRef?.addModel(odTvModelId);
@@ -288,18 +288,36 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             viewRef?.setActive(true);
 
             //9-Set the render mode
-            viewRef?.setMode(OdTvGsView.RenderMode.k2DOptimized);
+            //viewRef?.setMode(OdTvGsView.RenderMode.k2DOptimized);
 
             //10-Setup Bitmap Gs for OpenGLES2
             odTvGsDevice?.setupGsBitmap(0, 0, OdTvGsDevice.Name.kOpenGLES2);
             odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _appSettings.UseSceneGraph);
             odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _appSettings.UseForcePartialUpdate);
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _appSettings.UseBlocksCache);
 
             ConfigureViewSettings(odTvGsViewId);
 
+
+            using var rect = new OdTvDCRect(0, 800, 600, 0);
+            odTvGsDevice.onSize(rect);
+            odTvGsDevice.update();
+
+            //TvActiveViewport = 0;
+            //SetFrozenLayersVisible(odTvDatabase);
             TvActiveViewport = 0;
+
             SetFrozenLayersVisible(odTvDatabase);
 
+            FilePath = "HILTI-HCL-GL_Control";
+
+            EmitFileLoadedEvents();
+
+            _isFileLoading = true;
+
+            _cadModel.TvGsDeviceId = TvGsDeviceId;
+
+            Zoom(ZoomType.ZoomExtents);
         }
         catch (Exception e)
         {
@@ -348,6 +366,8 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             //2-Setup Bitmap Gs for OpenGLES2
             odTvGsDevice.setupGsBitmap(0, 0, OdTvGsDevice.Name.kOpenGLES2);
             odTvGsDevice.setForbidImageHighlight(_appSettings.SetForbidImageHighlight);
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _appSettings.UseForcePartialUpdate);
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _appSettings.UseBlocksCache);
 
             ConfigureViewSettings(activeViewId);
 
@@ -413,6 +433,11 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             }
 
         }
+
+        UnitConverter.MapUnitsToMetersConversionFactor =
+            UnitsValueConverter.MapUnitsToMetersConversion(CadUnits);
+        UnitConverter.MetersToMapUnitsConversionFactor =
+            UnitsValueConverter.MetersToMapUnitsConversion(CadUnits);
     }
 
     private void SetFrozenLayersVisible(OdTvDatabase odTvDatabase)
@@ -555,6 +580,12 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         ActionAfterDragger(res);
         res = _dragger.NextPoint((int)position.X, (int)position.Y);
         ActionAfterDragger(res);
+        if (_appSettings.Interactivity)
+        {
+            //start Interactivity
+            using var odTvGsView = TvGsDeviceId.openObject().viewAt(TvActiveViewport).openObject(OpenMode.kForWrite);
+            odTvGsView.beginInteractivity(_appSettings.InteractiveFPS);
+        }
     }
 
     public void MouseMove(System.Windows.Input.MouseEventArgs e, Point position)
@@ -574,6 +605,12 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     public void MouseUp(MouseButtonEventArgs e)
     {
         _mouseDown = MouseButtonState.Released;
+        if (_appSettings.Interactivity)
+        {
+            //start Interactivity
+            using var odTvGsView = TvGsDeviceId.openObject().viewAt(TvActiveViewport).openObject(OpenMode.kForWrite);
+            odTvGsView.endInteractivity();
+        }
         UpdateCadView();
     }
 
@@ -708,6 +745,20 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         Debug.WriteLine("1-Orbit");
         //DisableMarkups();
     }
+
+    public void ZoomToArea()
+    {
+        if (TvDatabaseId == null || TvGsDeviceId == null)
+            return;
+
+        //             if (_dragger != null && (_dragger as OdTvSelectDragger) == null)
+        //                 FinishDragger();
+
+        ODA.Draggers.OdTvDragger newDragger = new OdTvOrbitDragger(TvGsDeviceId, _tvDraggersModelId);
+        StartDragger(newDragger, true);
+        Debug.WriteLine("1-Orbit");
+        //DisableMarkups();
+    }
     #endregion
 
     #region Views & Styles
@@ -735,7 +786,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         //SetAnimation(exView.getAnimation());
         //DisableMarkups();
         //Invalidate();
-        //UpdateCadView();
+        UpdateCadView();
 
         UpdateWCSView();
         //MM.StopTransaction(mtr);
@@ -746,7 +797,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     }
 
     private void UpdateWCSView()
-    { 
+    {
         using var parentView = WCS.GetParentView(OpenMode.kForRead);
         var parentViewPosition = parentView.position();
         var targetTranslation = OdGeMatrix3d.translation(-parentView.target().asVector());
@@ -1972,6 +2023,11 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     public void ShowCube()
     {
         OnOffViewCube(_appSettings.ShowCube);
+    }
+    public void ShowCustomModels()
+    {
+        ShowFPS();
+        ShowWCS();
     }
     #endregion
 }

@@ -82,6 +82,21 @@
             <Setter Property="MinWidth" Value="80" />
         </Style>
 
+        <Style x:Key="HclImageStyle" TargetType="Image">
+            <Setter Property="Margin" Value="0,5,0,0" />
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="HclMenuIconImageStyle" TargetType="Image">
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
         <Style x:Key="ImageStyle" TargetType="Image">
             <Setter Property="Margin" Value="0,5,0,0" />
             <Setter Property="Width" Value="28" />
@@ -167,6 +182,44 @@
                     Width="25"
                     Height="25"
                     Source="{StaticResource MenuImg}" />
+                <buttons:DropDownButton.DropDown>
+                    <ContextMenu >
+                        <MenuItem x:Name="openMenu" ToolTip="Open CAD File" Command="{Binding OpenCommand}">
+                            <MenuItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{StaticResource OpenImg}" Style="{StaticResource HclMenuIconImageStyle}" VerticalAlignment="Center"/>
+                                    <Label Content="Open" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </MenuItem.Header>
+                        </MenuItem>
+                        <MenuItem x:Name="closeMenu" ToolTip="Close CAD File" Click="Close_Click">
+                            <MenuItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{StaticResource CloseImg}" Style="{StaticResource HclMenuIconImageStyle}" VerticalAlignment="Center"/>
+                                    <Label Content="Close" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </MenuItem.Header>
+                        </MenuItem>
+                        <Separator></Separator>
+                        <MenuItem x:Name="settingsMenu" ToolTip="TestPAD Settings" Command="{Binding SettingsCommand}">
+                            <MenuItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{StaticResource SettingsImg}" Style="{StaticResource HclMenuIconImageStyle}" VerticalAlignment="Center"/>
+                                    <Label Content="Settings" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </MenuItem.Header>
+                        </MenuItem>
+                        <Separator></Separator>
+                        <MenuItem x:Name="exitMenu" ToolTip="Exit TestPAD" Click="Exit_Click">
+                            <MenuItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{StaticResource ExitImg}" Style="{StaticResource HclMenuIconImageStyle}" VerticalAlignment="Center"/>
+                                    <Label Content="Exit" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </MenuItem.Header>
+                        </MenuItem>
+                    </ContextMenu>
+                </buttons:DropDownButton.DropDown>
             </buttons:DropDownButton>
 
             <Button
@@ -327,7 +380,7 @@
                 Command="{Binding PanCommand}"
                 Style="{StaticResource ToggleBtnStyle}"
                 ToolTip="Pan">
-                <Image Source="{StaticResource PanImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource PanImg}" Style="{StaticResource HclImageStyle}" />
             </ToggleButton>
 
             <ToggleButton
@@ -335,7 +388,7 @@
                 Command="{Binding OrbitCommand}"
                 Style="{StaticResource ToggleBtnStyle}"
                 ToolTip="Orbit">
-                <Image Source="{StaticResource OrbitImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource OrbitImg}" Style="{StaticResource HclImageStyle}" />
             </ToggleButton>
 
             <Button
@@ -343,7 +396,7 @@
                 CommandParameter="Zoom In"
                 Style="{StaticResource ButtonStyle}"
                 ToolTip="Zoom In">
-                <Image Source="{StaticResource ZoomInImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource ZoomInImg}" Style="{StaticResource HclImageStyle}" />
             </Button>
 
             <Button
@@ -351,7 +404,7 @@
                 CommandParameter="Zoom Out"
                 Style="{StaticResource ButtonStyle}"
                 ToolTip="Zoom Out">
-                <Image Source="{StaticResource ZoomOutImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource ZoomOutImg}" Style="{StaticResource HclImageStyle}" />
             </Button>
 
             <Button
@@ -359,8 +412,16 @@
                 CommandParameter="Zoom Extents"
                 Style="{StaticResource ButtonStyle}"
                 ToolTip="Zoom Extents">
-                <Image Source="{StaticResource ZoomExtImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource ZoomExtImg}" Style="{StaticResource HclImageStyle}" />
             </Button>
+
+            <ToggleButton
+                x:Name="ZoomToAreaBtn"
+                Command="{Binding ZoomToAreaCommand}"
+                Style="{StaticResource ToggleBtnStyle}"
+                ToolTip="Zoom To Area">
+                <Image Source="{StaticResource ZoomToAreaImg}" Style="{StaticResource HclImageStyle}" />
+            </ToggleButton>
         </StackPanel>
 
         <!--  View button panel  -->
@@ -377,7 +438,7 @@
                 CommandParameter="Top"
                 Style="{StaticResource ButtonStyle}"
                 ToolTip="Top">
-                <Image Source="{StaticResource ViewTopImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource ViewTopImg}" Style="{StaticResource HclImageStyle}" />
             </Button>
 
             <Button
@@ -385,7 +446,7 @@
                 CommandParameter="Bottom"
                 Style="{StaticResource ButtonStyle}"
                 ToolTip="Bottom">
-                <Image Source="{StaticResource ViewBottomImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource ViewBottomImg}" Style="{StaticResource HclImageStyle}" />
             </Button>
 
             <Button
@@ -393,7 +454,7 @@
                 CommandParameter="Left"
                 Style="{StaticResource ButtonStyle}"
                 ToolTip="Left">
-                <Image Source="{StaticResource ViewLeftImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource ViewLeftImg}" Style="{StaticResource HclImageStyle}" />
             </Button>
 
             <Button
@@ -401,7 +462,7 @@
                 CommandParameter="Right"
                 Style="{StaticResource ButtonStyle}"
                 ToolTip="Right">
-                <Image Source="{StaticResource ViewRightImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource ViewRightImg}" Style="{StaticResource HclImageStyle}" />
             </Button>
 
             <Button
@@ -409,7 +470,7 @@
                 CommandParameter="Front"
                 Style="{StaticResource ButtonStyle}"
                 ToolTip="Front">
-                <Image Source="{StaticResource ViewFrontImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource ViewFrontImg}" Style="{StaticResource HclImageStyle}" />
             </Button>
 
             <Button
@@ -417,7 +478,7 @@
                 CommandParameter="Back"
                 Style="{StaticResource ButtonStyle}"
                 ToolTip="Back">
-                <Image Source="{StaticResource ViewBackImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource ViewBackImg}" Style="{StaticResource HclImageStyle}" />
             </Button>
 
             <Button
@@ -495,7 +556,7 @@
                 CommandParameter="2D Wireframe"
                 Style="{StaticResource ToggleBtnStyle}"
                 ToolTip="2D Wireframe">
-                <Image Source="{StaticResource 2DWireframeImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource 2DWireframeImg}" Style="{StaticResource HclImageStyle}" />
             </ToggleButton>
 
             <ToggleButton
@@ -504,7 +565,7 @@
                 CommandParameter="3D Wireframe"
                 Style="{StaticResource ToggleBtnStyle}"
                 ToolTip="3D Wireframe">
-                <Image Source="{StaticResource 3DWireframeImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource 3DWireframeImg}" Style="{StaticResource HclImageStyle}" />
             </ToggleButton>
 
             <ToggleButton
@@ -513,7 +574,7 @@
                 CommandParameter="HiddenLine"
                 Style="{StaticResource ToggleBtnStyle}"
                 ToolTip="HiddenLine">
-                <Image Source="{StaticResource HiddenLineImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource HiddenLineImg}" Style="{StaticResource HclImageStyle}" />
             </ToggleButton>
 
             <ToggleButton
@@ -522,7 +583,7 @@
                 CommandParameter="Shaded"
                 Style="{StaticResource ToggleBtnStyle}"
                 ToolTip="Shaded">
-                <Image Source="{StaticResource ShadedImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource ShadedImg}" Style="{StaticResource HclImageStyle}" />
             </ToggleButton>
 
             <!--<ToggleButton
@@ -540,7 +601,7 @@
                 CommandParameter="Shaded with edges"
                 Style="{StaticResource ToggleBtnStyle}"
                 ToolTip="Shaded with edges">
-                <Image Source="{StaticResource ShadedEdgesImg}" Style="{StaticResource ImageStyle}" />
+                <Image Source="{StaticResource ShadedEdgesImg}" Style="{StaticResource HclImageStyle}" />
             </ToggleButton>
 
             <!--<ToggleButton

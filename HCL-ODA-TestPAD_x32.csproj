@@ -13,7 +13,7 @@
     <OutputPath>$(SolutionDir)Build\$(Configuration)\</OutputPath>
     <PlatformTarget>x86</PlatformTarget>
     <UseWindowsForms>True</UseWindowsForms>
-    <AssemblyVersion>2023.3.8</AssemblyVersion>
+    <AssemblyVersion>2023.3.16</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -32,6 +32,27 @@
     <None Remove="Images\Construct\line.png" />
     <None Remove="Images\Construct\ray.png" />
     <None Remove="Images\Construct\xline.png" />
+    <None Remove="Images\HCL\ContextMenu\close.png" />
+    <None Remove="Images\HCL\ContextMenu\exit.png" />
+    <None Remove="Images\HCL\ContextMenu\open.png" />
+    <None Remove="Images\HCL\ContextMenu\settings.png" />
+    <None Remove="Images\HCL\Navigation\Orbit.png" />
+    <None Remove="Images\HCL\Navigation\Pan.png" />
+    <None Remove="Images\HCL\Navigation\ZoomIn.png" />
+    <None Remove="Images\HCL\Navigation\ZoomOut.png" />
+    <None Remove="Images\HCL\Navigation\ZoomToArea.png" />
+    <None Remove="Images\HCL\Navigation\ZoomToExtent.png" />
+    <None Remove="Images\HCL\RenderMode\2dwireframe.png" />
+    <None Remove="Images\HCL\RenderMode\3dwireframe.png" />
+    <None Remove="Images\HCL\RenderMode\hiddenline.png" />
+    <None Remove="Images\HCL\RenderMode\shaded.png" />
+    <None Remove="Images\HCL\RenderMode\shaded_edges.png" />
+    <None Remove="Images\HCL\View\Back.png" />
+    <None Remove="Images\HCL\View\Bottom.png" />
+    <None Remove="Images\HCL\View\Front.png" />
+    <None Remove="Images\HCL\View\Left.png" />
+    <None Remove="Images\HCL\View\Right.png" />
+    <None Remove="Images\HCL\View\Top.png" />
     <None Remove="Images\Help\about.png" />
     <None Remove="Images\Icon-ODA.ico" />
     <None Remove="Images\Markups\circ.png" />
@@ -125,6 +146,27 @@
     <Resource Include="Images\Construct\line.png" />
     <Resource Include="Images\Construct\ray.png" />
     <Resource Include="Images\Construct\xline.png" />
+    <Resource Include="Images\HCL\ContextMenu\close.png" />
+    <Resource Include="Images\HCL\ContextMenu\exit.png" />
+    <Resource Include="Images\HCL\ContextMenu\open.png" />
+    <Resource Include="Images\HCL\ContextMenu\settings.png" />
+    <Resource Include="Images\HCL\Navigation\Orbit.png" />
+    <Resource Include="Images\HCL\Navigation\Pan.png" />
+    <Resource Include="Images\HCL\Navigation\ZoomIn.png" />
+    <Resource Include="Images\HCL\Navigation\ZoomOut.png" />
+    <Resource Include="Images\HCL\Navigation\ZoomToArea.png" />
+    <Resource Include="Images\HCL\Navigation\ZoomToExtent.png" />
+    <Resource Include="Images\HCL\RenderMode\2dwireframe.png" />
+    <Resource Include="Images\HCL\RenderMode\3dwireframe.png" />
+    <Resource Include="Images\HCL\RenderMode\hiddenline.png" />
+    <Resource Include="Images\HCL\RenderMode\shaded.png" />
+    <Resource Include="Images\HCL\RenderMode\shaded_edges.png" />
+    <Resource Include="Images\HCL\View\Back.png" />
+    <Resource Include="Images\HCL\View\Bottom.png" />
+    <Resource Include="Images\HCL\View\Front.png" />
+    <Resource Include="Images\HCL\View\Left.png" />
+    <Resource Include="Images\HCL\View\Right.png" />
+    <Resource Include="Images\HCL\View\Top.png" />
     <Resource Include="Images\Help\about.png" />
     <Resource Include="Images\Icon-ODA.ico" />
   </ItemGroup>

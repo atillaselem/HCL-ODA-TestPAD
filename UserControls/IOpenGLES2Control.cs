@@ -40,6 +40,7 @@ namespace HCL_ODA_TestPAD.UserControls
         void OnOffWCS(bool bEnable);
         void Orbit();
         void Pan();
+        void ZoomToArea(bool enable);
         void Regen();
         void Regen(OdTvGsDevice.RegenMode rm);
         void SaveFile(string filePath);

@@ -7,14 +7,15 @@ namespace HCL_ODA_TestPAD.Settings;
 
 [CategoryOrder("OpenGLES2 Device", 1)]
 [CategoryOrder("Regeneration", 2)]
-[CategoryOrder("DWG & DXF Import Parameters", 3)]
-[CategoryOrder("IFC Import Parameters", 4)] 
-[CategoryOrder("CAD Units", 5)] 
-[CategoryOrder("CAD Custom Models", 6)] 
-[CategoryOrder("User Interface", 7)] 
-[CategoryOrder("On Start", 8)]
-[CategoryOrder("About App", 9)] 
-[CategoryOrder("Preferences", 10)] 
+[CategoryOrder("Performance", 3)]
+[CategoryOrder("DWG & DXF Import Parameters", 4)]
+[CategoryOrder("IFC Import Parameters", 5)] 
+[CategoryOrder("CAD Units", 6)] 
+[CategoryOrder("CAD Custom Models", 7)] 
+[CategoryOrder("User Interface", 8)] 
+[CategoryOrder("On Start", 9)]
+[CategoryOrder("About App", 10)] 
+[CategoryOrder("Preferences", 11)] 
 
 public record AppSettings : IAppSettings
 {
@@ -101,6 +102,18 @@ public record AppSettings : IAppSettings
     [DisplayName("RegenMode")]
     [Description("Set Regeneration Mode")]
     public RegenMode RegenMode { get; set; }
+    #endregion
+
+    #region Performance
+    [Category("Performance")]
+    [DisplayName("Interactivity")]
+    [Description("Enable Interacivity")]
+    public bool Interactivity { get; set; }
+
+    [Category("Performance")]
+    [DisplayName("Interactive FPS")]
+    [Description("Set minimum FPS during Interactivity")]
+    public double InteractiveFPS { get; set; }
     #endregion
 
     #region DWG & DXF Import Parameters

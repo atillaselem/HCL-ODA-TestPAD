@@ -41,8 +41,7 @@ namespace HCL_ODA_TestPAD.Views
                 }
                 VM?.VisibilityChanged((bool)e.NewValue);
                 VM.LoadFile(VM.CadImageFilePath);
-                VM.ShowFPS();
-                VM.ShowWCS();
+                VM.ShowCustomModels();
             }
         }
         public void InvalidateControl()

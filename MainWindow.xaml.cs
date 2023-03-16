@@ -1,9 +1,12 @@
-﻿using HCL_ODA_TestPAD.ODA;
+﻿using HCL_ODA_TestPAD.Mvvm.Events;
+using HCL_ODA_TestPAD.ODA;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.Splash;
 using HCL_ODA_TestPAD.Utility;
 using HCL_ODA_TestPAD.ViewModels;
+using Prism.Commands;
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -49,66 +52,6 @@ public partial class MainWindow : Window
 
         ViewModel.FileIsExist = false;
         this.Closing += OdTvWpfMainWindow_Closing;
-
-        ContextMenu menu = new ContextMenu()
-        {
-            Background = new SolidColorBrush(Colors.White)
-        };
-
-        menu.Items.Add(new Separator());
-        MenuItem openItm = new MenuItem() { Header = "Open", Height = 30 };
-        openItm.Icon = new Image
-        {
-            Source = Application.Current.Resources["OpenImg"] as BitmapImage
-        };
-        menu.Items.Add(openItm);
-        openItm.Command = ViewModel.OpenCommand;
-
-
-        MenuItem saveItm = new MenuItem() { Header = "Save", Height = 30 };
-        saveItm.Icon = new Image
-        {
-            Source = Application.Current.Resources["SaveImg"] as BitmapImage
-        };
-        //menu.Items.Add(saveItm);
-        saveItm.Command = ViewModel.SaveCommand;
-        MenuItem saveAsItm = new MenuItem() { Header = "SaveAs", Height = 30 };
-        saveAsItm.Icon = new Image
-        {
-            Source = Application.Current.Resources["SaveAsImg"] as BitmapImage
-        };
-        //menu.Items.Add(saveAsItm);
-        saveAsItm.Command = ViewModel.SaveAsCommand;
-        //menu.Items.Add(new Separator());
-        MenuItem pdf2dItm = new MenuItem() { Header = "Export to 2D PDF", Height = 30 };
-        pdf2dItm.Icon = new Image
-        {
-            Source = Application.Current.Resources["PdfImg"] as BitmapImage
-        };
-        pdf2dItm.Command = ViewModel.Export2dPdfCommand;
-        //menu.Items.Add(pdf2dItm);
-        MenuItem pdf3dItem = new MenuItem() { Header = "Export to 3D PDF", Height = 30 };
-        pdf3dItem.Icon = new Image
-        {
-            Source = Application.Current.Resources["PublishImg"] as BitmapImage
-        };
-        pdf3dItem.Command = ViewModel.Export3dPdfCommand;
-        //menu.Items.Add(pdf3dItem);
-        MenuItem closeItm = new MenuItem() { Header = "Close", Height = 30 };
-        menu.Items.Add(closeItm);
-        closeItm.Click += Close_Click;
-
-        menu.Items.Add(new Separator());
-        MenuItem settingsItem = new MenuItem() { Header = "Settings", Height = 30 };
-        menu.Items.Add(settingsItem);
-        settingsItem.Command = ViewModel.SettingsCommand;
-
-        menu.Items.Add(new Separator());
-        MenuItem exitItm = new MenuItem() { Header = "Exit", Height = 30 };
-        menu.Items.Add(exitItm);
-        exitItm.Click += Exit_Click;
-
-        DropMenuBtn.DropDown = menu;
 
         if (_settingsProvider.AppSettings.RenderDevice == RenderDevice.OpenGL_Bitmap)
         {
@@ -185,5 +128,4 @@ public partial class MainWindow : Window
     {
         //ViewModel.CurrentPropertiesWidth = PropertiesColumn.ActualWidth;
     }
-
 }

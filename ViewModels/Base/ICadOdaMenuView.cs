@@ -7,7 +7,8 @@ namespace HCL_ODA_TestPAD.ViewModels.Base
     {
         ZoomIn,
         ZoomOut,
-        ZoomExtents
+        ZoomExtents,
+        ZoomToArea
     }
     public enum ButtonName
     {

@@ -1,5 +1,7 @@
 ﻿using HCL_ODA_TestPAD.Utility;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using Teigha.Core;
@@ -36,8 +38,7 @@ public class CadModel : ICadModel
             using var pRastImg = pDev?.getRasterImage();
             if (pRastImg != null)
             {
-                byte[] bufferedRasterImage = _rasterImageBufffer.GetBuffer(pRastImg);
-                pRastImg.scanLines(ref bufferedRasterImage, 0, _rasterImageBufffer.NumberOfLines);
+                byte[] bufferedRasterImage = pRastImg.scanLines();
                 Marshal.Copy(bufferedRasterImage, 0, WritableBackBuffer, bufferedRasterImage.Length);
             }
         }
@@ -47,7 +48,6 @@ public class CadModel : ICadModel
     public OdTvGsDeviceId TvGsDeviceId { get; set; }
 
     public event EventHandler ViewUpdateRequested;
-    public RasterImageBuffer _rasterImageBufffer = new();
     private Func<CadRegenerator> _cadRegenFactory;
 
     public CadModel(Func<CadRegenerator> cadRegenFactory)
@@ -60,7 +60,6 @@ public class CadModel : ICadModel
         if (writableBitmap == null)
         {
             WritableBackBuffer = IntPtr.Zero;
-            _rasterImageBufffer.ResetBuffer();
             return;
         }
         WritableBackBuffer = writableBitmap.BackBuffer;
@@ -105,68 +104,9 @@ public class CadModel : ICadModel
     {
         ViewUpdateRequested = null;
         WritableBackBuffer = IntPtr.Zero;
+        GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+        GC.Collect(GC.MaxGeneration);
     }
 }
 
-public class RasterImageBuffer
-{
-    private uint _lineSize;
-    private bool _isBufferCreated;
-    private byte[] _imageBuffer;
-    private uint _numberOfLines;
-    public  uint NumberOfLines => _numberOfLines;
 
-    public byte[] GetBuffer(OdGiRasterImage rasterImage)
-    {
-        if (rasterImage == null)
-        {
-            return _imageBuffer;
-        }
-
-        var pixelHeight = rasterImage.pixelHeight();
-        var lineSize = rasterImage.scanLineSize();
-        if (!_isBufferCreated || _numberOfLines != pixelHeight || _lineSize != lineSize)
-        {
-            _numberOfLines = pixelHeight;
-            _lineSize = lineSize;
-            _imageBuffer = new byte[(int)(pixelHeight * lineSize)];
-            _isBufferCreated = true;
-        }
-        return _imageBuffer;
-    }
-    public void ResetBuffer()
-    {
-        _isBufferCreated = false;
-    }
-}
-public static class RasterImageExtensions
-{
-    private static uint _lineSize;
-    private static bool _isBufferCreated;
-    private static byte[] _imageBuffer;
-    private static uint _numberOfLines;
-    public static uint NumberOfLines => _numberOfLines;
-
-    public static byte[] GetBuffer(this OdGiRasterImage rasterImage)
-    {
-        if (rasterImage == null)
-        {
-            return _imageBuffer;
-        }
-
-        var pixelHeight = rasterImage.pixelHeight();
-        var lineSize = rasterImage.scanLineSize();
-        if (!_isBufferCreated || _numberOfLines != pixelHeight || _lineSize != lineSize)
-        {
-            _numberOfLines = pixelHeight;
-            _lineSize = lineSize;
-            _imageBuffer = new byte[(int)(pixelHeight * lineSize)];
-            _isBufferCreated = true;
-        }
-        return _imageBuffer;
-    }
-    public static void ResetBuffer()
-    {
-        _isBufferCreated = false;
-    }
-}

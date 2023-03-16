@@ -37,7 +37,7 @@ namespace HCL_ODA_TestPAD.HCL
                 canRegenerate = false;
             }
 
-            // regen coeff beyond the threshold, regeneration is mandatory
+            // regen coeff  tbeyond the threshold, regeneration is mandatory
             //else if (currentCoeff >= _appSettings().RegenThreshold) // HCL Implementation
             else if (currentCoeff >= _appSettings().RegenThreshold && currentCoeff > _lastRegenCoeff) //TestPAD Fix Perfromance! 
             {
@@ -71,7 +71,7 @@ namespace HCL_ODA_TestPAD.HCL
                     RegenThreshold = _appSettings().RegenThreshold,
                     LastDeviceCoefficientAfterRegen = _lastRegenCoeff,
                     CurrentProgressStep = canRegenerate ? 5 : 0
-                }); ;
+                });
             }
             return dev;
         }

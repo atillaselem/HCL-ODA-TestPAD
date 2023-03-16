@@ -1,4 +1,5 @@
-﻿using HCL_ODA_TestPAD.Mvvm.Events;
+﻿using System;
+using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
@@ -29,9 +30,16 @@ namespace HCL_ODA_TestPAD.Views
         }
         private void OnPropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
         {
-            if (e.OriginalSource is PropertyItem propItem && (e.OldValue.ToString() != e.NewValue.ToString()))
+            try
             {
-                VM.SettingsProvider.OnDispatchChange(propItem.PropertyName, e.NewValue.ToString());
+                if (e.OriginalSource is PropertyItem propItem && (e.OldValue.ToString() != e.NewValue.ToString()))
+                {
+                    VM.SettingsProvider.OnDispatchChange(propItem.PropertyName, e.NewValue.ToString());
+                }
+            }
+            catch (Exception exception)
+            {
+                throw new InvalidCastException(exception.Message);
             }
         }
         /// <summary>

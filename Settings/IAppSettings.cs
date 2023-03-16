@@ -59,5 +59,7 @@ public interface IAppSettings
     //Preferences
     bool SaveSettings { get; set; }
     SettingsMode SettingsMode { get; set; }
-
+    //Interactivity
+    bool Interactivity { get; set; } 
+    double InteractiveFPS { get; set; }
 }

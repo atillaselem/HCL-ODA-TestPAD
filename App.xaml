@@ -51,14 +51,18 @@
             <BitmapImage x:Key="MenuImg" UriSource="pack://application:,,,/Images/menu.png" />
             <BitmapImage x:Key="OdaBgImg" UriSource="pack://application:,,,/Images/odaBgImg.png" />
             <BitmapImage x:Key="AppLogo" UriSource="pack://application:,,,/Images/Icon-ODA.ico" />
-            <!--  Menu images  -->
-            <BitmapImage x:Key="OpenImg" UriSource="pack://application:,,,/Images/Menu/open.png" />
-            <!--  Navigation images  -->
-            <BitmapImage x:Key="PanImg" UriSource="pack://application:,,,/Images/Navigation/pan.png" />
-            <BitmapImage x:Key="OrbitImg" UriSource="pack://application:,,,/Images/Navigation/orbit.png" />
-            <BitmapImage x:Key="ZoomInImg" UriSource="pack://application:,,,/Images/Navigation/zoom_in.png" />
-            <BitmapImage x:Key="ZoomOutImg" UriSource="pack://application:,,,/Images/Navigation/zoom_out.png" />
-            <BitmapImage x:Key="ZoomExtImg" UriSource="pack://application:,,,/Images/Navigation/zoom_ext.png" />
+            <!--  Context Menu images  -->
+            <BitmapImage x:Key="OpenImg" UriSource="pack://application:,,,/Images/HCL/ContextMenu/open.png" />
+            <BitmapImage x:Key="CloseImg" UriSource="pack://application:,,,/Images/HCL/ContextMenu/close.png" />
+            <BitmapImage x:Key="SettingsImg" UriSource="pack://application:,,,/Images/HCL/ContextMenu/settings.png" />
+            <BitmapImage x:Key="ExitImg" UriSource="pack://application:,,,/Images/HCL/ContextMenu/exit.png" />
+            <!--  HCL-Navigation images  -->
+            <BitmapImage x:Key="PanImg" UriSource="pack://application:,,,/Images/HCL/Navigation/Pan.png" />
+            <BitmapImage x:Key="OrbitImg" UriSource="pack://application:,,,/Images/HCL/Navigation/Orbit.png" />
+            <BitmapImage x:Key="ZoomInImg" UriSource="pack://application:,,,/Images/HCL/Navigation/ZoomIn.png" />
+            <BitmapImage x:Key="ZoomOutImg" UriSource="pack://application:,,,/Images/HCL/Navigation/ZoomOut.png" />
+            <BitmapImage x:Key="ZoomExtImg" UriSource="pack://application:,,,/Images/HCL/Navigation/ZoomToExtent.png" />
+            <BitmapImage x:Key="ZoomToAreaImg" UriSource="pack://application:,,,/Images/HCL/Navigation/ZoomToArea.png" />
             <!--  Markup images  -->
             <BitmapImage x:Key="MarkupCircImg" UriSource="pack://application:,,,/Images/Markups/circ.png" />
             <BitmapImage x:Key="MarkupCloudImg" UriSource="pack://application:,,,/Images/Markups/cloud.png" />
@@ -68,12 +72,13 @@
             <BitmapImage x:Key="MarkupSaveImg" UriSource="pack://application:,,,/Images/Markups/saveview.png" />
             <BitmapImage x:Key="MarkupTextImg" UriSource="pack://application:,,,/Images/Markups/txt.png" />
             <!--  View type images  -->
-            <BitmapImage x:Key="ViewTopImg" UriSource="pack://application:,,,/Images/Views/top.png" />
-            <BitmapImage x:Key="ViewBottomImg" UriSource="pack://application:,,,/Images/Views/bottom.png" />
-            <BitmapImage x:Key="ViewLeftImg" UriSource="pack://application:,,,/Images/Views/left.png" />
-            <BitmapImage x:Key="ViewRightImg" UriSource="pack://application:,,,/Images/Views/right.png" />
-            <BitmapImage x:Key="ViewFrontImg" UriSource="pack://application:,,,/Images/Views/front.png" />
-            <BitmapImage x:Key="ViewBackImg" UriSource="pack://application:,,,/Images/Views/back.png" />
+            <BitmapImage x:Key="ViewTopImg" UriSource="pack://application:,,,/Images/HCL/View/Top.png" />
+            <BitmapImage x:Key="ViewBottomImg" UriSource="pack://application:,,,/Images/HCL/View/Bottom.png" />
+            <BitmapImage x:Key="ViewLeftImg" UriSource="pack://application:,,,/Images/HCL/View/Left.png" />
+            <BitmapImage x:Key="ViewRightImg" UriSource="pack://application:,,,/Images/HCL/View/Right.png" />
+            <BitmapImage x:Key="ViewFrontImg" UriSource="pack://application:,,,/Images/HCL/View/Front.png" />
+            <BitmapImage x:Key="ViewBackImg" UriSource="pack://application:,,,/Images/HCL/View/Back.png" />
+
             <BitmapImage x:Key="ViewSwImg" UriSource="pack://application:,,,/Images/Views/swIsometric.png" />
             <BitmapImage x:Key="ViewSeImg" UriSource="pack://application:,,,/Images/Views/seIsometric.png" />
             <BitmapImage x:Key="ViewNeImg" UriSource="pack://application:,,,/Images/Views/neIsometric.png" />
@@ -81,12 +86,12 @@
             <BitmapImage x:Key="ViewIsometricImg" UriSource="pack://application:,,,/Images/Views/isometric.png" />
             <BitmapImage x:Key="ViewPerspectiveImg" UriSource="pack://application:,,,/Images/Views/perspective.png" />
             <!--  Render mode images  -->
-            <BitmapImage x:Key="2DWireframeImg" UriSource="pack://application:,,,/Images/RenderMode/2dwireframe.png" />
-            <BitmapImage x:Key="3DWireframeImg" UriSource="pack://application:,,,/Images/RenderMode/3dwireframe.png" />
-            <BitmapImage x:Key="HiddenLineImg" UriSource="pack://application:,,,/Images/RenderMode/hiddenline.png" />
-            <BitmapImage x:Key="ShadedImg" UriSource="pack://application:,,,/Images/RenderMode/shaded.png" />
+            <BitmapImage x:Key="2DWireframeImg" UriSource="pack://application:,,,/Images/HCL/RenderMode/2dwireframe.png" />
+            <BitmapImage x:Key="3DWireframeImg" UriSource="pack://application:,,,/Images/HCL/RenderMode/3dwireframe.png" />
+            <BitmapImage x:Key="HiddenLineImg" UriSource="pack://application:,,,/Images/HCL/RenderMode/hiddenline.png" />
+            <BitmapImage x:Key="ShadedImg" UriSource="pack://application:,,,/Images/HCL/RenderMode/shaded.png" />
             <BitmapImage x:Key="GouraudShadedImg" UriSource="pack://application:,,,/Images/RenderMode/gouraudshaded.png" />
-            <BitmapImage x:Key="ShadedEdgesImg" UriSource="pack://application:,,,/Images/RenderMode/shaded_edges.png" />
+            <BitmapImage x:Key="ShadedEdgesImg" UriSource="pack://application:,,,/Images/HCL/RenderMode/shaded_edges.png" />
             <BitmapImage x:Key="GouraudShadedEdgesImg" UriSource="pack://application:,,,/Images/RenderMode/gouraudshaded_edges.png" />
             <!--  Regen images  -->
             <BitmapImage x:Key="RegenAllImg" UriSource="pack://application:,,,/Images/Regen/regenAll.png" />

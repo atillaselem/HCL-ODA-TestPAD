@@ -12,6 +12,10 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using HCL_ODA_TestPAD.ODA.Draggers;
 using HCL_ODA_TestPAD.ODA.ModelBrowser;
 using Teigha.Core;
+using System.Collections.Generic;
+using System.ComponentModel;
+using HCL_ODA_TestPAD.HCL.MouseTouch;
+using System.Diagnostics.CodeAnalysis;
 
 namespace HCL_ODA_TestPAD.UserControls;
 
@@ -23,7 +27,8 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     private readonly HclCadImageViewModel _vmAdapter;
     //public HclCadImageViewModel Adapter => _vmAdapter;
     public MainWindowViewModel VM { get; set; }
-
+    private ZoomToAreaManager _zoomToAreaManager;
+    private ZoomToScaleManager _zoomToScaleManager;
     public string FilePath => throw new NotImplementedException();
 
     public bool AddDefaultViewOnLoad
@@ -36,7 +41,10 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     }
     public OdTvSectioningOptions SectioningOptions { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     public OdTvDatabaseId TvDatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
+    
+    private readonly List<int> _arrTouches = new();
+    private bool _isPinchZooming;
+    private readonly IAppSettings _appSettings;
     public DefaultCadImageViewControl(
         MainWindowViewModel vm,
         IEventAggregator eventAggregator,
@@ -49,6 +57,7 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
         _vmAdapter = new HclCadImageViewModel(
             eventAggregator, messageDialogService, consoleService, settingsProvider);
         IsVisibleChanged += VisibilityChanged;
+        _appSettings = settingsProvider.AppSettings;
     }
 
     private void VisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -69,6 +78,11 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
         {
             VM.PanCommand_Clicked();
             emitEvent?.Invoke($"File : [{filePath}] loaded successfully.");
+            _vmAdapter.ShowCustomModels();
+            if (_zoomToScaleManager is null)
+            {
+                _zoomToScaleManager = new ZoomToScaleManager(this, _vmAdapter.TvGsDeviceId, _appSettings);
+            }
         }
         else
         {
@@ -94,25 +108,95 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     {
         _vmAdapter.RenderSizeChanged(sizeInfo);
     }
+    #region Overriden Mouse Events
     protected override void OnMouseDown(MouseButtonEventArgs e)
     {
-        _vmAdapter.MouseDown(e, e.GetPosition(this));
+
+        if (_zoomToAreaManager is not null && _zoomToAreaManager.IsZoomToAreaEnabled)
+        {
+            _zoomToAreaManager.HandleTouchAndMouseDown(e, this);
+        }
+        else
+        {
+            if (!_isPinchZooming)
+            {
+                _vmAdapter.MouseDown(e, e.GetPosition(this));
+            }
+        }
     }
 
     protected override void OnMouseMove(System.Windows.Input.MouseEventArgs e)
     {
-        _vmAdapter.MouseMove(e, e.GetPosition(this));
+        if (_zoomToAreaManager is not null && _zoomToAreaManager.IsZoomToAreaEnabled)
+        {
+            _zoomToAreaManager.HandleTouchAndMouseMove(e, this);
+        }
+        else
+        {
+            if (!_isPinchZooming)
+            {
+                _vmAdapter.MouseMove(e, e.GetPosition(this));
+            }
+        }
     }
 
     protected override void OnMouseUp(MouseButtonEventArgs e)
     {
-        _vmAdapter.MouseUp(e);
+        if (_zoomToAreaManager is not null && _zoomToAreaManager.IsZoomToAreaEnabled)
+        {
+            _zoomToAreaManager.HandleTouchAndMouseUp(e, this);
+        }
+        else
+        {
+            if (!_isPinchZooming)
+            {
+                _vmAdapter.MouseUp(e);
+            }
+        }
     }
 
     protected override void OnMouseWheel(MouseWheelEventArgs e)
     {
         _vmAdapter.MouseWheel(e);
     }
+    #endregion
+
+    #region Overriden Touch Events
+    protected override void OnTouchDown(TouchEventArgs e)
+    {
+        if (_zoomToAreaManager.IsZoomToAreaEnabled)
+        {
+            _zoomToAreaManager.HandleTouchAndMouseDown(e, this);
+        }
+        else
+        {
+            _isPinchZooming = _zoomToScaleManager.HandleTouchAndMouseDown(e, this);
+        }
+    }
+    protected override void OnTouchMove(TouchEventArgs e)
+    {
+        if (_zoomToAreaManager is not null && _zoomToAreaManager.IsZoomToAreaEnabled)
+        {
+            _zoomToAreaManager.HandleTouchAndMouseMove(e, this);
+        }
+        else
+        {
+            _zoomToScaleManager.HandleTouchAndMouseMove(e, this);
+        }
+    }
+    protected override void OnTouchUp(TouchEventArgs e)
+    {
+        if (_zoomToAreaManager is not null && _zoomToAreaManager.IsZoomToAreaEnabled)
+        {
+            _zoomToAreaManager.HandleTouchAndMouseUp(e, this);
+        }
+        else
+        {
+            _zoomToScaleManager.HandleTouchAndMouseUp(e, this);
+            _isPinchZooming = false;
+        }
+    }
+    #endregion
     public void Pan()
     {
         _vmAdapter.Pan();
@@ -121,6 +205,16 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     public void Orbit()
     {
         _vmAdapter.Orbit();
+    }
+
+    public void ZoomToArea(bool enable)
+    {
+        if (_zoomToAreaManager is null)
+        {
+            _zoomToAreaManager = new ZoomToAreaManager(this, () => dragSelectionCanvas, () => dragSelectionBorder, _vmAdapter.TvGsDeviceId);
+        }
+
+        _zoomToAreaManager.IsZoomToAreaEnabled = enable;
     }
 
     public void SetRenderModeButton(OdTvGsView.RenderMode mode)
@@ -289,4 +383,11 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
         _vmAdapter.ShowWCS();
         //_vmAdapter.ShowCube();
     }
+
+    public void UpdateView()
+    {
+        _vmAdapter.UpdateCadView();
+    }
+
+
 }

@@ -81,7 +81,6 @@ public partial class App : Application
     private void ConfigureServices()
     {
         ServiceCollection = new ServiceCollection();
-        ServiceCollection.Configure<TabbedCadModelViewSettings>(Configuration.GetSection(nameof(TabbedCadModelViewSettings)));
         ServiceCollection.AddSingleton(Configuration);
         ConfigureSerilog();
     }

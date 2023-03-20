@@ -1,5 +1,6 @@
 ﻿using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.HCL;
+using HCL_ODA_TestPAD.HCL.CadUnits;
 using HCL_ODA_TestPAD.ODA.Draggers;
 using HCL_ODA_TestPAD.ODA.Draggers.Construct;
 using HCL_ODA_TestPAD.ODA.Draggers.Markups;
@@ -26,6 +27,7 @@ namespace HCL_ODA_TestPAD.UserControls
 {
     public partial class WinFormsCadImageViewControl : UserControl, IOdaSectioning, IOpenGLES2Control
     {
+        private readonly IServiceFactory _serviceFactory;
         public WinFormsCadImageViewControl Adapter => this;
         #region App Specific Variables
         public MainWindowViewModel VM { get; set; }
@@ -101,17 +103,13 @@ namespace HCL_ODA_TestPAD.UserControls
 
         private MouseDownState _mouseDown = MouseDownState.None;
         #endregion
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IAppSettings _appSettings;
 
         private Func<CadRegenerator> _cadRegenFactory;
         public WinFormsCadImageViewControl(
         MainWindowViewModel vm,
-        IEventAggregator eventAggregator,
-        IMessageDialogService messageDialogService,
-        IConsoleService consoleService,
-        ISettingsProvider settingsProvider)
+        IServiceFactory serviceFactory)
         {
+            _serviceFactory = serviceFactory;
             InitializeComponent();
             this.Paint += OdTvWpfView_Paint; ;
             this.Resize += ResizePanel;
@@ -123,9 +121,8 @@ namespace HCL_ODA_TestPAD.UserControls
             VM = vm;
             Size = new Size((int)VM.AppMainWindow.Width, (int)VM.AppMainWindow.Height);
             SectioningOptions = new ODA.Draggers.OdTvSectioningOptions();
-            _eventAggregator = eventAggregator;
-            _appSettings = settingsProvider.AppSettings;
-            var cadGenerator = new CadRegenerator(() => _appSettings, () => _eventAggregator);
+
+            var cadGenerator = new CadRegenerator(serviceFactory);
             _cadRegenFactory = () => cadGenerator;
         }
 
@@ -388,7 +385,7 @@ namespace HCL_ODA_TestPAD.UserControls
             Invalidate();
 
             MM.StopTransaction(mtr);
-            if (_appSettings.ShowCube)
+            if (_serviceFactory.AppSettings.ShowCube)
             {
                 OnOffViewCube(true);
             }
@@ -794,8 +791,8 @@ namespace HCL_ODA_TestPAD.UserControls
 
             if (_dbId != null)
             {
-                OdTvDatabase pDb = _dbId.openObject(OpenMode.kForWrite);
-                _tvActiveModelId = pDb == null ? null : pDb.getModelsIterator().getModel();
+                OdTvDatabase odTvDatabase = _dbId.openObject(OpenMode.kForWrite);
+                _tvActiveModelId = odTvDatabase == null ? null : odTvDatabase.getModelsIterator().getModel();
                 if (_tvActiveModelId == null)
                 {
                     MessageBox.Show("Import failed!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -808,8 +805,17 @@ namespace HCL_ODA_TestPAD.UserControls
 
                     return;
                 }
+                if (_serviceFactory.AppSettings.EnableImportUnitChange)
+                {
+                    SetCadDbUnitAsCadFileUnit(odTvDatabase);
+                }
+                else
+                {
+                    GetCadDbUnitAsCadFileUnit(odTvDatabase);
+                }
+                //SetCadDbUnitAsCadFileUnit(odTvDatabase);
 
-                OdTvDevicesIterator devIt = pDb.getDevicesIterator();
+                OdTvDevicesIterator devIt = odTvDatabase.getDevicesIterator();
                 if (devIt != null && !devIt.done())
                 {
                     _tvDeviceId = devIt.getDevice();
@@ -817,17 +823,17 @@ namespace HCL_ODA_TestPAD.UserControls
                     IntPtr wndHndl = new IntPtr(this.Handle.ToInt32());
                     OdTvDCRect rect = new OdTvDCRect(0, Width, Height, 0);
                     odTvGsDevice.setupGs(wndHndl, rect, OdTvGsDevice.Name.kOpenGLES2);
-                    odTvGsDevice.setForbidImageHighlight(_appSettings.SetForbidImageHighlight);
-                    odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _appSettings.UseForcePartialUpdate);
-                    odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _appSettings.UseBlocksCache);
+                    odTvGsDevice.setForbidImageHighlight(_serviceFactory.AppSettings.SetForbidImageHighlight);
+                    odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _serviceFactory.AppSettings.UseForcePartialUpdate);
+                    odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _serviceFactory.AppSettings.UseBlocksCache);
 
                     if (!isIfc)
                     {
-                        odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _appSettings.UseSceneGraph);
+                        odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _serviceFactory.AppSettings.UseSceneGraph);
                     }
                     else
                     {
-                        odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _appSettings.IfcUseSceneGraph);
+                        odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _serviceFactory.AppSettings.IfcUseSceneGraph);
                     }
 
                     for (int i = 0; i < odTvGsDevice.numViews(); i++)
@@ -848,7 +854,7 @@ namespace HCL_ODA_TestPAD.UserControls
                     OdTvGsViewId activeViewId = odTvGsDevice.viewAt(0);
                     ConfigureViewSettings(activeViewId);
                     TvActiveViewport = 0;
-                    SetFrozenLayersVisible(pDb);
+                    SetFrozenLayersVisible(odTvDatabase);
                 } // Means we have aldready a file and trying to create a new device.
                 else if (devIt != null && devIt.done())
                 {
@@ -869,9 +875,66 @@ namespace HCL_ODA_TestPAD.UserControls
             this.Cursor = Cursors.Default;
             MM.StopTransaction(mtr);
         }
+        public uint GetCadDbUnitAsCadFileUnit(OdTvDatabase odTvDatabase)
+        {
+            //Set model units in the database
+            using var modelsIterator = odTvDatabase.getModelsIterator();
+            for (; !modelsIterator.done(); modelsIterator.step())
+            {
+                using var odTvModelId = modelsIterator.getModel();
+                using var odTvModel = odTvModelId.openObject(OpenMode.kForRead);
+                if (!odTvModelId.isNull())
+                {
+                    var modelUnits = odTvModel.getUnits();
+                    double userDefCoef = 0;
+                    if (modelUnits == Units.kUserDefined)
+                    {
+                        modelUnits = odTvModel.getUnits(out userDefCoef);
+                    }
+                    var modelSurveyUnits = UnitsValueConverter.MapOdaUnitsToSurveyUnits(modelUnits, userDefCoef);
+                    _serviceFactory.AppSettings = _serviceFactory.AppSettings with { CadFileUnit = modelSurveyUnits };
+                    return (uint)modelSurveyUnits;
+                }
+            }
+            return (uint)UnitsValue.kUnitsMeters;
+        }
+
+        private void SetCadDbUnitAsCadFileUnit(OdTvDatabase odTvDatabase)
+        {
+            SurveyUnits surveyUnit = _serviceFactory.AppSettings.CadFileUnit;
+            CadUnits = UnitsValueConverter.ConvertUnits(surveyUnit, out var isMetric);
+
+            //Set model units in the database
+            using var modelsIterator = odTvDatabase.getModelsIterator();
+            for (; !modelsIterator.done(); modelsIterator.step())
+            {
+                using var odTvModelId = modelsIterator.getModel();
+                using var odTvModel = odTvModelId.openObject(OpenMode.kForWrite);
+                if (!odTvModelId.isNull())
+                {
+                    var tvUnits = UnitsValueConverter.MapHiltiUnitsToOda(CadUnits);
+                    if (tvUnits != 0)
+                    {
+                        odTvModel.setUnits(tvUnits);
+                    }
+                    else
+                    {
+                        // As US_Feet and other un available units in Units enum are treated as userdefined in visualize
+                        // have to set related coef value along with units, as of now HCL is supporting US_Feet so setting US_Feet coef value
+                        odTvModel.setUnits(tvUnits, CADModelConstants.UsFeetCoefValue);
+                    }
+                }
+
+            }
+
+            UnitConverter.MapUnitsToMetersConversionFactor =
+                UnitsValueConverter.MapUnitsToMetersConversion(CadUnits);
+            UnitConverter.MetersToMapUnitsConversionFactor =
+                UnitsValueConverter.MetersToMapUnitsConversion(CadUnits);
+        }
         private void SetFrozenLayersVisible(OdTvDatabase odTvDatabase)
         {
-            if (!_appSettings.SetFrozenLayersVisible) return;
+            if (!_serviceFactory.AppSettings.SetFrozenLayersVisible) return;
 
             using var layersIt = odTvDatabase.getLayersIterator();
             for (; !layersIt.done(); layersIt.step())
@@ -917,19 +980,19 @@ namespace HCL_ODA_TestPAD.UserControls
                     importParams = new OdTvDwgImportParams();
                     OdTvDwgImportParams dwgPmtrs = importParams as OdTvDwgImportParams;
                     dwgPmtrs.setDCRect(new OdTvDCRect(0, (int)_widthResized, (int)_heightResized, 0));
-                    dwgPmtrs.setObjectNaming(_appSettings.DwgSetObjectNaming);
-                    dwgPmtrs.setStoreSourceObjects(_appSettings.DwgSetStoreSourceObjects);
+                    dwgPmtrs.setObjectNaming(_serviceFactory.AppSettings.DwgSetObjectNaming);
+                    dwgPmtrs.setStoreSourceObjects(_serviceFactory.AppSettings.DwgSetStoreSourceObjects);
                     dwgPmtrs.setFeedbackForChooseCallback(null);
-                    dwgPmtrs.setImportFrozenLayers(_appSettings.DwgSetImportFrozenLayers);
-                    dwgPmtrs.setClearEmptyObjects(_appSettings.DwgSetClearEmptyObjects);
-                    dwgPmtrs.setNeedCDATree(_appSettings.DwgSetNeedCDATree);
-                    dwgPmtrs.setNeedCollectPropertiesInCDA(_appSettings.DwgSetNeedCollectPropertiesInCDA);
+                    dwgPmtrs.setImportFrozenLayers(_serviceFactory.AppSettings.DwgSetImportFrozenLayers);
+                    dwgPmtrs.setClearEmptyObjects(_serviceFactory.AppSettings.DwgSetClearEmptyObjects);
+                    dwgPmtrs.setNeedCDATree(_serviceFactory.AppSettings.DwgSetNeedCDATree);
+                    dwgPmtrs.setNeedCollectPropertiesInCDA(_serviceFactory.AppSettings.DwgSetNeedCollectPropertiesInCDA);
                 }
                 else if (ext == ".ifc")
                 {
                     var tvIfcImportParams = new OdTvIfcImportParams();
-                    tvIfcImportParams.setNeedCDATree(_appSettings.IfcSetNeedCDATree);
-                    tvIfcImportParams.setNeedCollectPropertiesInCDA(_appSettings.IfcSetNeedCollectPropertiesInCDA);
+                    tvIfcImportParams.setNeedCDATree(_serviceFactory.AppSettings.IfcSetNeedCDATree);
+                    tvIfcImportParams.setNeedCollectPropertiesInCDA(_serviceFactory.AppSettings.IfcSetNeedCollectPropertiesInCDA);
                     tvIfcImportParams.setFeedbackForChooseCallback(PCallback);
                     isIfc = true;
                     importParams = tvIfcImportParams;
@@ -1886,15 +1949,15 @@ namespace HCL_ODA_TestPAD.UserControls
         }
         public void ShowFPS()
         {
-            OnOffFPS(_appSettings.ShowFPS);
+            OnOffFPS(_serviceFactory.AppSettings.ShowFPS);
         }
         public void ShowWCS()
         {
-            OnOffWCS(_appSettings.ShowWCS);
+            OnOffWCS(_serviceFactory.AppSettings.ShowWCS);
         }
         public void ShowCube()
         {
-            OnOffViewCube(_appSettings.ShowCube);
+            OnOffViewCube(_serviceFactory.AppSettings.ShowCube);
         }
 
         public void ShowCustomModels()

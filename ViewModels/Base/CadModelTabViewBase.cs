@@ -1,6 +1,7 @@
 ﻿using HCL_ODA_TestPAD.Mvvm;
 using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.Services;
+using HCL_ODA_TestPAD.Settings;
 using Prism.Commands;
 using Prism.Events;
 using System.Threading.Tasks;
@@ -11,21 +12,15 @@ namespace HCL_ODA_TestPAD.ViewModels.Base
 {
     public abstract class CadImageTabViewModelBase : BindableBase, ICadImageTabViewModel
     {
-        protected readonly IEventAggregator EventAggregator;
-        protected readonly IMessageDialogService MessageDialogService;
-        protected readonly IConsoleService ConsoleService;
+        private readonly IServiceFactory _serviceFactory;
         public string CadImageFilePath { get; set; }
         public ICadOdaMenuView CadOdaMenuView { get; set; }
         public ICommand CloseCadImageTabViewCommand { get; }
         public string TabItemTitle { get; set; }
 
-        public CadImageTabViewModelBase(IEventAggregator eventAggregator,
-          IMessageDialogService messageDialogService,
-          IConsoleService consoleService)
+        public CadImageTabViewModelBase(IServiceFactory serviceFactory)
         {
-            EventAggregator = eventAggregator;
-            MessageDialogService = messageDialogService;
-            ConsoleService = consoleService;
+            _serviceFactory = serviceFactory;
             CloseCadImageTabViewCommand = new DelegateCommand(OnCloseCadImageTabViewExecute);
         }
 
@@ -36,11 +31,8 @@ namespace HCL_ODA_TestPAD.ViewModels.Base
         protected virtual void OnCloseCadImageTabViewExecute()
         {
             CloseTabView();
-            EventAggregator.GetEvent<CloseCadModelTabViewEvent>()
-              .Publish(new CloseCadModelTabViewEventArgs
-              {
-                  CadModelTabViewKey = TabItemTitle
-              });
+            _serviceFactory.EventSrv.GetEvent<CloseCadModelTabViewEvent>()
+              .Publish(new CloseCadModelTabViewEventArgs(TabItemTitle));
         }
 
         public void OnPanClicked()

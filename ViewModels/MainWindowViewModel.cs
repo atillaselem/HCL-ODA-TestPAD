@@ -10,8 +10,6 @@ using HCL_ODA_TestPAD.Mvvm.Commands;
 using HCL_ODA_TestPAD.ODA.ModelBrowser;
 using HCL_ODA_TestPAD.Views;
 using HCL_ODA_TestPAD.Settings;
-using HCL_ODA_TestPAD.Services;
-using Prism.Events;
 using HCL_ODA_TestPAD.UserControls;
 using HCL_ODA_TestPAD.Mvvm;
 using HCL_ODA_TestPAD.ViewModels.Base;
@@ -21,17 +19,12 @@ namespace HCL_ODA_TestPAD.ViewModels;
 
 public class MainWindowViewModel : BindableBase
 {
-    private readonly IEventAggregator _eventAggregator;
-    private readonly ISettingsProvider _settingsProvider;
+    private readonly IServiceFactory _serviceFactory;
     public AppStatusBarViewModel AppStatusBarViewModel { get; set; }
-    public MainWindowViewModel(IEventAggregator eventAggregator,
-        IMessageDialogService messageDialogService,
-        IConsoleService consoleService,
-        ISettingsProvider settingsProvider,
+    public MainWindowViewModel(IServiceFactory serviceFactory,
         AppStatusBarViewModel appStatusBarViewModel)
     {
-        _eventAggregator = eventAggregator;
-        _settingsProvider = settingsProvider;
+        _serviceFactory = serviceFactory;
         AppStatusBarViewModel = appStatusBarViewModel;
     }
 
@@ -213,12 +206,10 @@ public class MainWindowViewModel : BindableBase
     private WindowsFormsHost _winHost = null;
     public void AddView(bool addView = false)
     {
-        if(_settingsProvider.AppSettings.RenderDevice == RenderDevice.OpenGL_Bitmap)
+        if(_serviceFactory.AppSettings.RenderDevice == RenderDevice.OpenGL_Bitmap)
         {
             _hclGLES2_Control = new DefaultCadImageViewControl(
-                this,
-                _eventAggregator, null, null,
-                _settingsProvider);
+                this, _serviceFactory);
             _hclGLES2_Control.AddDefaultViewOnLoad = addView;
             AppMainWindow.RenderArea.Children.Add((DefaultCadImageViewControl)_hclGLES2_Control);
             //_hclGLES2_Control.ShowCustomModels();
@@ -226,9 +217,7 @@ public class MainWindowViewModel : BindableBase
         else
         {
             _hclGLES2_Control = new WinFormsCadImageViewControl(
-                this,
-                _eventAggregator, null, null,
-                _settingsProvider);
+                this, _serviceFactory);
             _winHost = new WindowsFormsHost();
             _winHost.Child = (WinFormsCadImageViewControl)_hclGLES2_Control;
             AppMainWindow.RenderArea.Children.Add(_winHost);
@@ -536,12 +525,13 @@ public class MainWindowViewModel : BindableBase
     }
     public void SaveSettings()
     {
-        _settingsProvider.SaveSettings();
+        _serviceFactory.SettingsSrv.SaveSettings(_serviceFactory.AppSettings);
     }
     private void SettingsCommand_Clicked()
     {
         var settingsView = new TestPADSettingsView();
-        var settingsViewModel = new TestPADSettingsViewModel(_eventAggregator, null, _settingsProvider);
+        var settingsViewModel = new TestPADSettingsViewModel(_serviceFactory);
+        settingsViewModel.TestPadSettings = new TestPADSettings(_serviceFactory);
         settingsView.DataContext = settingsViewModel;
         Window window = new Window
         {

@@ -4,32 +4,20 @@ using Prism.Events;
 
 namespace HCL_ODA_TestPAD.Settings;
 
-public class TestPADSettings : ISettingsProvider
+public class TestPADSettings
 {
-    private readonly IEventAggregator _eventAggregator;
-    private readonly SettingsLoader _mSettingsLoader;
+    private readonly IServiceFactory _serviceFactory;
     public event Action<string, object> OneOfTheSettingsChanged;
-    public IAppSettings AppSettings => _mSettingsLoader.AppSettings;
+    
+    public TestPADSettings(IServiceFactory serviceFactory)
+    {
+        _serviceFactory = serviceFactory;
+    }
 
-    public TestPADSettings(IEventAggregator eventAggregator)
-    {
-        _eventAggregator = eventAggregator;
-        _mSettingsLoader = new SettingsLoader();
-        LoadSettings();
-    }
-    private void LoadSettings()
-    {
-        _mSettingsLoader.LoadAppSettings();
-    }
-    public void SaveSettings()
-    {
-        _mSettingsLoader.SaveAppSettings();
-    }
     public void OnDispatchChange(string itemName, string itemValue)
     {
-        _mSettingsLoader.CompareSettings(itemValue);
-        _eventAggregator.GetEvent<SettingsUpdateEvent>().Publish(_mSettingsLoader.AppSettings);
+        _serviceFactory.AppSettings = _serviceFactory.SettingsSrv.CompareSettings(_serviceFactory.AppSettings, itemValue);
+        _serviceFactory.EventSrv.GetEvent<SettingsUpdateEvent>().Publish(_serviceFactory.AppSettings);
         OneOfTheSettingsChanged?.Invoke(itemName, itemValue);
-
     }
 }

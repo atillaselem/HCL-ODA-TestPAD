@@ -53,8 +53,8 @@ namespace HCL_ODA_TestPAD.HCL.MouseTouch
 
         private readonly CadZoomOperations _cadZoomOperations;
         private readonly OdTvGsViewId _odTvGsViewId;
-        private readonly IAppSettings _appSettings;
-        public ZoomToScaleManager(ICadImageViewControl viewControl, OdTvGsDeviceId odTvGsDeviceId, IAppSettings appSettings)
+        private readonly AppSettings _appSettings;
+        public ZoomToScaleManager(ICadImageViewControl viewControl, OdTvGsDeviceId odTvGsDeviceId, AppSettings appSettings)
         {
             _viewControl = viewControl;
             using var odTvGsDevice = odTvGsDeviceId.openObject(OpenMode.kForRead);

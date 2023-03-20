@@ -12,29 +12,26 @@ namespace HCL_ODA_TestPAD.ViewModels;
 
 public class MainViewModel : BindableBase
 {
-    private readonly IEventAggregator _eventAggregator;
+    private readonly IServiceFactory _serviceFactory;
     public AppAvalonDockViewModel AppAvalonDockViewModel { get; }
     public AppMenuViewModel AppMenuViewModel { get; }
     public AppStatusBarViewModel AppStatusBarViewModel { get; }
-    private readonly ISettingsProvider _settingsProvider;
 
     public MainViewModel(AppMenuViewModel appMenuViewModel,
         AppAvalonDockViewModel appAvalonDockViewModel,
-        AppStatusBarViewModel appStatusBarViewModel, 
-        IEventAggregator eventAggregator,
-        ISettingsProvider settingsProvider)
+        AppStatusBarViewModel appStatusBarViewModel,
+        IServiceFactory serviceFactory)
     {
+        _serviceFactory = serviceFactory;
         AppAvalonDockViewModel = appAvalonDockViewModel;
         AppMenuViewModel = appMenuViewModel;
         AppStatusBarViewModel = appStatusBarViewModel;
-        _eventAggregator = eventAggregator;
-        _settingsProvider = settingsProvider;
         SubscribeEvents();
     }
 
     private void SubscribeEvents()
     {
-        _eventAggregator.GetEvent<ExitApplicationEvent>().Subscribe(OnExitApplication);
+        _serviceFactory.EventSrv.GetEvent<ExitApplicationEvent>().Subscribe(OnExitApplication);
     }
 
     private void OnExitApplication()
@@ -76,16 +73,16 @@ public class MainViewModel : BindableBase
 
     public void DoAppSpecificClosing()
     {
-        _eventAggregator.GetEvent<UnLoadTabViewEvent>().Publish();
-        if (_settingsProvider.AppSettings.SaveSettings)
+        _serviceFactory.EventSrv.GetEvent<UnLoadTabViewEvent>().Publish();
+        if (_serviceFactory.AppSettings.SaveSettings)
         {
-            _settingsProvider.SaveSettings();
+            _serviceFactory.SettingsSrv.SaveSettings(_serviceFactory.AppSettings);
         }
     }
 
     public void ShowSplashScreen()
     {
-        if (_settingsProvider.AppSettings.ShowSplashScreen)
+        if (_serviceFactory.AppSettings.ShowSplashScreen)
         {
             SplashTestPAD.ShowSplashScreenEvents();
         }

@@ -16,40 +16,28 @@ namespace HCL_ODA_TestPAD.ViewModels
     }
     public class TabPagedCadImageViewModel : BindableBase
     {
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IMessageDialogService _messageDialogService;
-        private readonly IConsoleService _consoleService;
-        private readonly ISettingsProvider _settingsProvider;
-        private readonly TabbedCadModelViewSettings _tabbedCadModelViewSettings;
+        private readonly IServiceFactory _serviceFactory;
         private readonly IIndex<DeviceType, ICadImageTabViewModel> _cadModelTabViewCreator;
         public ObservableCollection<CadImageViewModelWrapper> CadImageTabViewModels { get; }
 
-        public TabPagedCadImageViewModel(
-            IEventAggregator eventAggregator,
-            IMessageDialogService messageDialogService,
-            IIndex<DeviceType, ICadImageTabViewModel> cadModelTabViewCreator,
-            IConsoleService consoleService,
-            ISettingsProvider settingsProvider)
+        public TabPagedCadImageViewModel(IServiceFactory serviceFactory,
+            IIndex<DeviceType, ICadImageTabViewModel> cadModelTabViewCreator)
         {
-            _eventAggregator = eventAggregator;
-            _messageDialogService = messageDialogService;
+            _serviceFactory = serviceFactory;
             _cadModelTabViewCreator = cadModelTabViewCreator;
-            _consoleService = consoleService;
-            _settingsProvider = settingsProvider;
             CadImageTabViewModels = new ObservableCollection<CadImageViewModelWrapper>();
             SubscribeEvents();
-
         }
 
         private void SubscribeEvents()
         {
-            _eventAggregator.GetEvent<OpenCadModelTabViewEvent>()
+            _serviceFactory.EventSrv.GetEvent<OpenCadModelTabViewEvent>()
                 .Subscribe(OnOpenCadModelTabViewEvent);
-            _eventAggregator.GetEvent<CloseCadModelTabViewEvent>()
+            _serviceFactory.EventSrv.GetEvent<CloseCadModelTabViewEvent>()
                 .Subscribe(OnCloseCadModelTabViewEvent);
-            _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+            _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                 .Subscribe(OnOdaMenuCommandClickEvent);
-            _eventAggregator.GetEvent<UnLoadTabViewEvent>().Subscribe(OnUnLoadTabViewEvent);
+            _serviceFactory.EventSrv.GetEvent<UnLoadTabViewEvent>().Subscribe(OnUnLoadTabViewEvent);
         }
 
         private void OnOdaMenuCommandClickEvent(OdaMenuCommandClickEventArg odaMenuCommandArg)
@@ -113,7 +101,7 @@ namespace HCL_ODA_TestPAD.ViewModels
 
         internal void TabPageSelectionChanged(int selectedIndex)
         {
-            _eventAggregator.GetEvent<TabPageSelectionChangedEvent>().Publish(selectedIndex);
+            _serviceFactory.EventSrv.GetEvent<TabPageSelectionChangedEvent>().Publish(selectedIndex);
         }
     }
 }

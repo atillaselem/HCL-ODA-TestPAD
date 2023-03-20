@@ -4,10 +4,8 @@ namespace HCL_ODA_TestPAD.Settings
 {
     public interface ISettingsProvider
     {
-        //void LoadSettings();
-        void SaveSettings();
-        IAppSettings AppSettings { get; }
-        event Action<string, object> OneOfTheSettingsChanged;
-        void OnDispatchChange(string itemName, string itemValue);
+        AppSettings CompareSettings(AppSettings appSettings, string itemValue);
+        void SaveSettings(AppSettings appSettings);
+        AppSettings AppSettings { get; }
     }
 }

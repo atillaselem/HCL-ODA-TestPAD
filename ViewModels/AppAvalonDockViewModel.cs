@@ -48,7 +48,7 @@ namespace HCL_ODA_TestPAD.ViewModels
         {
             if (_settingsProvider.AppSettings.SaveDockLayout)
             {
-                var layoutFilePath = PathResolver.GetTargetPathUsingRelativePath(SettingsLoader.APP_DOCKPANELLAYOUT_FILE);
+                var layoutFilePath = PathResolver.GetTargetPathUsingRelativePath(SettingsProvider.APP_DOCKPANELLAYOUT_FILE);
                 using var writer = new StreamWriter(layoutFilePath);
                 var layoutSerializer = new XmlLayoutSerializer(dockingManagerFactory());
                 layoutSerializer.Serialize(writer);
@@ -56,7 +56,7 @@ namespace HCL_ODA_TestPAD.ViewModels
         }
         public void LoadDockLayout(Func<DockingManager> dockingManagerFactory)
         {
-            var layoutFilePath = PathResolver.GetTargetPathUsingRelativePath(SettingsLoader.APP_DOCKPANELLAYOUT_FILE);
+            var layoutFilePath = PathResolver.GetTargetPathUsingRelativePath(SettingsProvider.APP_DOCKPANELLAYOUT_FILE);
             if (File.Exists(layoutFilePath))
             {
                 using var reader = new StreamReader(layoutFilePath);

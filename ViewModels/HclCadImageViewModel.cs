@@ -31,15 +31,16 @@ using System.Windows.Documents;
 using static Teigha.Core.OdGsCullingVolume;
 using System.Configuration;
 using System.ComponentModel;
+using HCL_ODA_TestPAD.Extensions.ObjectExtensions;
 
 namespace HCL_ODA_TestPAD.ViewModels;
 
 public class HclCadImageViewModel : CadImageTabViewModelBase,
     IOdaSectioning
 {
+    private readonly IServiceFactory _serviceFactory;
     public ICadImageViewControl ViewControl { get; set; }
-    private readonly IEventAggregator _eventAggregator;
-    private readonly IAppSettings _appSettings;
+
     #region App Specific Variables
     public MainWindowViewModel VM { get; set; }
     public string FilePath { get; private set; }
@@ -101,14 +102,10 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     #endregion
 
-    public HclCadImageViewModel(IEventAggregator eventAggregator,
-        IMessageDialogService messageDialogService,
-        IConsoleService consoleService,
-        ISettingsProvider settingsProvider)
-    : base(eventAggregator, messageDialogService, consoleService)
+    public HclCadImageViewModel(IServiceFactory serviceFactory)
+    : base(serviceFactory)
     {
-        _eventAggregator = eventAggregator;
-        _appSettings = settingsProvider.AppSettings;
+        _serviceFactory = serviceFactory;
     }
 
     public override async Task LoadCadModelViewAsync()
@@ -120,7 +117,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     public void InitViewModel()
     {
         ILogger logger = new HPLLogger();
-        var cadGenFactory = new CadRegenerator(() => _appSettings, () => _eventAggregator);
+        var cadGenFactory = new CadRegenerator(_serviceFactory);
         _cadModel = new CadModel(() => cadGenFactory);
         _cadImageViewModel = new CadImageViewModel(ViewControl, logger, _cadModel, new CadImageViewBitmapService());
 
@@ -243,11 +240,11 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
                 pnts.ForEach(p => p.Dispose());
                 
             }
-            
-            SetCadDbUnitAsCadFileUnit(odTvDatabase);
+
+            _serviceFactory.AppSettings = _serviceFactory.AppSettings with { CadFileUnit = SurveyUnits.meters };
             CreateDefaultBitmapDevice(width, height, odTvDatabase, odTvModelId);
            
-            ViewControl?.SetFileLoaded(true, FilePath, (statusText) => _eventAggregator.GetEvent<AppStatusTextChanged>().Publish(statusText));
+            ViewControl?.SetFileLoaded(true, FilePath, (statusText) => _serviceFactory.EventSrv.GetEvent<AppStatusTextChanged>().Publish(statusText));
         }
         catch
         {
@@ -292,9 +289,9 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
             //10-Setup Bitmap Gs for OpenGLES2
             odTvGsDevice?.setupGsBitmap(0, 0, OdTvGsDevice.Name.kOpenGLES2);
-            odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _appSettings.UseSceneGraph);
-            odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _appSettings.UseForcePartialUpdate);
-            odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _appSettings.UseBlocksCache);
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _serviceFactory.AppSettings.UseSceneGraph);
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _serviceFactory.AppSettings.UseForcePartialUpdate);
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _serviceFactory.AppSettings.UseBlocksCache);
 
             ConfigureViewSettings(odTvGsViewId);
 
@@ -349,7 +346,14 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         if (TvDatabaseId != null)
         {
             using var odTvDatabase = TvDatabaseId.openObject(OpenMode.kForWrite);
-            SetCadDbUnitAsCadFileUnit(odTvDatabase);
+            if (_serviceFactory.AppSettings.EnableImportUnitChange)
+            {
+                SetCadDbUnitAsCadFileUnit(odTvDatabase);
+            }
+            else
+            {
+                GetCadDbUnitAsCadFileUnit(odTvDatabase);
+            }
 
             using var importedDevIt = odTvDatabase.getDevicesIterator();
             using var importedDeviceId = importedDevIt.getDevice();
@@ -365,19 +369,19 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             odTvGsDevice.setActive(true);
             //2-Setup Bitmap Gs for OpenGLES2
             odTvGsDevice.setupGsBitmap(0, 0, OdTvGsDevice.Name.kOpenGLES2);
-            odTvGsDevice.setForbidImageHighlight(_appSettings.SetForbidImageHighlight);
-            odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _appSettings.UseForcePartialUpdate);
-            odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _appSettings.UseBlocksCache);
+            odTvGsDevice.setForbidImageHighlight(_serviceFactory.AppSettings.SetForbidImageHighlight);
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _serviceFactory.AppSettings.UseForcePartialUpdate);
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _serviceFactory.AppSettings.UseBlocksCache);
 
             ConfigureViewSettings(activeViewId);
 
             if (!isIfc)
             {
-                odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _appSettings.UseSceneGraph);
+                odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _serviceFactory.AppSettings.UseSceneGraph);
             }
             else
             {
-                odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _appSettings.IfcUseSceneGraph);
+                odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _serviceFactory.AppSettings.IfcUseSceneGraph);
             }
 
             using var rect = new OdTvDCRect(0, 800, 600, 0);
@@ -402,15 +406,39 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     private void EmitFileLoadedEvents()
     {
-        ViewControl?.SetFileLoaded(true, FilePath, (statusText) => _eventAggregator.GetEvent<AppStatusTextChanged>().Publish(statusText));
-        _eventAggregator.GetEvent<CadModelLoadedEvent>().Publish(FilePath);
+        ViewControl?.SetFileLoaded(true, FilePath, (statusText) => _serviceFactory.EventSrv.GetEvent<AppStatusTextChanged>().Publish(statusText));
+        _serviceFactory.EventSrv.GetEvent<CadModelLoadedEvent>().Publish(FilePath);
+    }
+
+    public uint GetCadDbUnitAsCadFileUnit(OdTvDatabase odTvDatabase)
+    {
+        //Set model units in the database
+        using var modelsIterator = odTvDatabase.getModelsIterator();
+        for (; !modelsIterator.done(); modelsIterator.step())
+        {
+            using var odTvModelId = modelsIterator.getModel();
+            using var odTvModel = odTvModelId.openObject(OpenMode.kForRead);
+            if (!odTvModelId.isNull())
+            {
+                var modelUnits = odTvModel.getUnits();
+                double userDefCoef = 0;
+                if (modelUnits == Units.kUserDefined)
+                {
+                    modelUnits = odTvModel.getUnits(out userDefCoef);
+                }
+                var modelSurveyUnits = UnitsValueConverter.MapOdaUnitsToSurveyUnits(modelUnits, userDefCoef);
+                _serviceFactory.AppSettings = _serviceFactory.AppSettings with { CadFileUnit = modelSurveyUnits };
+                return (uint)modelSurveyUnits;
+            }
+        }
+        return (uint)UnitsValue.kUnitsMeters;
     }
 
     private void SetCadDbUnitAsCadFileUnit(OdTvDatabase odTvDatabase)
     {
-        SurveyUnits surveyUnit = _appSettings.CadFileUnit;
+        SurveyUnits surveyUnit = _serviceFactory.AppSettings.CadImportUnit;
         CadUnits = UnitsValueConverter.ConvertUnits(surveyUnit, out var isMetric);
-      
+
         //Set model units in the database
         using var modelsIterator = odTvDatabase.getModelsIterator();
         for (; !modelsIterator.done(); modelsIterator.step())
@@ -442,7 +470,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     private void SetFrozenLayersVisible(OdTvDatabase odTvDatabase)
     {
-        if (!_appSettings.SetFrozenLayersVisible) return;
+        if (!_serviceFactory.AppSettings.SetFrozenLayersVisible) return;
 
         using var layersIt = odTvDatabase.getLayersIterator();
         for (; !layersIt.done(); layersIt.step())
@@ -488,19 +516,19 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
                 importParams = new OdTvDwgImportParams();
                 OdTvDwgImportParams dwgPmtrs = importParams as OdTvDwgImportParams;
                 dwgPmtrs.setDCRect(new OdTvDCRect(0, (int)_widthResized, (int)_heightResized, 0));
-                dwgPmtrs.setObjectNaming(_appSettings.DwgSetObjectNaming);
-                dwgPmtrs.setStoreSourceObjects(_appSettings.DwgSetStoreSourceObjects);
+                dwgPmtrs.setObjectNaming(_serviceFactory.AppSettings.DwgSetObjectNaming);
+                dwgPmtrs.setStoreSourceObjects(_serviceFactory.AppSettings.DwgSetStoreSourceObjects);
                 dwgPmtrs.setFeedbackForChooseCallback(null);
-                dwgPmtrs.setImportFrozenLayers(_appSettings.DwgSetImportFrozenLayers);
-                dwgPmtrs.setClearEmptyObjects(_appSettings.DwgSetClearEmptyObjects);
-                dwgPmtrs.setNeedCDATree(_appSettings.DwgSetNeedCDATree);
-                dwgPmtrs.setNeedCollectPropertiesInCDA(_appSettings.DwgSetNeedCollectPropertiesInCDA);
+                dwgPmtrs.setImportFrozenLayers(_serviceFactory.AppSettings.DwgSetImportFrozenLayers);
+                dwgPmtrs.setClearEmptyObjects(_serviceFactory.AppSettings.DwgSetClearEmptyObjects);
+                dwgPmtrs.setNeedCDATree(_serviceFactory.AppSettings.DwgSetNeedCDATree);
+                dwgPmtrs.setNeedCollectPropertiesInCDA(_serviceFactory.AppSettings.DwgSetNeedCollectPropertiesInCDA);
             }
             else if (ext == ".ifc")
             {
                 var tvIfcImportParams = new OdTvIfcImportParams();
-                tvIfcImportParams.setNeedCDATree(_appSettings.IfcSetNeedCDATree);
-                tvIfcImportParams.setNeedCollectPropertiesInCDA(_appSettings.IfcSetNeedCollectPropertiesInCDA);
+                tvIfcImportParams.setNeedCDATree(_serviceFactory.AppSettings.IfcSetNeedCDATree);
+                tvIfcImportParams.setNeedCollectPropertiesInCDA(_serviceFactory.AppSettings.IfcSetNeedCollectPropertiesInCDA);
                 tvIfcImportParams.setFeedbackForChooseCallback(PCallback);
                 isIfc = true;
                 importParams = tvIfcImportParams;
@@ -580,11 +608,11 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         ActionAfterDragger(res);
         res = _dragger.NextPoint((int)position.X, (int)position.Y);
         ActionAfterDragger(res);
-        if (_appSettings.Interactivity)
+        if (_serviceFactory.AppSettings.Interactivity)
         {
             //start Interactivity
             using var odTvGsView = TvGsDeviceId.openObject().viewAt(TvActiveViewport).openObject(OpenMode.kForWrite);
-            odTvGsView.beginInteractivity(_appSettings.InteractiveFPS);
+            odTvGsView.beginInteractivity(_serviceFactory.AppSettings.InteractiveFPS);
         }
     }
 
@@ -605,7 +633,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     public void MouseUp(MouseButtonEventArgs e)
     {
         _mouseDown = MouseButtonState.Released;
-        if (_appSettings.Interactivity)
+        if (_serviceFactory.AppSettings.Interactivity)
         {
             //start Interactivity
             using var odTvGsView = TvGsDeviceId.openObject().viewAt(TvActiveViewport).openObject(OpenMode.kForWrite);
@@ -790,7 +818,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
         UpdateWCSView();
         //MM.StopTransaction(mtr);
-        if (_appSettings.ShowCube)
+        if (_serviceFactory.AppSettings.ShowCube)
         {
             OnOffViewCube(true);
         }
@@ -841,7 +869,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
                 view.setMode(renderMode);
 
                 // set mode for WCS
-                //if (WCS != null && _appSettings.ShowWCS && WCS.IsNeedUpdateWCS(oldMode, renderMode))
+                //if (WCS != null && _serviceFactory.AppSettings.ShowWCS && WCS.IsNeedUpdateWCS(oldMode, renderMode))
                 //    WCS.UpdateWCS();
 
                 //TvDeviceId.openObject().update();
@@ -1964,7 +1992,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     {
         ClearDevices();
         ClearDatabases();
-        ViewControl?.SetFileLoaded(false, FilePath, (statusText) => _eventAggregator.GetEvent<AppStatusTextChanged>().Publish(statusText));
+        ViewControl?.SetFileLoaded(false, FilePath, (statusText) => _serviceFactory.EventSrv.GetEvent<AppStatusTextChanged>().Publish(statusText));
     }
     private void ClearDevices()
     {
@@ -2014,15 +2042,15 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     public void ShowFPS()
     {
-        OnOffFPS(_appSettings.ShowFPS);
+        OnOffFPS(_serviceFactory.AppSettings.ShowFPS);
     }
     public void ShowWCS()
     {
-        OnOffWCS(_appSettings.ShowWCS);
+        OnOffWCS(_serviceFactory.AppSettings.ShowWCS);
     }
     public void ShowCube()
     {
-        OnOffViewCube(_appSettings.ShowCube);
+        OnOffViewCube(_serviceFactory.AppSettings.ShowCube);
     }
     public void ShowCustomModels()
     {

@@ -8,25 +8,21 @@ namespace HCL_ODA_TestPAD.ViewModels
 {
     public class TestPADSettingsViewModel : BindableBase
     {
-        public ISettingsProvider SettingsProvider { get; }
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IConsoleService _consoleService;
-        private IAppSettings _appSettings;
+        public TestPADSettings TestPadSettings { get; set; }
+        private readonly IServiceFactory _serviceFactory;
+        private AppSettings _appSettings;
         public Func<IEventAggregator> EventFactory { get; private set; }
-        public TestPADSettingsViewModel(IEventAggregator eventAggregator,
-            IConsoleService consoleService, 
-            ISettingsProvider settingsProvider)
+        public TestPADSettingsViewModel(IServiceFactory serviceFactory)
         {
-            SettingsProvider = settingsProvider;
-            _eventAggregator = eventAggregator;
-            _consoleService = consoleService;
-            _appSettings = settingsProvider.AppSettings;
-            EventFactory = () => _eventAggregator;
+            _serviceFactory = serviceFactory;
+            EventFactory = () => _serviceFactory.EventSrv;
+            _appSettings = _serviceFactory.AppSettings;
         }
-        public IAppSettings AppSettings
+        public AppSettings AppSettings
         {
             get => _appSettings;
             set => SetProperty(ref _appSettings, value);
         }
+
     }
 }

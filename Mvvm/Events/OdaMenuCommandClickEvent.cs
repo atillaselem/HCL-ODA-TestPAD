@@ -6,14 +6,14 @@ namespace HCL_ODA_TestPAD.Mvvm.Events
 {
     public class OdaMenuCommandClickEvent : PubSubEvent<OdaMenuCommandClickEventArg>{}
 
-    public class OdaMenuCommandClickEventArg
+    public record struct OdaMenuCommandClickEventArg
     {
-        public OdaEventType OdaEventType { get; set; }
-        public ZoomType eZoomType { get; set; }
-        public OdTvExtendedView.e3DViewType e3DViewType { get; set; }
-        public OdTvGsView.Projection eProjectionType { get; set; }
-        public OdTvGsView.RenderMode eRenderModeType { get; set; }
-        public OdTvGsDevice.RegenMode eRegenModeType { get; set; }
+        public OdaEventType OdaEventType { get; init; }
+        public ZoomType eZoomType { get; init; }
+        public OdTvExtendedView.e3DViewType e3DViewType { get; init; }
+        public OdTvGsView.Projection eProjectionType { get; init; }
+        public OdTvGsView.RenderMode eRenderModeType { get; init; }
+        public OdTvGsDevice.RegenMode eRegenModeType { get; init; }
     }
     public enum OdaEventType
     {

@@ -6,8 +6,7 @@ namespace HCL_ODA_TestPAD.Mvvm.Events
         PubSubEvent<CloseCadModelTabViewEventArgs>
     {
     }
-    public class CloseCadModelTabViewEventArgs
-    {
-        public string CadModelTabViewKey { get; set; }
-    }
+
+    public record struct CloseCadModelTabViewEventArgs(string CadModelTabViewKey);
+
 }

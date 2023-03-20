@@ -14,6 +14,7 @@
     <xctk:PropertyGrid
         x:Name="_propertyGrid"
         HorizontalAlignment="Stretch"
+        MaxHeight="800"
         VerticalAlignment="Stretch"
         PropertyValueChanged="OnPropertyValueChanged"
         SelectedObject="{Binding AppSettings}"

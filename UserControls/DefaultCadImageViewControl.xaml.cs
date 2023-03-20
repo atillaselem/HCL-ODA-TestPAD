@@ -24,6 +24,8 @@ namespace HCL_ODA_TestPAD.UserControls;
 /// </summary>
 public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageViewControl
 {
+    private readonly IServiceFactory _serviceFactory;
+
     private readonly HclCadImageViewModel _vmAdapter;
     //public HclCadImageViewModel Adapter => _vmAdapter;
     public MainWindowViewModel VM { get; set; }
@@ -44,20 +46,14 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     
     private readonly List<int> _arrTouches = new();
     private bool _isPinchZooming;
-    private readonly IAppSettings _appSettings;
-    public DefaultCadImageViewControl(
-        MainWindowViewModel vm,
-        IEventAggregator eventAggregator,
-        IMessageDialogService messageDialogService,
-        IConsoleService consoleService,
-        ISettingsProvider settingsProvider)
+
+    public DefaultCadImageViewControl(MainWindowViewModel vm, IServiceFactory serviceFactory)
     {
         InitializeComponent();
         VM = vm;
-        _vmAdapter = new HclCadImageViewModel(
-            eventAggregator, messageDialogService, consoleService, settingsProvider);
+        _serviceFactory = serviceFactory;
+        _vmAdapter = new HclCadImageViewModel(serviceFactory);
         IsVisibleChanged += VisibilityChanged;
-        _appSettings = settingsProvider.AppSettings;
     }
 
     private void VisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -81,7 +77,7 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
             _vmAdapter.ShowCustomModels();
             if (_zoomToScaleManager is null)
             {
-                _zoomToScaleManager = new ZoomToScaleManager(this, _vmAdapter.TvGsDeviceId, _appSettings);
+                _zoomToScaleManager = new ZoomToScaleManager(this, _vmAdapter.TvGsDeviceId, _serviceFactory.AppSettings);
             }
         }
         else

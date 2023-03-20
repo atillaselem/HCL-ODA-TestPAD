@@ -12,12 +12,10 @@ namespace HCL_ODA_TestPAD.ViewModels
 {
     public class AppMonitorViewModel : BindableBase
     {
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IAppSettings _appSettings;
+        private readonly IServiceFactory _serviceFactory;
         private readonly ObservableCollection<ConsoleTabItemViewModel> _consoleTabViewItems;
         private string _appConsoleText;
         private ConsoleTabItemViewModel _activeTabItem;
-        private object _lock = new object();
 
         /// <summary>
         ///     List that the TabControl's ItemsSource property is bound to
@@ -37,11 +35,9 @@ namespace HCL_ODA_TestPAD.ViewModels
             set => SetProperty(ref _isBorderVisible, value);
         }
 
-        public AppMonitorViewModel(IEventAggregator eventAggregator,
-        ISettingsProvider settingsProvider)
+        public AppMonitorViewModel(IServiceFactory serviceFactory)
         {
-            _eventAggregator = eventAggregator;
-            _appSettings = settingsProvider.AppSettings;
+            _serviceFactory = serviceFactory;
             _consoleTabViewItems = new ObservableCollection<ConsoleTabItemViewModel>();
             _isBorderVisible = true;
             SubscribeEvents();
@@ -50,8 +46,8 @@ namespace HCL_ODA_TestPAD.ViewModels
 
         private void SubscribeEvents()
         {
-            _eventAggregator.GetEvent<CadModelLoadedEvent>().Subscribe(OnCadModelLoadedEvent);
-            _eventAggregator.GetEvent<CloseCadModelTabViewEvent>().Subscribe(OnCloseCadModelTabViewEvent);
+            _serviceFactory.EventSrv.GetEvent<CadModelLoadedEvent>().Subscribe(OnCadModelLoadedEvent);
+            _serviceFactory.EventSrv.GetEvent<CloseCadModelTabViewEvent>().Subscribe(OnCloseCadModelTabViewEvent);
             //_eventAggregator.GetEvent<TabPageSelectionChangedEvent>().Subscribe(OnTabPageSelectionChangedEvent);
         }
 

@@ -223,5 +223,20 @@ namespace HCL_ODA_TestPAD.HCL.CadUnits
                 _ => Units.kMeters,
             };
         }
+
+        public static SurveyUnits MapOdaUnitsToSurveyUnits(Units units, double userDefCoef)
+        {
+            //Mapping Cad File Unit read from file to Survey Units shown in Settings Combobox
+            return units switch
+            {
+                Units.kMeters => SurveyUnits.meters,
+                Units.kCentimeters => SurveyUnits.centimeters,
+                Units.kMillimeters => SurveyUnits.millimeters,
+                Units.kFeet => SurveyUnits.feet,
+                Units.kInches => SurveyUnits.inches,
+                Units.kUserDefined => userDefCoef == CADModelConstants.UsFeetCoefValue ? SurveyUnits.usfeet : SurveyUnits.meters,
+                _ => SurveyUnits.meters,
+            };
+        }
     }
 }

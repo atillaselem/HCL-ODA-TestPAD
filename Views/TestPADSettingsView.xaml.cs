@@ -34,7 +34,7 @@ namespace HCL_ODA_TestPAD.Views
             {
                 if (e.OriginalSource is PropertyItem propItem && (e.OldValue.ToString() != e.NewValue.ToString()))
                 {
-                    VM.SettingsProvider.OnDispatchChange(propItem.PropertyName, e.NewValue.ToString());
+                    VM.TestPadSettings.OnDispatchChange(propItem.PropertyName, e.NewValue.ToString());
                 }
             }
             catch (Exception exception)

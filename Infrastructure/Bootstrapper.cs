@@ -37,9 +37,11 @@ public class Bootstrapper
 
         builder.RegisterType<HclCadImageViewModel>().Keyed<ICadImageTabViewModel>(DeviceType.BitmapDevice);
 
-        builder.RegisterType<TestPADSettings>().As<ISettingsProvider>().SingleInstance();
+        builder.RegisterType<SettingsProvider>().As<ISettingsProvider>().SingleInstance();
         builder.RegisterType<MainWindowViewModel>().AsSelf();
         builder.RegisterType<MainWindow>().AsSelf();
+        builder.RegisterType<ServiceFactory>().As<IServiceFactory>().SingleInstance();
+        builder.RegisterType<TestPADSettings>().AsSelf();
 
         var container = builder.Build();
         return new AutofacServiceProvider(container);

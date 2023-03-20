@@ -20,8 +20,7 @@ namespace HCL_ODA_TestPAD.ViewModels
 {
     public class OdaMenuViewModel : BindableBase
     {
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IAppSettings _appSettings;
+        private readonly IServiceFactory _serviceFactory;
         private DelegateCommand _openCommand;
         public ICommand OpenCommand => _openCommand ??= new DelegateCommand(OnMenuOpenCommand, () => true);
 
@@ -33,20 +32,19 @@ namespace HCL_ODA_TestPAD.ViewModels
 
         public Dictionary<ButtonName, Func<ToggleButton>> ButtonFactory { get; set; }
         private int _numberOfTabPages;
-        public OdaMenuViewModel(IEventAggregator eventAggregator,
-        ISettingsProvider settingsProvider)
+        public OdaMenuViewModel(IServiceFactory serviceFactory)
         {
-            _eventAggregator = eventAggregator;
+            _serviceFactory = serviceFactory;
+
             SubscribeEvents();
             IsNavigation = true;
-            _appSettings = settingsProvider.AppSettings;
         }
 
         private void SubscribeEvents()
         {
-            _eventAggregator.GetEvent<CadModelLoadedEvent>().Subscribe(OnCadModelLoadedEvent);
-            _eventAggregator.GetEvent<CloseCadModelTabViewEvent>().Subscribe(OnCloseCadModelTabViewEvent);
-            _eventAggregator.GetEvent<TabPageSelectionChangedEvent>().Subscribe(OnTabPageSelectionChangedEvent);
+            _serviceFactory.EventSrv.GetEvent<CadModelLoadedEvent>().Subscribe(OnCadModelLoadedEvent);
+            _serviceFactory.EventSrv.GetEvent<CloseCadModelTabViewEvent>().Subscribe(OnCloseCadModelTabViewEvent);
+            _serviceFactory.EventSrv.GetEvent<TabPageSelectionChangedEvent>().Subscribe(OnTabPageSelectionChangedEvent);
         }
 
 
@@ -164,20 +162,16 @@ namespace HCL_ODA_TestPAD.ViewModels
 
             //_ctsForProgressbar = new();
             //progressNotifier.RunAsync(_ctsForProgressbar, 
-            //    _eventAggregator.GetEvent<ProgressStepChangedEvent>,
-            //    _eventAggregator.GetEvent<ProgressMaxChangedEvent>);
+            //    _serviceFactory.EventSrv.GetEvent<ProgressStepChangedEvent>,
+            //    _serviceFactory.EventSrv.GetEvent<ProgressMaxChangedEvent>);
 
-            _eventAggregator.GetEvent<OpenCadModelTabViewEvent>()
+            _serviceFactory.EventSrv.GetEvent<OpenCadModelTabViewEvent>()
                 .Publish(
-                    new OpenCadModelTabViewEventArgs
-                    {
-                        ViewModelFilePath = dlg.FileName,
-                        ViewModelKey = Path.GetFileName(dlg.FileName),
-                    });
+                    new OpenCadModelTabViewEventArgs(dlg.FileName, Path.GetFileName(dlg.FileName)));
         }
         public void OnMenuExitCommand()
         {
-            _eventAggregator.GetEvent<ExitApplicationEvent>().Publish();
+            _serviceFactory.EventSrv.GetEvent<ExitApplicationEvent>().Publish();
         }
         private bool _fileIsExist;
         public bool FileIsExist
@@ -308,7 +302,7 @@ namespace HCL_ODA_TestPAD.ViewModels
             ResetMenuFlags();
             IsAbout = true;
             SyncContext.Post(o => OdaMenuView?.PlayNavRectAnimation(100), null);
-            //_eventAggregator.GetEvent<PanCommandClickedEvent>().Publish();
+            //_serviceFactory.EventSrv.GetEvent<PanCommandClickedEvent>().Publish();
         }
 
         private DelegateCommand _markUpMenuCommand;
@@ -351,7 +345,7 @@ namespace HCL_ODA_TestPAD.ViewModels
             IsNavigation = true;
             ButtonFactory[ButtonName.PanBtn]().IsChecked = true;
             ButtonFactory[ButtonName.OrbitBtn]().IsChecked = false;
-            _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+            _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
             .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Panning });
         }
 
@@ -364,7 +358,7 @@ namespace HCL_ODA_TestPAD.ViewModels
             IsNavigation = true;
             ButtonFactory[ButtonName.OrbitBtn]().IsChecked = true;
             ButtonFactory[ButtonName.PanBtn]().IsChecked = false;
-            _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+            _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
             .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Orbitting });
         }
         private DelegateCommand _aboutCommand;
@@ -373,7 +367,7 @@ namespace HCL_ODA_TestPAD.ViewModels
         private void AboutCommand_Clicked()
         {
             //ResetMenuFlags();
-            if (_appSettings.ShowAboutAnimation)
+            if (_serviceFactory.AppSettings.ShowAboutAnimation)
             {
                 var aboutDlg = new AboutTestPAD();
                 aboutDlg.Show();
@@ -388,15 +382,15 @@ namespace HCL_ODA_TestPAD.ViewModels
             switch (param.ToString())
             {
                 case "Zoom In":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.SetZoom, eZoomType = ZoomType.ZoomIn });
                     break;
                 case "Zoom Out":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.SetZoom, eZoomType = ZoomType.ZoomOut });
                     break;
                 case "Zoom Extents":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.SetZoom, eZoomType = ZoomType.ZoomExtents });
                     break;
             }
@@ -411,43 +405,43 @@ namespace HCL_ODA_TestPAD.ViewModels
             switch (param.ToString())
             {
                 case "Top":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
             .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kTop });
                     break;
                 case "Bottom":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
             .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kBottom });
                     break;
                 case "Left":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
             .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kLeft });
                     break;
                 case "Right":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
             .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kRight });
                     break;
                 case "Front":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
             .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kFront });
                     break;
                 case "Back":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
             .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kBack });
                     break;
                 case "SW Isometric":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
             .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kSW });
                     break;
                 case "SE Isometric":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
             .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kSE });
                     break;
                 case "NE Isometric":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
             .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kNE });
                     break;
                 case "NW Isometric":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
             .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kNW });
                     break;
             }
@@ -461,7 +455,7 @@ namespace HCL_ODA_TestPAD.ViewModels
             switch (param.ToString())
             {
                 case "Isometric":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
                     { OdaEventType = OdaEventType.SetProjection, eProjectionType = OdTvGsView.Projection.kParallel });
                     ButtonFactory[ButtonName.IsometricBtn]().IsChecked = true;
@@ -470,7 +464,7 @@ namespace HCL_ODA_TestPAD.ViewModels
                 case "Perspective":
                     ButtonFactory[ButtonName.PerspectiveBtn]().IsChecked = true;
                     ButtonFactory[ButtonName.IsometricBtn]().IsChecked = false;
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
                     { OdaEventType = OdaEventType.SetProjection, eProjectionType = OdTvGsView.Projection.kPerspective });
                     break;
@@ -487,31 +481,31 @@ namespace HCL_ODA_TestPAD.ViewModels
             {
                 case "2D Wireframe":
                     ButtonFactory[ButtonName.Wireframe2DBtn]().IsChecked = true;
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
                     { OdaEventType = OdaEventType.SetRender, eRenderModeType = OdTvGsView.RenderMode.k2DOptimized });
                     break;
                 case "3D Wireframe":
                     ButtonFactory[ButtonName.Wireframe3DBtn]().IsChecked = true;
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
                     { OdaEventType = OdaEventType.SetRender, eRenderModeType = OdTvGsView.RenderMode.kWireframe });
                     break;
                 case "HiddenLine":
                     ButtonFactory[ButtonName.HiddenLineBtn]().IsChecked = true;
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
                     { OdaEventType = OdaEventType.SetRender, eRenderModeType = OdTvGsView.RenderMode.kHiddenLine });
                     break;
                 case "Shaded":
                     ButtonFactory[ButtonName.ShadedBtn]().IsChecked = true;
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
                     { OdaEventType = OdaEventType.SetRender, eRenderModeType = OdTvGsView.RenderMode.kFlatShaded });
                     break;
                 case "Shaded with edges":
                     ButtonFactory[ButtonName.ShadedWithEdgesBtn]().IsChecked = true;
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
                     { OdaEventType = OdaEventType.SetRender, eRenderModeType = OdTvGsView.RenderMode.kFlatShadedWithWireframe });
                     break;
@@ -536,17 +530,17 @@ namespace HCL_ODA_TestPAD.ViewModels
             switch (param.ToString())
             {
                 case "RegenAll":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
                     { OdaEventType = OdaEventType.SetRegen, eRegenModeType = OdTvGsDevice.RegenMode.kRegenAll });
                     break;
                 case "RegenVisible":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
                     { OdaEventType = OdaEventType.SetRegen, eRegenModeType = OdTvGsDevice.RegenMode.kRegenVisible });
                     break;
                 case "RegenView":
-                    _eventAggregator.GetEvent<OdaMenuCommandClickEvent>()
+                    _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
                     { OdaEventType = OdaEventType.RegenView });
                     break;

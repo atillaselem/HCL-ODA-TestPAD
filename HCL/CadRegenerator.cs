@@ -12,19 +12,19 @@ namespace HCL_ODA_TestPAD.HCL
 {
     public class CadRegenerator
     {
+        private readonly IServiceFactory _serviceFactory;
+
         /// <summary>
         /// Auto-Regeneration parameters
         /// </summary>
         //private const double _regenThreshold = 0.01;
         private double _lastRegenCoeff;
-        private readonly Func<IAppSettings> _appSettings;
-        private readonly Func<IEventAggregator> _eventAggregator;
 
-        public CadRegenerator(Func<IAppSettings> appSettings, Func<IEventAggregator> eventAggregator)
+
+        public CadRegenerator(IServiceFactory serviceFactory)
         {
-            _appSettings = appSettings;
-            _eventAggregator = eventAggregator;
-            _eventAggregator().GetEvent<ProgressMaxChangedEvent>().Publish(100);
+            _serviceFactory = serviceFactory;
+            serviceFactory.EventSrv.GetEvent<ProgressMaxChangedEvent>().Publish(100);
         }
 
         private (bool, double) CheckAutoRegeneration(OdTvGsDevice dev)
@@ -32,14 +32,14 @@ namespace HCL_ODA_TestPAD.HCL
             var canRegenerate = false;
             var currentCoeff = 0d;
             currentCoeff = GetRegenCoefficient(dev);
-            if (currentCoeff >= _appSettings().RegenThreshold && currentCoeff == _lastRegenCoeff)
+            if (currentCoeff >= _serviceFactory.AppSettings.RegenThreshold && currentCoeff == _lastRegenCoeff)
             {
                 canRegenerate = false;
             }
 
             // regen coeff  tbeyond the threshold, regeneration is mandatory
-            //else if (currentCoeff >= _appSettings().RegenThreshold) // HCL Implementation
-            else if (currentCoeff >= _appSettings().RegenThreshold && currentCoeff > _lastRegenCoeff) //TestPAD Fix Perfromance! 
+            //else if (currentCoeff >= _serviceFactory.AppSettings.RegenThreshold) // HCL Implementation
+            else if (currentCoeff >= _serviceFactory.AppSettings.RegenThreshold && currentCoeff > _lastRegenCoeff) //TestPAD Fix Perfromance! 
             {
                 canRegenerate = true;
             }
@@ -53,22 +53,22 @@ namespace HCL_ODA_TestPAD.HCL
 
         public OdTvGsDevice TryAutoRegeneration(OdTvGsDevice dev)
         {
-            if (_appSettings().AutoRegeneration)
+            if (_serviceFactory.AppSettings.AutoRegeneration)
             {
                 var (canRegenerate, currentCoeff) = CheckAutoRegeneration(dev);
 
                 if (canRegenerate)
                 {
-                    dev.regen(_appSettings().RegenMode);
+                    dev.regen(_serviceFactory.AppSettings.RegenMode);
 
                     _lastRegenCoeff = currentCoeff;
 
                 }
 
-                _eventAggregator().GetEvent<ProgressStepChangedEvent>().Publish(new ProgressStepChangedEventArg()
+                _serviceFactory.EventSrv.GetEvent<ProgressStepChangedEvent>().Publish(new ProgressStepChangedEventArg()
                 {
                     CurrentDeviceCoefficient = currentCoeff,
-                    RegenThreshold = _appSettings().RegenThreshold,
+                    RegenThreshold = _serviceFactory.AppSettings.RegenThreshold,
                     LastDeviceCoefficientAfterRegen = _lastRegenCoeff,
                     CurrentProgressStep = canRegenerate ? 5 : 0
                 });

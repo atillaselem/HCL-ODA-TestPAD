@@ -10,8 +10,7 @@ namespace HCL_ODA_TestPAD.ViewModels
 {
     public class AppStatusBarViewModel : BindableBase
     {
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IAppSettings _appSettings;
+        private readonly IServiceFactory _serviceFactory;
         private string _statusMessage;
         private int _progressValue;
         private int _progressMax;
@@ -20,20 +19,18 @@ namespace HCL_ODA_TestPAD.ViewModels
 
         private LinearGradientBrush _exceptionBrush = new LinearGradientBrush(Colors.LightPink, Colors.IndianRed, new Point(0.5, 0), new Point(0.5, 1));
         private LinearGradientBrush _brushStatusBar = new LinearGradientBrush(Colors.LightGray, Colors.DarkGray, new Point(0.5, 0), new Point(0.5, 1));
-        public AppStatusBarViewModel(IEventAggregator eventAggregator,
-        ISettingsProvider settingsProvider)
+        public AppStatusBarViewModel(IServiceFactory serviceFactory)
         {
-            _eventAggregator = eventAggregator;
-            _appSettings = settingsProvider.AppSettings;
+            _serviceFactory = serviceFactory;
             StatusMessage = "HCL-ODA-TestPAD loaded successfully";
             SubscribeEvents();
         }
 
         private void SubscribeEvents()
         {
-            _eventAggregator.GetEvent<ProgressStepChangedEvent>().Subscribe(OnProgressStepChangedEvent);
-            _eventAggregator.GetEvent<ProgressMaxChangedEvent>().Subscribe(OnProgressMaxEvent);
-            _eventAggregator.GetEvent<AppStatusTextChanged>().Subscribe(OnAppStatusTextChanged);
+            _serviceFactory.EventSrv.GetEvent<ProgressStepChangedEvent>().Subscribe(OnProgressStepChangedEvent);
+            _serviceFactory.EventSrv.GetEvent<ProgressMaxChangedEvent>().Subscribe(OnProgressMaxEvent);
+            _serviceFactory.EventSrv.GetEvent<AppStatusTextChanged>().Subscribe(OnAppStatusTextChanged);
         }
 
         private void OnAppStatusTextChanged(string statusText)

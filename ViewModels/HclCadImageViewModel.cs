@@ -144,7 +144,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             OnRenderSizeChanged(sizeInfo.NewSize);
         }
 
-        UpdateCadView(true);
+        //UpdateCadView(true);
     }
     public void VisibilityChanged(bool visibility)
     {
@@ -372,6 +372,8 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             odTvGsDevice.setForbidImageHighlight(_serviceFactory.AppSettings.SetForbidImageHighlight);
             odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _serviceFactory.AppSettings.UseForcePartialUpdate);
             odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _serviceFactory.AppSettings.UseBlocksCache);
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kForceOffscreenSceneGraph, _serviceFactory.AppSettings.UseForceOffscreenSceneGraph);
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kSceneGraphPurgeGrouppedRenders, _serviceFactory.AppSettings.UseSceneGraphPurgeGroupedRenders);
 
             ConfigureViewSettings(activeViewId);
 
@@ -386,7 +388,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
             using var rect = new OdTvDCRect(0, 800, 600, 0);
             odTvGsDevice.onSize(rect);
-            odTvGsDevice.update();
+            //odTvGsDevice.update();
 
             TvActiveViewport = 0;
 
@@ -503,6 +505,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             bg.setColorBottom(new OdTvColorDef(CADModelConstants.GradientColorBottom.R, CADModelConstants.GradientColorBottom.G, CADModelConstants.GradientColorBottom.B));
             viewOpen.setBackground(background);
         }
+        viewOpen.setMode(OdTvGsView.RenderMode.k2DOptimized);
     }
     private OdTvBaseImportParams GetImportParams(string filePath, ref bool isIfc)
     {
@@ -529,7 +532,6 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
                 var tvIfcImportParams = new OdTvIfcImportParams();
                 tvIfcImportParams.setNeedCDATree(_serviceFactory.AppSettings.IfcSetNeedCDATree);
                 tvIfcImportParams.setNeedCollectPropertiesInCDA(_serviceFactory.AppSettings.IfcSetNeedCollectPropertiesInCDA);
-                tvIfcImportParams.setFeedbackForChooseCallback(PCallback);
                 isIfc = true;
                 importParams = tvIfcImportParams;
             }

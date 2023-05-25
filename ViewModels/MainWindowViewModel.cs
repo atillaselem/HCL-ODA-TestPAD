@@ -578,7 +578,7 @@ public class MainWindowViewModel : BindableBase
 
         _hclGLES2_Control.LoadFile(dlg.FileName);
         //_hclGLES2_Control.OnOffFPS(true);
-        _hclGLES2_Control.ShowCustomModels();
+        //_hclGLES2_Control.ShowCustomModels();
         //UncheckDraggersBtns();
     }
 

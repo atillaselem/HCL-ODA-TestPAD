@@ -63,6 +63,16 @@ public record AppSettings
     public bool UseBlocksCache { get; init; }
 
     [Category("OpenGLES2 Device")]
+    [DisplayName("Force Offscreen SceneGraph")]
+    [Description("Enable Force Offscreen SceneGraph")]
+    public bool UseForceOffscreenSceneGraph { get; init; }
+
+    [Category("OpenGLES2 Device")]
+    [DisplayName("SceneGraph Purge Grouped Renders")]
+    [Description("Purge Grouped Renders")]
+    public bool UseSceneGraphPurgeGroupedRenders { get; init; }
+
+    [Category("OpenGLES2 Device")]
     [DisplayName("Forbid Image Highlight")]
     [Description("Set Forbid Image Highlight")]
     public bool SetForbidImageHighlight { get; init; }

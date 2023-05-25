@@ -65,23 +65,28 @@ public class CadModel : ICadModel
         WritableBackBuffer = writableBitmap.BackBuffer;
     }
 
+    private bool _isViewResized;
     public void ViewSizeChanged(Size size)
     {
         if (TvGsDeviceId != null && !TvGsDeviceId.isNull())
         {
-            using var odTvGsDevice = TvGsDeviceId.openObject(OpenMode.kForWrite);
-            using var rect = new OdTvDCRect(0, (int)size.Width, (int)size.Height, 0);
-            odTvGsDevice.onSize(rect);
-            odTvGsDevice.invalidate();
-            odTvGsDevice.regen(OdTvGsDevice.RegenMode.kRegenVisible);
-            odTvGsDevice.update();
+            {
+                using var odTvGsDevice = TvGsDeviceId.openObject(OpenMode.kForWrite);
+                using var rect = new OdTvDCRect(0, (int)size.Width, (int)size.Height, 0);
+                odTvGsDevice.onSize(rect);
+                odTvGsDevice.invalidate();
+                odTvGsDevice.regen(OdTvGsDevice.RegenMode.kRegenVisible);
+                //odTvGsDevice.update();
+                _isViewResized = true;
+            }
+            Update(false);
         }
 
     }
 
     public void Update(bool invalidate)
     {
-        if (TvGsDeviceId != null && !TvGsDeviceId.isNull())
+        if (_isViewResized && TvGsDeviceId != null && !TvGsDeviceId.isNull())
         {
             using var odTvGsDevice = TvGsDeviceId.openObject(OpenMode.kForWrite);
 

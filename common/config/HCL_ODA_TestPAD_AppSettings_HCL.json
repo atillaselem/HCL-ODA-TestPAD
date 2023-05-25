@@ -2,8 +2,10 @@
 	"SetFrozenLayersVisible": true,
 	"UseSceneGraph": true,
 	"RenderDevice": 0,
-	"UseForcePartialUpdate": true,
+	"UseForcePartialUpdate": false,
 	"UseBlocksCache": true,
+	"UseForceOffscreenSceneGraph": true,
+	"UseSceneGraphPurgeGroupedRenders": false,
 	"SetForbidImageHighlight": true,
 	"AutoRegeneration": true,
 	"RegenThreshold": 0.01,
@@ -30,5 +32,5 @@
 	"ShowSplashScreen": false,
 	"ShowAboutAnimation": true,
 	"SaveSettings": true,
-	"SettingsMode": 0
+	"SettingsMode": 1
 }

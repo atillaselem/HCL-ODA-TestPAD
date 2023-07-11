@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-namespace MEGA_MainWindow.Splash
+namespace HCL_ODA_TestPAD.Splash
 {
     /// <summary>
     /// 

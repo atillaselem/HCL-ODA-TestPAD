@@ -3,9 +3,9 @@ Unicode True
 ; Hilti Construction Layout Software
 
 ; HM NIS Edit Wizard helper defines
-!define PRODUCT_NAME "HCL-ODA-TestPAD_x32 ${VersionBuild}"
+!define PRODUCT_NAME "HCL-ODA-TestPAD (32-bit) ${VersionBuild}"
 ;To display text on header of welcome page
-!define PRODUCT_HEADER_NAME "HCL-ODA-TestPAD_x32"
+!define PRODUCT_HEADER_NAME "HCL-ODA-TestPAD (32-bit)"
 !define PRODUCT_PUBLISHER "Hilti"
 !define PRODUCT_INFO_REGKEY "Software\Hilti\${ApplicationName}"
 !define PRODUCT_UNINST_REGKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\2012f369-9c57-4052-a77d-a2436a6f0fa8"
@@ -49,7 +49,7 @@ VIAddVersionKey "FileDescription" "Installer for HCL-ODA-TestPAD_x32."
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_RUN "$INSTDIR\HCL-ODA-TestPAD_x32.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\HCL-ODA-TestPAD.exe"
 !insertmacro MUI_PAGE_FINISH
 ;Application Name
 !define ApplicationName "HCL-ODA-TestPAD_x32"
@@ -64,7 +64,7 @@ VIAddVersionKey "FileDescription" "Installer for HCL-ODA-TestPAD_x32."
 Name "${PRODUCT_HEADER_NAME}"
 OutFile "${ApplicationName}_${VersionBuild}.exe"
 RequestExecutionLevel admin
-InstallDir "$PROGRAMFILES\Hilti\HCL-ODA-TestPAD_x32"
+InstallDir "$PROGRAMFILES32\Hilti\HCL-ODA-TestPAD"
 InstallDirRegKey ${PRODUCT_REG_ROOT_KEY} "${PRODUCT_INFO_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
@@ -117,16 +117,16 @@ Section "MainSection" SEC02
   ;RMDir /r "$DOCUMENTS\Hilti Project\CAD_Files"
   
   SetOutPath "$INSTDIR"
-  File "..\${SourceMainDir}${SourceSubDir}\${ApplicationName}.dll"
-  File "..\${SourceMainDir}\${ApplicationName}.exe"
-  File "..\${SourceMainDir}\${ApplicationName}.runtimeconfig.json"
-  File "..\${SourceMainDir}\${ApplicationName}.deps.json"
+  File "..\${SourceMainDir}${SourceSubDir}\HCL-ODA-TestPAD.dll"
+  File "..\${SourceMainDir}\HCL-ODA-TestPAD.exe"
+  File "..\${SourceMainDir}\HCL-ODA-TestPAD.runtimeconfig.json"
+  File "..\${SourceMainDir}\HCL-ODA-TestPAD.deps.json"
 
   CreateDirectory "$SMPROGRAMS\${ApplicationName}"
-  CreateShortCut "$SMPROGRAMS\${ApplicationName}\${ApplicationName}.lnk" "$INSTDIR\${ApplicationName}.exe"
+  CreateShortCut "$SMPROGRAMS\${ApplicationName}\${ApplicationName}.lnk" "$INSTDIR\HCL-ODA-TestPAD.exe"
   ;CreateShortCut "$SMPROGRAMS\${ApplicationName}\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
   CreateShortCut "$SMPROGRAMS\${ApplicationName}\Uninstall.lnk" "$INSTDIR\uninst.exe"
-  CreateShortCut "$DESKTOP\${ApplicationName}.lnk" "$INSTDIR\${ApplicationName}.exe"
+  CreateShortCut "$DESKTOP\${ApplicationName}.lnk" "$INSTDIR\HCL-ODA-TestPAD.exe"
 
   File "..\${SourceMainDir}\appsettings.json"
   File "..\${SourceMainDir}\Autofac.dll"
@@ -187,7 +187,7 @@ SectionEnd
 
 Section -RegistryUpdate
   SetRegView 64
-  WriteRegStr ${PRODUCT_REG_ROOT_KEY} "${PRODUCT_INFO_REGKEY}" "" "$INSTDIR\${ApplicationName}.exe"
+  WriteRegStr ${PRODUCT_REG_ROOT_KEY} "${PRODUCT_INFO_REGKEY}" "" "$INSTDIR\HCL-ODA-TestPAD.exe"
   WriteRegStr ${PRODUCT_REG_ROOT_KEY} "${PRODUCT_INFO_REGKEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_REG_ROOT_KEY} "${PRODUCT_INFO_REGKEY}" "DisplayIcon" "$INSTDIR\${ApplicationName}.exe"
   WriteRegStr ${PRODUCT_REG_ROOT_KEY} "${PRODUCT_INFO_REGKEY}" "DisplayVersion" "${VersionBuild}"
@@ -199,7 +199,7 @@ Section -RegistryUpdate
   WriteRegStr ${PRODUCT_REG_ROOT_KEY} "${PRODUCT_UNINST_REGKEY}" "DisplayVersion" "${VersionBuild}"
   WriteRegStr ${PRODUCT_REG_ROOT_KEY} "${PRODUCT_UNINST_REGKEY}" "Publisher" "${PRODUCT_PUBLISHER}"
   WriteRegDword ${PRODUCT_REG_ROOT_KEY} "${PRODUCT_UNINST_REGKEY}" "EstimatedSize" "$0"
-  DeleteRegValue ${PRODUCT_REG_ROOT_KEY} "${PRODUCT_RUNADMIN_REGKEY}" "$INSTDIR\${ApplicationName}.exe"
+  DeleteRegValue ${PRODUCT_REG_ROOT_KEY} "${PRODUCT_RUNADMIN_REGKEY}" "$INSTDIR\HCL-ODA-TestPAD.exe"
 SectionEnd
 
 Section -Cleanup

@@ -1,6 +1,5 @@
 ﻿using System.Configuration;
 using System.IO;
-using HCL_ODA_TestPAD.Extensions;
 using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.Utility;
 using Newtonsoft.Json;

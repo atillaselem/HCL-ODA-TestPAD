@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Windows;
 
 namespace HCL_ODA_TestPAD.HCL;
 
@@ -15,18 +16,8 @@ internal static partial class NativeMethods
 }
 public interface ICadScreenInfoProvider
 {
-    /// <summary>
-    ///     Get effective DPI value.
-    /// </summary>
-    /// <param name="dpiX">DPI in x direction.</param>
-    /// <param name="dpiY">DPI in y direction.</param>
-    void GetEffectiveDpi(out uint dpiX, out uint dpiY);
+    (uint dpiX, uint dpiY) GetEffectiveDpi();
 
-    /// <summary>
-    ///     Get raw DPI value.
-    /// </summary>
-    /// <param name="dpiX">DPI in x direction.</param>
-    /// <param name="dpiY">DPI in y direction.</param>
     void GetRawDpi(out uint dpiX, out uint dpiY);
 }
 internal enum DpiType
@@ -111,15 +102,36 @@ public sealed class CadScreenInfoProvider : ICadScreenInfoProvider
         dpiY = _rawDpiY;
     }
 
-    /// <inheritdoc cref="IScreenInfoProvider"/>
-    public void GetEffectiveDpi(out uint dpiX, out uint dpiY)
+    public (uint dpiX, uint dpiY) GetEffectiveDpi()
     {
         if (_effectiveDpiX == 0 || _effectiveDpiY == 0)
         {
             GetDpi(DpiType.EFFECTIVE, out _effectiveDpiX, out _effectiveDpiY);
         }
-        dpiX = _effectiveDpiX;
-        dpiY = _effectiveDpiY;
+
+        return (_effectiveDpiX, _effectiveDpiY);
     }
 
+    private static double _dpiScaleFactor;
+    public static double DpiScaleFactor
+    {
+        get
+        {
+            if (_dpiScaleFactor != 0)
+            {
+                return _dpiScaleFactor;
+            }
+
+            var infoProvider = new CadScreenInfoProvider().GetEffectiveDpi();
+            _dpiScaleFactor = infoProvider.dpiX / 96.0;
+
+            return _dpiScaleFactor;
+        }
+    }
+
+    public static Point DpiScaledPoint(Point point)
+    {
+        return new Point(point.X * DpiScaleFactor,
+            point.Y * DpiScaleFactor);
+    }
 }

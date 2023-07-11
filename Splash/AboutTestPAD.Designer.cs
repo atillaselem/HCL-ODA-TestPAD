@@ -1,4 +1,4 @@
-﻿namespace MEGA_MainWindow.Splash
+﻿namespace HCL_ODA_TestPAD.Splash
 {
     partial class AboutTestPAD
     {

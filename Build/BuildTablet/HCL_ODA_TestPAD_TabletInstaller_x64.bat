@@ -11,7 +11,7 @@ REM FOR /F "TOKENS=1,2 eol=/ DELIMS=/ " %%A IN ('DATE/T') DO SET mm=%%B
 REM FOR /F "TOKENS=1,2,3 eol=/ DELIMS=/ " %%A IN ('DATE/T') DO SET yyyy=%%C
 REM set VERSION_BUILD=0.%yyyy%.%dd%.%mm%
 
-echo *** Creating the HCL-ODA-TestPAD installer ... ***
+echo *** Creating the HCL-ODA-TestPAD (64-bit) installer ... ***
 if "%ProgramFiles(x86)%."=="." set PFDir=%ProgramFiles%
 if not "%ProgramFiles(x86)%."=="." set PFDir=%ProgramFiles(x86)%
 

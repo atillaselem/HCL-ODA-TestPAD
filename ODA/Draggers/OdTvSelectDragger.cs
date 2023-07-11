@@ -62,8 +62,6 @@ public class OdTvSelectDragger : OdTvDragger
     private OdTvGeometryDataId _frameId;
     private OdTvGeometryDataId _frameIdContourId;
 
-    private IOdaSectioning _wpfView;
-
     private OdTvSelectionOptions _opt = new OdTvSelectionOptions();
     private OdTvDCPoint[] _pts = new OdTvDCPoint[2];
 
@@ -77,7 +75,6 @@ public class OdTvSelectDragger : OdTvDragger
         _pts[0] = new OdTvDCPoint();
         _pts[1] = new OdTvDCPoint();
 
-        _wpfView = wpfView;
         _modelId = modelId;
         // In this dragger we will be used a separate special view for drawing temporary objects like selection rectangles
         // Such technique will allow doesn't depend on the render mode at the current active view. Also we will not have any problems 

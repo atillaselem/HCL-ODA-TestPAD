@@ -50,7 +50,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
     // State of this dragger
     protected CuttingState _state = CuttingState.WaitingForCutPlSelect;
     //parents rendering area
-    protected IOdaSectioning _wpfView;
+    //protected IOdaSectioning _wpfView;
     // Options used for the selection of cutting planes
     protected OdTvSelectionOptions _selectionOptions = new OdTvSelectionOptions();
     //axis control

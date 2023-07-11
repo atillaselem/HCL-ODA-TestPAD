@@ -58,10 +58,10 @@ public class CadImageViewModel
 
     public static (Size, uint, uint) GetScaledSize(Size newSize)
     {
-        new CadScreenInfoProvider().GetEffectiveDpi(out var dpiX, out var dpiY);
+        var (dpiX, dpiY) = new CadScreenInfoProvider().GetEffectiveDpi();
         const double defaultImageDpi = 96;
-        double scaleDpiX = dpiX / defaultImageDpi;
-        double scaleDpiY = dpiY / defaultImageDpi;
+        var scaleDpiX = dpiX / defaultImageDpi;
+        var scaleDpiY = dpiY / defaultImageDpi;
         var scaledSize = new Size(newSize.Width * scaleDpiX, newSize.Height * scaleDpiY);
         return (scaledSize, dpiX, dpiY);
     }

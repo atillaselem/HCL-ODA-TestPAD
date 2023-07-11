@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using HCL_ODA_TestPAD.Mvvm;
 using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.Resources.Converters;
 using HCL_ODA_TestPAD.Settings;
+using HCL_ODA_TestPAD.Splash;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using HCL_ODA_TestPAD.Views;
-using MEGA_MainWindow.Splash;
 using Microsoft.Win32;
 using Prism.Commands;
 using Prism.Events;
@@ -28,7 +27,6 @@ namespace HCL_ODA_TestPAD.ViewModels
         public ICommand ExitCommand => _exitCommand ??= new DelegateCommand(OnMenuExitCommand, () => true);
 
         public IOdaMenuView OdaMenuView { get; set; }
-        private CancellationTokenSource _ctsForProgressbar;
 
         public Dictionary<ButtonName, Func<ToggleButton>> ButtonFactory { get; set; }
         private int _numberOfTabPages;

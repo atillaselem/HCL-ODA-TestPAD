@@ -38,8 +38,9 @@ namespace HCL_ODA_TestPAD.UserControls
         #endregion
 
         #region Image Bufferring Variables
-        bool _isInitialized, _isFileLoading;
-        static int _widthResized, _heightResized;
+
+        static readonly int WidthResized;
+        static readonly int HeightResized;
         #endregion
 
         #region Unit Variables
@@ -124,6 +125,12 @@ namespace HCL_ODA_TestPAD.UserControls
 
             var cadGenerator = new CadRegenerator(serviceFactory);
             _cadRegenFactory = () => cadGenerator;
+        }
+
+        static WinFormsCadImageViewControl()
+        {
+            WidthResized = 0;
+            HeightResized = 0;
         }
 
         public void ClearDevices()
@@ -872,6 +879,7 @@ namespace HCL_ODA_TestPAD.UserControls
                 //VM.AppMainWindow.ModelBrowser.Initialize(_dbId, this);
             }
 
+            OnOffFPS(true);
             this.Cursor = Cursors.Default;
             MM.StopTransaction(mtr);
         }
@@ -979,7 +987,7 @@ namespace HCL_ODA_TestPAD.UserControls
                 {
                     importParams = new OdTvDwgImportParams();
                     OdTvDwgImportParams dwgPmtrs = importParams as OdTvDwgImportParams;
-                    dwgPmtrs.setDCRect(new OdTvDCRect(0, (int)_widthResized, (int)_heightResized, 0));
+                    dwgPmtrs.setDCRect(new OdTvDCRect(0, (int)WidthResized, (int)HeightResized, 0));
                     dwgPmtrs.setObjectNaming(_serviceFactory.AppSettings.DwgSetObjectNaming);
                     dwgPmtrs.setStoreSourceObjects(_serviceFactory.AppSettings.DwgSetStoreSourceObjects);
                     dwgPmtrs.setFeedbackForChooseCallback(null);

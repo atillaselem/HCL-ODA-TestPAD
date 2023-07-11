@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HCL_ODA_TestPAD.Extensions
+namespace HCL_ODA_TestPAD.Functional.Extensions
 {
     public static class EnumUtils
     {

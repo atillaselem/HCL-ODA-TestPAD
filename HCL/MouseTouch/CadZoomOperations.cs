@@ -55,7 +55,7 @@ public sealed class CadZoomOperations : ICadZoomOperations
             //_logger.LogError("CadView : zoom not possible");
             throw ex;
         }
-        catch (Exception exception)
+        catch (Exception)
         {
             //_logger.LogError(exception, "CadView : zoom to area failed");
         }

@@ -1,6 +1,7 @@
 ﻿using HCL_ODA_TestPAD.Utility;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
@@ -16,6 +17,20 @@ public interface ILogger
 }
 internal class HPLLogger : ILogger
 {
+}
+
+public interface ICadBehavior : IDisposable
+{
+    void Init(dynamic point);
+    void Run(dynamic point);
+    void Finish(dynamic point);
+}
+public enum CadViewOperation
+{
+    Pan,
+    ZoomToScale,    
+    ZoomToArea,
+    Orbit
 }
 public interface ICadModel : IDisposable
 {
@@ -49,7 +64,7 @@ public class CadModel : ICadModel
 
     public event EventHandler ViewUpdateRequested;
     private Func<CadRegenerator> _cadRegenFactory;
-
+    private readonly Dictionary<CadViewOperation, ICadBehavior> _behaviourDict = new();
     public CadModel(Func<CadRegenerator> cadRegenFactory)
     {
         _cadRegenFactory = cadRegenFactory;

@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using HCL_ODA_TestPAD.HCL.MouseTouch;
 using System.Diagnostics.CodeAnalysis;
+using HCL_ODA_TestPAD.UserActions.States;
 
 namespace HCL_ODA_TestPAD.UserControls;
 
@@ -29,9 +30,10 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     private readonly HclCadImageViewModel _vmAdapter;
     //public HclCadImageViewModel Adapter => _vmAdapter;
     public MainWindowViewModel VM { get; set; }
-    private ZoomToAreaManager _zoomToAreaManager;
-    private ZoomToScaleManager _zoomToScaleManager;
     public string FilePath => throw new NotImplementedException();
+    private IUserActionState _userActionState;
+    private ActionZoomToScale _actionZoomToScale;
+    private readonly IUserActionManager _userActionManager;
 
     public bool AddDefaultViewOnLoad
     {
@@ -44,9 +46,6 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     public OdTvSectioningOptions SectioningOptions { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     public OdTvDatabaseId TvDatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     
-    private readonly List<int> _arrTouches = new();
-    private bool _isPinchZooming;
-
     public DefaultCadImageViewControl(MainWindowViewModel vm, IServiceFactory serviceFactory)
     {
         InitializeComponent();
@@ -54,6 +53,13 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
         _serviceFactory = serviceFactory;
         _vmAdapter = new HclCadImageViewModel(serviceFactory);
         IsVisibleChanged += VisibilityChanged;
+        _userActionManager = new UserActionManager(serviceFactory.EventSrv, 
+            () => dragSelectionCanvas, 
+            () => dragSelectionBorder,
+            this,
+            serviceFactory.AppSettings,
+            _vmAdapter);
+        _userActionState = new ActionIdle(_userActionManager);
     }
 
     private void VisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -75,10 +81,7 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
             VM.PanCommand_Clicked();
             emitEvent?.Invoke($"File : [{filePath}] loaded successfully.");
             _vmAdapter.ShowCustomModels();
-            if (_zoomToScaleManager is null)
-            {
-                _zoomToScaleManager = new ZoomToScaleManager(this, _vmAdapter.TvGsDeviceId, _serviceFactory.AppSettings);
-            }
+            _actionZoomToScale = new ActionZoomToScale(_userActionManager);
         }
         else
         {
@@ -104,113 +107,93 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     {
         _vmAdapter.RenderSizeChanged(sizeInfo);
     }
-    #region Overriden Mouse Events
+
+    #region Action State Transitions
+    public IUserActionState TransitState(UserInteraction userInteraction) =>
+    _userActionState = _userActionState.DoStateTransition(userInteraction);
+
+
+    private void UserInteractionChanged(string property)
+    {
+        TransitState(
+            property switch
+            {
+                "Pan" => UserInteraction.Panning,
+                "Orbit" => UserInteraction.Orbiting,
+                "ZoomToArea" => UserInteraction.ZoomToArea,
+                _ => _userActionState.ActiveAction
+            }
+        );
+    }
+    #endregion
+
+    #region Mouse & Touch Events
+    /// <summary>
+    /// WPF converts Touch events to Mouse events if they are not handled. 
+    /// </summary>
     protected override void OnMouseDown(MouseButtonEventArgs e)
     {
-
-        if (_zoomToAreaManager is not null && _zoomToAreaManager.IsZoomToAreaEnabled)
-        {
-            _zoomToAreaManager.HandleTouchAndMouseDown(e, this);
-        }
-        else
-        {
-            if (!_isPinchZooming)
-            {
-                _vmAdapter.MouseDown(e, e.GetPosition(this));
-            }
-        }
+        ArgumentNullException.ThrowIfNull(e);
+        _userActionState.ExecuteMouseTouchDown(e, this);
     }
-
-    protected override void OnMouseMove(System.Windows.Input.MouseEventArgs e)
+    protected override void OnMouseMove(MouseEventArgs e)
     {
-        if (_zoomToAreaManager is not null && _zoomToAreaManager.IsZoomToAreaEnabled)
+        ArgumentNullException.ThrowIfNull(e);
+        if (e.LeftButton != MouseButtonState.Pressed)
         {
-            _zoomToAreaManager.HandleTouchAndMouseMove(e, this);
+            return;
         }
-        else
-        {
-            if (!_isPinchZooming)
-            {
-                _vmAdapter.MouseMove(e, e.GetPosition(this));
-            }
-        }
+        _userActionState.ExecuteMouseTouchMove(e, this);
     }
-
     protected override void OnMouseUp(MouseButtonEventArgs e)
     {
-        if (_zoomToAreaManager is not null && _zoomToAreaManager.IsZoomToAreaEnabled)
-        {
-            _zoomToAreaManager.HandleTouchAndMouseUp(e, this);
-        }
-        else
-        {
-            if (!_isPinchZooming)
-            {
-                _vmAdapter.MouseUp(e);
-            }
-        }
+        ArgumentNullException.ThrowIfNull(e);
+        _userActionState.ExecuteMouseTouchUp(e, this);
     }
-
     protected override void OnMouseWheel(MouseWheelEventArgs e)
     {
-        _vmAdapter.MouseWheel(e);
+        ArgumentNullException.ThrowIfNull(e);
+        //Return back to active user action state before Wheeling executes
+        _userActionState = _userActionState
+                           .DoStateTransition(UserInteraction.Wheeling)
+                           .ExecuteWheeling(e, _userActionState.ActiveAction, () => MessageBox.Show("Zoom Not Possible"));
     }
     #endregion
 
     #region Overriden Touch Events
     protected override void OnTouchDown(TouchEventArgs e)
     {
-        if (_zoomToAreaManager.IsZoomToAreaEnabled)
-        {
-            _zoomToAreaManager.HandleTouchAndMouseDown(e, this);
-        }
-        else
-        {
-            _isPinchZooming = _zoomToScaleManager.HandleTouchAndMouseDown(e, this);
-        }
+        _actionZoomToScale.ExecuteMouseTouchDown(e, this);
     }
     protected override void OnTouchMove(TouchEventArgs e)
     {
-        if (_zoomToAreaManager is not null && _zoomToAreaManager.IsZoomToAreaEnabled)
-        {
-            _zoomToAreaManager.HandleTouchAndMouseMove(e, this);
-        }
-        else
-        {
-            _zoomToScaleManager.HandleTouchAndMouseMove(e, this);
-        }
+        _actionZoomToScale.ExecuteMouseTouchMove(e, this);
     }
     protected override void OnTouchUp(TouchEventArgs e)
     {
-        if (_zoomToAreaManager is not null && _zoomToAreaManager.IsZoomToAreaEnabled)
-        {
-            _zoomToAreaManager.HandleTouchAndMouseUp(e, this);
-        }
-        else
-        {
-            _zoomToScaleManager.HandleTouchAndMouseUp(e, this);
-            _isPinchZooming = false;
-        }
+        _actionZoomToScale.ExecuteMouseTouchUp(e, this);
+    }
+    protected override void OnTouchLeave(TouchEventArgs e)
+    {
+        _actionZoomToScale!.ExecuteTouchLeave(e, this);
     }
     #endregion
+
     public void Pan()
     {
         _vmAdapter.Pan();
+        UserInteractionChanged("Pan");
     }
 
     public void Orbit()
     {
         _vmAdapter.Orbit();
+        UserInteractionChanged("Orbit");
     }
 
     public void ZoomToArea(bool enable)
     {
-        if (_zoomToAreaManager is null)
-        {
-            _zoomToAreaManager = new ZoomToAreaManager(this, () => dragSelectionCanvas, () => dragSelectionBorder, _vmAdapter.TvGsDeviceId);
-        }
-
-        _zoomToAreaManager.IsZoomToAreaEnabled = enable;
+        UserInteractionChanged("ZoomToArea");
     }
 
     public void SetRenderModeButton(OdTvGsView.RenderMode mode)

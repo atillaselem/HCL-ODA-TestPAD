@@ -212,7 +212,6 @@ public class MainWindowViewModel : BindableBase
                 this, _serviceFactory);
             _hclGLES2_Control.AddDefaultViewOnLoad = addView;
             AppMainWindow.RenderArea.Children.Add((DefaultCadImageViewControl)_hclGLES2_Control);
-            //_hclGLES2_Control.ShowCustomModels();
         }
         else
         {
@@ -811,13 +810,9 @@ public class MainWindowViewModel : BindableBase
     #region Markups commands
 
     // rect markup
-    private RelayCommand _markupCommand;
-    public RelayCommand MarkupCommand
-    {
-        get { return _markupCommand; }
-        //get { return _markupCommand ?? (_markupCommand = new RelayCommand(param => MarkupCommand_Clicked(param), param => FileIsExist)); }
-    }
+    public RelayCommand MarkupCommand { get; }
 
+    //get { return _markupCommand ?? (_markupCommand = new RelayCommand(param => MarkupCommand_Clicked(param), param => FileIsExist)); }
     private void MarkupCommand_Clicked(object param)
     {
         switch (param.ToString())

@@ -31,7 +31,6 @@ using System.Windows.Documents;
 using static Teigha.Core.OdGsCullingVolume;
 using System.Configuration;
 using System.ComponentModel;
-using HCL_ODA_TestPAD.Extensions.ObjectExtensions;
 
 namespace HCL_ODA_TestPAD.ViewModels;
 
@@ -83,7 +82,6 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     public OdTvModelId CuttingPlaneModelId { get { return _cuttingPlanesModelId; } }
     private OdTvGsViewId _cuttingPlanesViewId = null;
     public OdTvGsViewId CuttingPlanesViewId { get { return _cuttingPlanesViewId; } }
-    private int CuttingPlaneNum = 0;
     public OdTvSectioningOptions SectioningOptions { get; private set; }
     public static int OD_TV_CUTTING_PLANE_MAX_NUM = 5;
 
@@ -99,7 +97,6 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     public TvWpfViewWCS WCS { get; set; }
     public TvDatabaseInfo DatabaseInfo { get; set; }
     private CadModel _cadModel;
-
     #endregion
 
     public HclCadImageViewModel(IServiceFactory serviceFactory)
@@ -108,8 +105,9 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         _serviceFactory = serviceFactory;
     }
 
-    public override async Task LoadCadModelViewAsync()
+    public override Task LoadCadModelViewAsync()
     {
+        return Task.CompletedTask;
         //var cadFile = CadImageFilePath;
         //_eventAggregator.GetEvent<CadModelLoadedEvent>().Publish();
         //LoadFile(CadImageFilePath);
@@ -374,6 +372,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _serviceFactory.AppSettings.UseBlocksCache);
             odTvGsDevice.setOption(OdTvGsDevice.Options.kForceOffscreenSceneGraph, _serviceFactory.AppSettings.UseForceOffscreenSceneGraph);
             odTvGsDevice.setOption(OdTvGsDevice.Options.kSceneGraphPurgeGrouppedRenders, _serviceFactory.AppSettings.UseSceneGraphPurgeGroupedRenders);
+            odTvGsDevice.setOption(OdTvGsDevice.Options.kUseVisualStyles, _serviceFactory.AppSettings.UseVisualStyles);
 
             ConfigureViewSettings(activeViewId);
 
@@ -581,8 +580,6 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         ActionAfterDragger(res);
 
         // find service models
-        OdTvResult rc = new OdTvResult();
-        rc = OdTvResult.tvOk;
 
         // set projection button
         OdTvGsView view = TvGsDeviceId.openObject().viewAt(TvActiveViewport).openObject();
@@ -650,9 +647,6 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         try
         {
             Zoom(zoomIn ? ZoomType.ZoomIn : ZoomType.ZoomOut);
-        }
-        catch (Exception ex)
-        {
         }
         finally
         {

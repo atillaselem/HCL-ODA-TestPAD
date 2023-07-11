@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace HCL_ODA_TestPAD.Utility;
 
 public class AssemblyHelper
 {
+    private const string X32_BIT = "(32-bit)";
+    private const string X64_BIT = "(64-bit)";
     /// <summary>
     /// Call this method at the beginning of the program
     /// </summary>
@@ -46,21 +49,15 @@ public class AssemblyHelper
         return version;
     }
 
-    private static string GetPlatformTarget()
+    private static string GetProcessArchitecture()
     {
-        string platformTarget = "AnyCPU";
-#if x86
-        platformTarget = "(32 bit)";
-#elif x64
-    platformTarget = "(64 bit)";
-#endif
-        return platformTarget;
+        return RuntimeInformation.ProcessArchitecture == Architecture.X86 ? X32_BIT : X64_BIT; ;
     }
 
     public static string GetAppTitle()
     {
         var assemblyFullPath = Assembly.GetExecutingAssembly().Location;
         var assemblyName = AssemblyName.GetAssemblyName(assemblyFullPath).Name;
-        return $"{assemblyName.Substring(0, assemblyName.Length-4)} {GetPlatformTarget()} - Version {{0.{GetAssemblyVersionText()}}}";
+        return $"{assemblyName.Substring(0, assemblyName.Length)} {GetProcessArchitecture().ToLower()} - Version {{0.{GetAssemblyVersionText()}}}";
     }
 }

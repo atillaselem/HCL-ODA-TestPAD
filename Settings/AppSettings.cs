@@ -73,6 +73,11 @@ public record AppSettings
     public bool UseSceneGraphPurgeGroupedRenders { get; init; }
 
     [Category("OpenGLES2 Device")]
+    [DisplayName("Use Visual Styles")]
+    [Description("If True Use Visual Styles, else use only Render Modes")]
+    public bool UseVisualStyles { get; init; }
+
+    [Category("OpenGLES2 Device")]
     [DisplayName("Forbid Image Highlight")]
     [Description("Set Forbid Image Highlight")]
     public bool SetForbidImageHighlight { get; init; }

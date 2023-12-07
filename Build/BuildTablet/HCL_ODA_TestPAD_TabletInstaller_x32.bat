@@ -4,12 +4,10 @@ setlocal enabledelayedexpansion
 REM This is a local script to kick off the full build process without obfuscating.
 set	BUILD_CONFIG=Release
 
-REM Version Build is current date in 'yyyy.mm.dd' format => 0.23023.01.31'.
-set VERSION_BUILD=0.%date:~10,4%.%date:~4,2%.%date:~7,2%
-REM FOR /F "TOKENS=1 eol=/ DELIMS=/ " %%A IN ('DATE/T') DO SET dd=%%A
-REM FOR /F "TOKENS=1,2 eol=/ DELIMS=/ " %%A IN ('DATE/T') DO SET mm=%%B
-REM FOR /F "TOKENS=1,2,3 eol=/ DELIMS=/ " %%A IN ('DATE/T') DO SET yyyy=%%C
-REM set VERSION_BUILD=0.%yyyy%.%dd%.%mm%
+for /f %%i in ('"powershell (Get-Date).ToString(\"dd\")"') do set day=%%i
+for /f %%i in ('"powershell (Get-Date).ToString(\"MM\")"') do set month=%%i
+for /f %%i in ('"powershell (Get-Date).ToString(\"yyyy\")"') do set year=%%i
+set VERSION_BUILD=0.%year%.%month%.%day%
 
 echo *** Creating the HCL-ODA-TestPAD (32-bit) installer ... ***
 if "%ProgramFiles(x86)%."=="." set PFDir=%ProgramFiles%

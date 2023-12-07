@@ -5,17 +5,11 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Teigha.Visualize;
-using HCL_ODA_TestPAD.Services;
 using HCL_ODA_TestPAD.Settings;
-using Prism.Events;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using HCL_ODA_TestPAD.ODA.Draggers;
 using HCL_ODA_TestPAD.ODA.ModelBrowser;
 using Teigha.Core;
-using System.Collections.Generic;
-using System.ComponentModel;
-using HCL_ODA_TestPAD.HCL.MouseTouch;
-using System.Diagnostics.CodeAnalysis;
 using HCL_ODA_TestPAD.UserActions.States;
 
 namespace HCL_ODA_TestPAD.UserControls;
@@ -135,7 +129,15 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     {
         ArgumentNullException.ThrowIfNull(e);
         _userActionState.ExecuteMouseTouchDown(e, this);
+        ToggleAsyncPBO(true);
     }
+
+    private void ToggleAsyncPBO(bool enable)
+    {
+        using var dev = _vmAdapter.TvGsDeviceId.openObject(OpenMode.kForWrite);
+        dev.setOption(OdTvGsDevice.Options.kAsyncReadback, enable ? 2 : 0);
+    }
+
     protected override void OnMouseMove(MouseEventArgs e)
     {
         ArgumentNullException.ThrowIfNull(e);
@@ -149,7 +151,9 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     {
         ArgumentNullException.ThrowIfNull(e);
         _userActionState.ExecuteMouseTouchUp(e, this);
+        ToggleAsyncPBO(false);
     }
+
     protected override void OnMouseWheel(MouseWheelEventArgs e)
     {
         ArgumentNullException.ThrowIfNull(e);

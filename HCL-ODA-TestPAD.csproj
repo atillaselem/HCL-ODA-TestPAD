@@ -12,7 +12,7 @@
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <OutputPath>$(SolutionDir)Build\$(Configuration)\</OutputPath>
     <UseWindowsForms>True</UseWindowsForms>
-    <AssemblyVersion>2023.7.11</AssemblyVersion>
+    <AssemblyVersion>2023.12.05</AssemblyVersion>
     <Platforms>x64;x86</Platforms>
   </PropertyGroup>
 

@@ -26,7 +26,6 @@ public class CadImageViewModel
     public void OnVisibilityChanged(bool isVisible)
     {
         //_logger.LogInformation("CadImageViewControl visibility changed to: {IsVisible}", isVisible);
-        _cadModel.UpdateImageBuffer(_cadImageViewBitmapService.GetWritableBitmap(isVisible));
         if (isVisible)
         {
             _cadModel.ViewUpdateRequested += OnCadImageViewUpdateRequested;
@@ -44,8 +43,6 @@ public class CadImageViewModel
 
     public void Update()
     {
-        //_cadModel.Render();
-        _cadModel.UpdateWritableBitmap();
         _cadImageViewBitmapService.UpdateImageArea();
     }
 

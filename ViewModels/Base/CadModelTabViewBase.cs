@@ -1,12 +1,11 @@
-﻿using HCL_ODA_TestPAD.Mvvm;
+using HCL_ODA_TestPAD.Mvvm;
 using HCL_ODA_TestPAD.Mvvm.Events;
-using HCL_ODA_TestPAD.Services;
 using HCL_ODA_TestPAD.Settings;
 using Prism.Commands;
-using Prism.Events;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 
 namespace HCL_ODA_TestPAD.ViewModels.Base
 {
@@ -47,19 +46,19 @@ namespace HCL_ODA_TestPAD.ViewModels.Base
         {
             CadOdaMenuView?.SetZoom(zoomType);
         }
-        public void OnSet3DViewClicked(OdTvExtendedView.e3DViewType e3DViewType)
+        public void OnSet3DViewClicked(OdTvExtendedView_e3DViewType e3DViewType)
         {
             CadOdaMenuView?.Set3DView(e3DViewType);
         }
-        public void OnRenderModeClicked(OdTvGsView.RenderMode eRenderModeType)
+        public void OnRenderModeClicked(OdTvGsView_RenderMode eRenderModeType)
         {
             CadOdaMenuView?.SetRenderMode(eRenderModeType);
         }
-        public void OnSetProjectionClicked(OdTvGsView.Projection eProjectionType)
+        public void OnSetProjectionClicked(OdTvGsView_Projection eProjectionType)
         {
             CadOdaMenuView?.SetProjectionType(eProjectionType);
         }
-        public void OnRegenModeClicked(OdTvGsDevice.RegenMode eRegenModeType)
+        public void OnRegenModeClicked(OdTvGsDevice_RegenMode eRegenModeType)
         {
             CadOdaMenuView?.Regen(eRegenModeType);
         }

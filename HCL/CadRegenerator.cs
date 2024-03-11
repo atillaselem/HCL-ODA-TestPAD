@@ -1,12 +1,7 @@
-﻿using HCL_ODA_TestPAD.Mvvm.Events;
+using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.Settings;
-using Prism.Events;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.HCL
 {
@@ -47,7 +42,7 @@ namespace HCL_ODA_TestPAD.HCL
         }
         private double GetRegenCoefficient(OdTvGsDevice dev)
         {
-            dev.getOption(OdTvGsDevice.Options.kRegenCoef, out double result);
+            dev.getOption(OdTvGsDevice_Options.kRegenCoef, out double result);
             return result;
         }
 

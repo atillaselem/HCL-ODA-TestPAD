@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -169,7 +169,7 @@ class TvMaterialProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvMaterial mat = _matId.openObject(OpenMode.kForWrite);
+        OdTvMaterial mat = _matId.openObject(OdTv_OpenMode.kForWrite);
         switch ((ComboboxProperty)cb.Tag)
         {
             case ComboboxProperty.AmbitientColorMethod:
@@ -177,7 +177,7 @@ class TvMaterialProperties : BasePaletteProperties
                     OdTvMaterialColor amb = mat.getAmbient();
                     if ((int)amb.getMethod() != cb.SelectedIndex)
                     {
-                        amb.setMethod((OdTvMaterialColor.Method)cb.SelectedIndex);
+                        amb.setMethod((OdTvMaterialColor_Method)cb.SelectedIndex);
                         mat.setAmbient(amb);
                     }
                     break;
@@ -189,7 +189,7 @@ class TvMaterialProperties : BasePaletteProperties
                     mat.getDiffuse(dif, map);
                     if ((int)dif.getMethod() != cb.SelectedIndex)
                     {
-                        dif.setMethod((OdTvMaterialColor.Method)cb.SelectedIndex);
+                        dif.setMethod((OdTvMaterialColor_Method)cb.SelectedIndex);
                         mat.setDiffuse(dif, map);
                     }
                     break;
@@ -202,7 +202,7 @@ class TvMaterialProperties : BasePaletteProperties
                     if ((int)map.getMapper().uTiling() != cb.SelectedIndex)
                     {
                         OdTvTextureMapper texMap = map.getMapper();
-                        texMap.setUTiling((OdTvTextureMapper.Tiling)cb.SelectedIndex);
+                        texMap.setUTiling((OdTvTextureMapper_Tiling)cb.SelectedIndex);
                         map.setMapper(texMap);
                         mat.setDiffuse(dif, map);
                     }
@@ -216,7 +216,7 @@ class TvMaterialProperties : BasePaletteProperties
                     if ((int)map.getMapper().vTiling() != cb.SelectedIndex)
                     {
                         OdTvTextureMapper texMap = map.getMapper();
-                        texMap.setVTiling((OdTvTextureMapper.Tiling)cb.SelectedIndex);
+                        texMap.setVTiling((OdTvTextureMapper_Tiling)cb.SelectedIndex);
                         map.setMapper(texMap); mat.setDiffuse(dif, map);
                     }
                     break;
@@ -226,7 +226,7 @@ class TvMaterialProperties : BasePaletteProperties
                     OdTvMaterialColor emis = mat.getEmission();
                     if ((int)emis.getMethod() != cb.SelectedIndex)
                     {
-                        emis.setMethod((OdTvMaterialColor.Method)cb.SelectedIndex);
+                        emis.setMethod((OdTvMaterialColor_Method)cb.SelectedIndex);
                         mat.setEmission(emis);
                     }
                     break;
@@ -238,7 +238,7 @@ class TvMaterialProperties : BasePaletteProperties
                     mat.getSpecular(spec, out fact);
                     if ((int)spec.getMethod() != cb.SelectedIndex)
                     {
-                        spec.setMethod((OdTvMaterialColor.Method)cb.SelectedIndex);
+                        spec.setMethod((OdTvMaterialColor_Method)cb.SelectedIndex);
                         mat.setSpecular(spec, fact);
                     }
                     break;
@@ -255,7 +255,7 @@ class TvMaterialProperties : BasePaletteProperties
         if (cp == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvMaterial mat = _matId.openObject(OpenMode.kForWrite);
+        OdTvMaterial mat = _matId.openObject(OdTv_OpenMode.kForWrite);
         switch ((ColorProperty)cp.Tag)
         {
             case ColorProperty.AmbitientColor:
@@ -313,7 +313,7 @@ class TvMaterialProperties : BasePaletteProperties
         if (tb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvMaterial mat = _matId.openObject(OpenMode.kForWrite);
+        OdTvMaterial mat = _matId.openObject(OdTv_OpenMode.kForWrite);
         tb.Text = tb.Text.Replace(".", ",");
         double val = double.Parse(tb.Text);
         switch ((ValueProperty)tb.Tag)

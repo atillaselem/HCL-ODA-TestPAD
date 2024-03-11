@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
 using Label = System.Windows.Controls.Label;
@@ -68,25 +68,25 @@ class TvDeviceProperties : BasePaletteProperties
         Grid cmnOptGrid = CreateGrid(2, 5);
         cmnOptItm.Items.Add(cmnOptGrid);
         int optRow = 0;
-        AddBoolDeviceOption("DoubleBufferEnabled:", dev, OdTvGsDevice.Options.kDoubleBufferEnabled, cmnOptGrid, optRow++);
-        AddBoolDeviceOption("BlocksCache:", dev, OdTvGsDevice.Options.kBlocksCache, cmnOptGrid, optRow++);
-        AddBoolDeviceOption("EnableMultithread:", dev, OdTvGsDevice.Options.kEnableMultithread, cmnOptGrid, optRow++);
+        AddBoolDeviceOption("DoubleBufferEnabled:", dev, OdTvGsDevice_Options.kDoubleBufferEnabled, cmnOptGrid, optRow++);
+        AddBoolDeviceOption("BlocksCache:", dev, OdTvGsDevice_Options.kBlocksCache, cmnOptGrid, optRow++);
+        AddBoolDeviceOption("EnableMultithread:", dev, OdTvGsDevice_Options.kEnableMultithread, cmnOptGrid, optRow++);
         short val;
-        dev.getOption(OdTvGsDevice.Options.kMaxRegenThreads, out val);
+        dev.getOption(OdTvGsDevice_Options.kMaxRegenThreads, out val);
         TextBox maxRegTh = AddLabelAndTextBox("MaxRegenThreads:", val.ToString(), cmnOptGrid, new[] { optRow, 0, optRow++, 1 });
         maxRegTh.LostKeyboardFocus += MaxRegTh_LostKeyboardFocus;
-        AddBoolDeviceOption("UseDynamicSubEntHlt:", dev, OdTvGsDevice.Options.kUseDynamicSubEntHlt, cmnOptGrid, optRow++);
+        AddBoolDeviceOption("UseDynamicSubEntHlt:", dev, OdTvGsDevice_Options.kUseDynamicSubEntHlt, cmnOptGrid, optRow++);
 
         StretchingTreeViewItem specOptItm = AddTreeItem("Specific options", MainGrid, new[] { row++, 0 });
         Grid specOptGrid = CreateGrid(2, 6);
         specOptItm.Items.Add(specOptGrid);
         optRow = 0;
-        AddBoolDeviceOption("DiscardBackFaces:", dev, OdTvGsDevice.Options.kDiscardBackFaces, specOptGrid, optRow++);
-        AddBoolDeviceOption("UseTTFCache:", dev, OdTvGsDevice.Options.kUseTTFCache, specOptGrid, optRow++);
-        AddBoolDeviceOption("UseVisualStyles:", dev, OdTvGsDevice.Options.kUseVisualStyles, specOptGrid, optRow++);
-        AddBoolDeviceOption("UseOverlayBuffers:", dev, OdTvGsDevice.Options.kUseOverlayBuffers, specOptGrid, optRow++);
+        AddBoolDeviceOption("DiscardBackFaces:", dev, OdTvGsDevice_Options.kDiscardBackFaces, specOptGrid, optRow++);
+        AddBoolDeviceOption("UseTTFCache:", dev, OdTvGsDevice_Options.kUseTTFCache, specOptGrid, optRow++);
+        AddBoolDeviceOption("UseVisualStyles:", dev, OdTvGsDevice_Options.kUseVisualStyles, specOptGrid, optRow++);
+        AddBoolDeviceOption("UseOverlayBuffers:", dev, OdTvGsDevice_Options.kUseOverlayBuffers, specOptGrid, optRow++);
         int iVal;
-        OdTvResult rc = dev.getOption(OdTvGsDevice.Options.kUseLutPalette, out iVal);
+        OdTvResult rc = dev.getOption(OdTvGsDevice_Options.kUseLutPalette, out iVal);
         if (rc == OdTvResult.tvOk)
         {
             bool lutMonochrome = (iVal & 0x1) != 0;
@@ -163,7 +163,7 @@ class TvDeviceProperties : BasePaletteProperties
         if (cp == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsDevice dev = TvDeviceId.openObject(OpenMode.kForWrite);
+        OdTvGsDevice dev = TvDeviceId.openObject(OdTv_OpenMode.kForWrite);
         byte r, g, b;
         newColor.getColor(out r, out g, out b);
         uint color = (uint)(b << 16 | g << 8 | r << 0);
@@ -178,13 +178,13 @@ class TvDeviceProperties : BasePaletteProperties
         if (tb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsDevice dev = TvDeviceId.openObject(OpenMode.kForWrite);
-        dev.setOption(OdTvGsDevice.Options.kMaxRegenThreads, short.Parse(tb.Text));
+        OdTvGsDevice dev = TvDeviceId.openObject(OdTv_OpenMode.kForWrite);
+        dev.setOption(OdTvGsDevice_Options.kMaxRegenThreads, short.Parse(tb.Text));
         Update();
         MM.StopTransaction(mtr);
     }
 
-    private void AddBoolDeviceOption(string label, OdTvGsDevice dev, OdTvGsDevice.Options option, Grid grid, int curRow)
+    private void AddBoolDeviceOption(string label, OdTvGsDevice dev, OdTvGsDevice_Options option, Grid grid, int curRow)
     {
         bool flag;
         OdTvResult rc = dev.getOption(option, out flag);
@@ -202,8 +202,8 @@ class TvDeviceProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsDevice.Options opt = (OdTvGsDevice.Options)cb.Tag;
-        OdTvGsDevice dev = TvDeviceId.openObject(OpenMode.kForWrite);
+        OdTvGsDevice_Options opt = (OdTvGsDevice_Options)cb.Tag;
+        OdTvGsDevice dev = TvDeviceId.openObject(OdTv_OpenMode.kForWrite);
         dev.setOption(opt, cb.IsChecked == true);
         Update();
         MM.StopTransaction(mtr);
@@ -215,12 +215,12 @@ class TvDeviceProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsDevice dev = TvDeviceId.openObject(OpenMode.kForWrite);
+        OdTvGsDevice dev = TvDeviceId.openObject(OdTv_OpenMode.kForWrite);
         int val;
-        dev.getOption(OdTvGsDevice.Options.kUseLutPalette, out val);
+        dev.getOption(OdTvGsDevice_Options.kUseLutPalette, out val);
         int tag = (int)cb.Tag;
         val = cb.IsChecked == true ? (val |= tag) : (val &= ~tag);
-        dev.setOption(OdTvGsDevice.Options.kUseLutPalette, val);
+        dev.setOption(OdTvGsDevice_Options.kUseLutPalette, val);
         Update();
         MM.StopTransaction(mtr);
     }

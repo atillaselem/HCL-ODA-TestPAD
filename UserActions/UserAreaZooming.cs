@@ -1,4 +1,4 @@
-﻿// Copyright © 2018 by Hilti Corporation – all rights reserved
+// Copyright © 2018 by Hilti Corporation – all rights reserved
 
 using System;
 using System.Windows;
@@ -8,8 +8,8 @@ using HCL_ODA_TestPAD.HCL;
 using HCL_ODA_TestPAD.HCL.MouseTouch;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels.Base;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.UserActions
 {
@@ -40,7 +40,7 @@ namespace HCL_ODA_TestPAD.UserActions
             _appSettings = appSettings;
             _canvasFactory = canvasFactory;
             _borderFactory = borderFactory;
-            using var odTvGsDevice = odTvGsDeviceId.openObject(OpenMode.kForRead);
+            using var odTvGsDevice = odTvGsDeviceId.openObject(OdTv_OpenMode.kForRead);
             _odTvGsViewId = odTvGsDevice.getActiveView();
             _cadZoomOperations = new CadZoomOperations(_odTvGsViewId);
             _cadTransformer = new CadTransformer(odTvGsDevice.getActiveView());

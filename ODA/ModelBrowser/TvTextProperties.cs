@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -145,16 +145,16 @@ class TvTextProperties : TvBaseGeometryProperties
         switch ((ComboboxType)cb.Tag)
         {
             case ComboboxType.Alignment:
-                txt.setAlignmentMode((OdTvTextStyle.AlignmentType)cb.SelectedIndex);
+                txt.setAlignmentMode((OdTvTextStyle_AlignmentType)cb.SelectedIndex);
                 break;
             case ComboboxType.Underlined:
-                txt.setUnderlined((OdTvTextData.StrokeState)cb.SelectedIndex);
+                txt.setUnderlined((OdTvTextData_StrokeState)cb.SelectedIndex);
                 break;
             case ComboboxType.Overlined:
-                txt.setOverlined((OdTvTextData.StrokeState)cb.SelectedIndex);
+                txt.setOverlined((OdTvTextData_StrokeState)cb.SelectedIndex);
                 break;
             case ComboboxType.Striked:
-                txt.setStriked((OdTvTextData.StrokeState)cb.SelectedIndex);
+                txt.setStriked((OdTvTextData_StrokeState)cb.SelectedIndex);
                 break;
             case ComboboxType.TextStyle:
                 txt.setTextStyle(GetTextStyleDef(cb.SelectedItem.ToString()));

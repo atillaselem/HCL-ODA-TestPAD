@@ -20,7 +20,7 @@
 // By use of this software, its documentation or related materials, you 
 // acknowledge and accept the above terms.
 ///////////////////////////////////////////////////////////////////////////////
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Construct;
 
@@ -41,15 +41,15 @@ public class OdTvXLineDragger : OdTvBaseConstructDragger
         //update or create entity
         if (bCreate || _newGeometryId == null)
         {
-            OdTvModel modelPtr = TvDraggerModelId.openObject(OpenMode.kForWrite);
+            OdTvModel modelPtr = TvDraggerModelId.openObject(OdTv_OpenMode.kForWrite);
             _entityId = modelPtr.appendEntity();
             {
-                OdTvEntity entityNewPtr = _entityId.openObject(OpenMode.kForWrite);
+                OdTvEntity entityNewPtr = _entityId.openObject(OdTv_OpenMode.kForWrite);
                 entityNewPtr.setColor(TvDraggerColor);
                 OdTvResult rc = new OdTvResult();
                 rc = OdTvResult.tvOk;
                 //create ray
-                _newGeometryId = entityNewPtr.appendInfiniteLine(_clickedPts[0], _clickedPts[1], OdTvInfiniteLineData.Type.kLine, ref rc);
+                _newGeometryId = entityNewPtr.appendInfiniteLine(_clickedPts[0], _clickedPts[1], OdTvInfiniteLineData_Type.kLine, ref rc);
                 entityNewPtr.Dispose();
 
                 if (rc != OdTvResult.tvOk)

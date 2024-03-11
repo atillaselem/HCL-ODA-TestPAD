@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Teigha.Core;
-using Teigha.Visualize;
+using System;
+using ODA.Kernel.TD_RootIntegrated;
 
 namespace HCL_ODA_TestPAD.HCL.CadUnits
 {
@@ -45,6 +40,5 @@ namespace HCL_ODA_TestPAD.HCL.CadUnits
             double dConvFactor = MetersToMapUnitsConversionFactor;
             return len * dConvFactor;
         }
-
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace HCL_ODA_TestPAD.Functional
+namespace HCL_ODA_TestPAD.Functional
 {
     public abstract class ValueObjectTyped<T>
         where T : ValueObjectTyped<T>

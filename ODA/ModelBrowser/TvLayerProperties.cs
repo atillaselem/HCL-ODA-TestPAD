@@ -23,8 +23,8 @@
 using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -63,7 +63,7 @@ class TvLayerProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLayer layer = _layerId.openObject(OpenMode.kForWrite);
+        OdTvLayer layer = _layerId.openObject(OdTv_OpenMode.kForWrite);
         layer.setMaterial(GetMaterialDef(cb.SelectedItem.ToString()));
         Update();
         MM.StopTransaction(mtr);
@@ -75,7 +75,7 @@ class TvLayerProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        _layerId.openObject(OpenMode.kForWrite).setVisible(cb.IsChecked == true);
+        _layerId.openObject(OdTv_OpenMode.kForWrite).setVisible(cb.IsChecked == true);
         Update();
         MM.StopTransaction(mtr);
 
@@ -87,7 +87,7 @@ class TvLayerProperties : BasePaletteProperties
         if (tb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLayer layer = _layerId.openObject(OpenMode.kForWrite);
+        OdTvLayer layer = _layerId.openObject(OdTv_OpenMode.kForWrite);
         if (!layer.getTransparency().getValue().Equals(double.Parse(tb.Text)))
         {
             layer.setTransparency(new OdTvTransparencyDef(double.Parse(tb.Text)));
@@ -102,7 +102,7 @@ class TvLayerProperties : BasePaletteProperties
         if (tb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLayer layer = _layerId.openObject(OpenMode.kForWrite);
+        OdTvLayer layer = _layerId.openObject(OdTv_OpenMode.kForWrite);
         if (layer.getLineWeight().getValue() != byte.Parse(tb.Text))
         {
             layer.setLineWeight(new OdTvLineWeightDef(byte.Parse(tb.Text)));
@@ -117,7 +117,7 @@ class TvLayerProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLayer layer = _layerId.openObject(OpenMode.kForWrite);
+        OdTvLayer layer = _layerId.openObject(OdTv_OpenMode.kForWrite);
         layer.setLinetype(GetLinetypeDef(cb.SelectedItem.ToString()));
         Update();
         MM.StopTransaction(mtr);
@@ -126,7 +126,7 @@ class TvLayerProperties : BasePaletteProperties
     private void Color_ColorChanged(object sender, OdTvColorDef newColor)
     {
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLayer layer = _layerId.openObject(OpenMode.kForWrite);
+        OdTvLayer layer = _layerId.openObject(OdTv_OpenMode.kForWrite);
         if (layer.getColor() != newColor)
         {
             layer.setColor(newColor);

@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -39,8 +39,8 @@ class TvCylinderProperties : TvBaseGeometryProperties
 
     private TypeOfPropety _type;
 
-    private OdTvPointArray _pointArr;
-    private OdGeDoubleArray _radii;
+    private OdGePoint3dVector _pointArr;
+    private OdDoubleArray _radii;
     private int CountOfObjectsForLoad = 200;
     private bool isChanged = false;
     private int _countOfLoadedObjects = 0;
@@ -74,7 +74,7 @@ class TvCylinderProperties : TvBaseGeometryProperties
             return;
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvCylinderData cyl = GeomId.openAsCylinder();
-        cyl.setCaps((OdTvCylinderData.Capping)cb.SelectedIndex);
+        cyl.setCaps((OdTvCylinderData_Capping)cb.SelectedIndex);
         Update();
         MM.StopTransaction(mtr);
     }

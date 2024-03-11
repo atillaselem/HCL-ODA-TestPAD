@@ -1,4 +1,4 @@
-﻿using HCL_ODA_TestPAD.Settings;
+using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
@@ -6,7 +6,8 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 
 namespace HCL_ODA_TestPAD.Views
 {
@@ -109,22 +110,22 @@ namespace HCL_ODA_TestPAD.Views
             VM.Zoom(type);
         }
 
-        public void Set3DView(OdTvExtendedView.e3DViewType type)
+        public void Set3DView(OdTvExtendedView_e3DViewType type)
         {
             VM.Set3DView(type);
         }
 
-        public void SetRenderMode(OdTvGsView.RenderMode renderMode)
+        public void SetRenderMode(OdTvGsView_RenderMode renderMode)
         {
             VM.SetRenderMode(renderMode);
         }
 
-        public void SetProjectionType(OdTvGsView.Projection projection)
+        public void SetProjectionType(OdTvGsView_Projection projection)
         {
             VM.SetProjectionType(projection);
         }
 
-        public void Regen(OdTvGsDevice.RegenMode rm)
+        public void Regen(OdTvGsDevice_RegenMode rm)
         {
             VM.Regen(rm);
         }

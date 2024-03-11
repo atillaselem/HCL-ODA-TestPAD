@@ -22,8 +22,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Navigation;
 
@@ -114,7 +114,7 @@ public class OdTvOrbitDragger : OdTvDragger
         view.dolly(-delta);
 
         // set orbit for view
-        OdTvGsView wcsView = WCS == null ? null : WCS.GetWcsViewId().openObject(OpenMode.kForWrite);
+        OdTvGsView wcsView = WCS == null ? null : WCS.GetWcsViewId().openObject(OdTv_OpenMode.kForWrite);
         if (wcsView != null)
         {
             OdGeVector3d targetWcs = wcsView.target().asVector();

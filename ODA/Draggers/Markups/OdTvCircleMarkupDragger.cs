@@ -23,8 +23,8 @@
 
 using HCL_ODA_TestPAD.ODA.WCS;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Markups;
 
@@ -54,18 +54,18 @@ public class OdTvCircleMarkupDragger : OdTvMarkupDragger
 
         MemoryTransaction mTr = MM.StartTransaction();
         // create main entity
-        OdTvModel pModel = markupModelId.openObject(OpenMode.kForWrite);
+        OdTvModel pModel = markupModelId.openObject(OdTv_OpenMode.kForWrite);
         _entityId = FindMarkupEntity(NameOfMarkupTempEntity, true);
         if (_entityId == null)
         {
             _entityId = pModel.appendEntity(NameOfMarkupTempEntity);
-            _entityId.openObject(OpenMode.kForWrite).setColor(MarkupColor);
+            _entityId.openObject(OdTv_OpenMode.kForWrite).setColor(MarkupColor);
         }
 
         // crate circle subEntity if not exist
         _circFoldId = FindSubEntity(_entityId.openObject().getGeometryDataIterator(), NameOfMarkupCircFold);
         if (_circFoldId == null)
-            _circFoldId = _entityId.openObject(OpenMode.kForWrite).appendSubEntity(NameOfMarkupCircFold);
+            _circFoldId = _entityId.openObject(OdTv_OpenMode.kForWrite).appendSubEntity(NameOfMarkupCircFold);
 
         MM.StopTransaction(mTr);
     }
@@ -112,7 +112,7 @@ public class OdTvCircleMarkupDragger : OdTvMarkupDragger
             if (_circEntityId != null)
             {
                 MemoryTransaction mtr = MM.StartTransaction();
-                _circEntityId.openAsSubEntity(OpenMode.kForWrite).setLineWeight(LineWeight);
+                _circEntityId.openAsSubEntity(OdTv_OpenMode.kForWrite).setLineWeight(LineWeight);
                 MM.StopTransaction(mtr);
             }
             return DraggerResult.NeedUpdateView;
@@ -159,7 +159,7 @@ public class OdTvCircleMarkupDragger : OdTvMarkupDragger
         if (!_isSuccess && _circEntityId != null)
         {
             MemoryTransaction mtr = MM.StartTransaction();
-            _circFoldId.openAsSubEntity(OpenMode.kForWrite).removeGeometryData(_circEntityId);
+            _circFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite).removeGeometryData(_circEntityId);
             TvDeviceId.openObject().update();
             MM.StopTransaction(mtr);
         }
@@ -176,14 +176,14 @@ public class OdTvCircleMarkupDragger : OdTvMarkupDragger
         if (isNeedCreate)
         {
             OdTvGsView view = TvView.openObject();
-            _circEntityId = _circFoldId.openAsSubEntity(OpenMode.kForWrite).appendSubEntity();
-            OdTvEntity circEnt = _circEntityId.openAsSubEntity(OpenMode.kForWrite);
+            _circEntityId = _circFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite).appendSubEntity();
+            OdTvEntity circEnt = _circEntityId.openAsSubEntity(OdTv_OpenMode.kForWrite);
             _circId = circEnt.appendCircle(_firstPoint, (_lastDragPoint - _firstPoint).length(), view.position() - view.target());
         }
         else
         {
             OdTvGeometryData pFrame = _circId.openObject();
-            if (pFrame == null || pFrame.getType() != OdTvGeometryDataType.kCircle)
+            if (pFrame == null || pFrame.getType() != OdTv_OdTvGeometryDataType.kCircle)
                 return;
             OdTvCircleData circle = pFrame.getAsCircle();
             circle.setRadius((_lastDragPoint - _firstPoint).length());

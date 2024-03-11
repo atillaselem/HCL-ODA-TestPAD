@@ -21,7 +21,7 @@
 // acknowledge and accept the above terms.
 ///////////////////////////////////////////////////////////////////////////////
 using System;
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
 using Microsoft.Win32;
 using System.Windows.Media;
 using HCL_ODA_TestPAD.Dialogs;
@@ -36,7 +36,7 @@ public class OdTvSectioningOptions
     public bool IsFilled { get; set; }
     public uint FillingColor { get; set; }
     public bool FillingPatternEnabled { get; set; }
-    public OdTvGsView.CuttingPlaneFillStyle FillingPaternStyle { get; set; }
+    public OdTvGsView_CuttingPlaneFillStyle FillingPaternStyle { get; set; }
     public uint FillingPatternColor { get; set; }
 
     private const string SECTIONING_OPTIONS_SUBKEY = "WpfVisualizeViewer_SectioningOptions";
@@ -63,14 +63,14 @@ public class OdTvSectioningOptions
             fillColor.A = 255;
             key.SetValue(FILLING_COLOR_KEY, BasePaletteProperties.ColorToUInt(fillColor));
             key.SetValue(FILLING_PATTERN_ENABLED_KEY, true);
-            key.SetValue(FILLING_PATTERN_STYLE_KEY, (int)OdTvGsView.CuttingPlaneFillStyle.kCheckerboard);
+            key.SetValue(FILLING_PATTERN_STYLE_KEY, (int)OdTvGsView_CuttingPlaneFillStyle.kCheckerboard);
             key.SetValue(FILLING_PATTERN_COLOR_KEY, BasePaletteProperties.ColorToUInt(new OdTvColorDef(0, 0, 255)));
         }
 
         IsFilled = Convert.ToBoolean(key.GetValue(FILL_KEY));
         FillingColor = Convert.ToUInt32(key.GetValue(FILLING_COLOR_KEY));
         FillingPatternEnabled = Convert.ToBoolean(key.GetValue(FILLING_PATTERN_ENABLED_KEY));
-        FillingPaternStyle = (OdTvGsView.CuttingPlaneFillStyle)Convert.ToInt32(key.GetValue(FILLING_PATTERN_STYLE_KEY));
+        FillingPaternStyle = (OdTvGsView_CuttingPlaneFillStyle)Convert.ToInt32(key.GetValue(FILLING_PATTERN_STYLE_KEY));
         FillingPatternColor = Convert.ToUInt32(key.GetValue(FILLING_PATTERN_COLOR_KEY));
     }
 

@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -44,8 +44,8 @@ class TvNurbsProperties : TvBaseGeometryProperties
 
     private TypeOfPropety _type;
 
-    private OdTvPointArray _pointArr;
-    private OdGeDoubleArray _doubleArr;
+    private OdGePoint3dVector _pointArr;
+    private OdDoubleArray _doubleArr;
     private int CountOfObjectsForLoad = 200;
     private bool isChanged = false;
     private int _countOfLoadedObjects = 0;

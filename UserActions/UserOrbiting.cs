@@ -1,9 +1,8 @@
-﻿// Copyright © 2018 by Hilti Corporation – all rights reserved
+// Copyright © 2018 by Hilti Corporation – all rights reserved
 
 using System;
 using System.Windows.Controls;
 using System.Windows.Input;
-using HCL_ODA_TestPAD.HCL;
 using HCL_ODA_TestPAD.ViewModels;
 using Prism.Events;
 

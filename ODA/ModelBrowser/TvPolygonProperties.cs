@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -93,7 +93,7 @@ class TvPolygonProperties : TvBaseGeometryProperties
     {
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvPolygonData pol = GeomId.openAsPolygon();
-        OdTvPointArray pnts = new OdTvPointArray();
+        OdGePoint3dVector pnts = new OdGePoint3dVector();
         pol.getPoints(pnts);
 
         StretchingTreeView tree = new StretchingTreeView()

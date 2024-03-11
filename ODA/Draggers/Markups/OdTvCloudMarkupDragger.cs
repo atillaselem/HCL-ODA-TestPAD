@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ODA.WCS;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Markups;
 
@@ -58,18 +58,18 @@ public class OdTvCloudMarkupDragger : OdTvMarkupDragger
 
         MemoryTransaction mTr = MM.StartTransaction();
         // create main entity
-        OdTvModel pModel = markupModelId.openObject(OpenMode.kForWrite);
+        OdTvModel pModel = markupModelId.openObject(OdTv_OpenMode.kForWrite);
         _entityId = FindMarkupEntity(NameOfMarkupTempEntity, true);
         if (_entityId == null)
         {
             _entityId = pModel.appendEntity(NameOfMarkupTempEntity);
-            _entityId.openObject(OpenMode.kForWrite).setColor(MarkupColor);
+            _entityId.openObject(OdTv_OpenMode.kForWrite).setColor(MarkupColor);
         }
 
         // crate circle subEntity if not exist
         _cloudFoldId = FindSubEntity(_entityId.openObject().getGeometryDataIterator(), NameOfMarkupCloudFold);
         if (_cloudFoldId == null)
-            _cloudFoldId = _entityId.openObject(OpenMode.kForWrite).appendSubEntity(NameOfMarkupCloudFold);
+            _cloudFoldId = _entityId.openObject(OdTv_OpenMode.kForWrite).appendSubEntity(NameOfMarkupCloudFold);
 
         MM.StopTransaction(mTr);
     }
@@ -116,7 +116,7 @@ public class OdTvCloudMarkupDragger : OdTvMarkupDragger
             MemoryTransaction mtr = MM.StartTransaction();
             if (_cloudId == null)
                 CreateFrame();
-            DrawArcs(_cloudId.openAsSubEntity(OpenMode.kForWrite));
+            DrawArcs(_cloudId.openAsSubEntity(OdTv_OpenMode.kForWrite));
             _firstPoint = _lastPoint;
             MM.StopTransaction(mtr);
             return DraggerResult.NeedUpdateView;
@@ -141,7 +141,7 @@ public class OdTvCloudMarkupDragger : OdTvMarkupDragger
         MemoryTransaction mtr = MM.StartTransaction();
         if (_cloudId != null)
         {
-            OdTvEntity cloud = _cloudId.openAsSubEntity(OpenMode.kForWrite);
+            OdTvEntity cloud = _cloudId.openAsSubEntity(OdTv_OpenMode.kForWrite);
             OdTvGeometryDataIterator it = cloud.getGeometryDataIterator();
 
             OdGePoint3d firstPt = null;
@@ -179,10 +179,10 @@ public class OdTvCloudMarkupDragger : OdTvMarkupDragger
         MemoryTransaction mtr = MM.StartTransaction();
 
         if (!_isSuccess && _cloudId != null && _lastAppendedArcsList.Count > 0)
-            _lastAppendedArcsList.ForEach(id => { _cloudId.openAsSubEntity(OpenMode.kForWrite).removeGeometryData(id); });
+            _lastAppendedArcsList.ForEach(id => { _cloudId.openAsSubEntity(OdTv_OpenMode.kForWrite).removeGeometryData(id); });
 
         if (_cloudId != null)
-            _cloudId.openAsSubEntity(OpenMode.kForWrite).setLineWeight(LineWeight);
+            _cloudId.openAsSubEntity(OdTv_OpenMode.kForWrite).setLineWeight(LineWeight);
         if (_tempEntity != null)
             RemoveGeometryData(ref _cloudFoldId, ref _tempEntity);
 
@@ -219,8 +219,8 @@ public class OdTvCloudMarkupDragger : OdTvMarkupDragger
         if (isNeedCreate)
         {
             if (_tempEntity == null)
-                _tempEntity = _cloudFoldId.openAsSubEntity(OpenMode.kForWrite).appendSubEntity("TempArcs");
-            OdTvEntity newEn = _tempEntity.openAsSubEntity(OpenMode.kForWrite);
+                _tempEntity = _cloudFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite).appendSubEntity("TempArcs");
+            OdTvEntity newEn = _tempEntity.openAsSubEntity(OdTv_OpenMode.kForWrite);
             DrawArcs(newEn);
         }
         else
@@ -228,7 +228,7 @@ public class OdTvCloudMarkupDragger : OdTvMarkupDragger
             if (_tempEntity != null)
             {
                 // Get arcs and update them
-                OdTvEntity cloudEntity = _tempEntity.openAsSubEntity(OpenMode.kForWrite);
+                OdTvEntity cloudEntity = _tempEntity.openAsSubEntity(OdTv_OpenMode.kForWrite);
                 OdTvGeometryDataIterator pGeomIterator = cloudEntity.getGeometryDataIterator();
                 OdTvGeometryDataId firstArcId = pGeomIterator.getGeometryData();
                 pGeomIterator.step();
@@ -306,7 +306,7 @@ public class OdTvCloudMarkupDragger : OdTvMarkupDragger
     private void CreateFrame()
     {
         MemoryTransaction mtr = MM.StartTransaction();
-        _cloudId = _cloudFoldId.openAsSubEntity(OpenMode.kForWrite).appendSubEntity("CloudMarkup_" + NumOfMarkup++);
+        _cloudId = _cloudFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite).appendSubEntity("CloudMarkup_" + NumOfMarkup++);
         MM.StopTransaction(mtr);
     }
 }

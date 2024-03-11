@@ -26,8 +26,8 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
 using ComboBox = System.Windows.Controls.ComboBox;
@@ -68,9 +68,9 @@ class TvMeshProperties : TvBaseGeometryProperties
     private int _scrollHeight = 0;
 
     // temp arrays
-    private OdTvPointArray _pointArr;
-    private OdTvVectorArray _vectorArr;
-    private OdTvVectorArray _bufVectorArr;
+    private OdGePoint3dVector _pointArr;
+    private OdGeVector3dVector _vectorArr;
+    private OdGeVector3dVector _bufVectorArr;
     private OdInt32Array _intArr;
     private OdTvColorDefArray _colorDefArr;
     private OdTvColorDefArray _bufColorDefArray;
@@ -111,7 +111,7 @@ class TvMeshProperties : TvBaseGeometryProperties
         _layerDefArr = new OdTvLayerDefArray();
         _ltDefArr = new OdTvLinetypeDefArray();
         _visDefArr = new OdTvVisibilityDefArray();
-        _vectorArr = new OdTvVectorArray();
+        _vectorArr = new OdGeVector3dVector();
         _mapDefArr = new OdTvMapperDefArray();
         _matDefArr = new OdTvMaterialDefArray();
         _transpDefArr = new OdTvTransparencyDefArray();
@@ -186,7 +186,7 @@ class TvMeshProperties : TvBaseGeometryProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        GeomId.openAsMesh().setVertexOrientation((OrientationType)cb.SelectedIndex);
+        GeomId.openAsMesh().setVertexOrientation((OdTv_OrientationType)cb.SelectedIndex);
         Update();
         MM.StopTransaction(mtr);
     }
@@ -258,7 +258,7 @@ class TvMeshProperties : TvBaseGeometryProperties
     {
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvMeshData mesh = GeomId.openAsMesh();
-        _pointArr = new OdTvPointArray();
+        _pointArr = new OdGePoint3dVector();
         uint rows, cols;
         mesh.getParam(out rows, out cols, _pointArr);
 
@@ -816,9 +816,9 @@ class TvMeshProperties : TvBaseGeometryProperties
     {
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvMeshData Mesh = GeomId.openAsMesh();
-        _vectorArr = new OdTvVectorArray();
+        _vectorArr = new OdGeVector3dVector();
         _intArr = new OdInt32Array();
-        _bufVectorArr = new OdTvVectorArray();
+        _bufVectorArr = new OdGeVector3dVector();
         Mesh.getFaceNormalsViaRange(0, (int)Mesh.getFacesCount(), _vectorArr);
         if (_vectorArr.Count == 0)
         {
@@ -967,7 +967,7 @@ class TvMeshProperties : TvBaseGeometryProperties
         for (int i = 0; i < CountOfLoadedObjects; i++, _countOfLoadedObjects++)
         {
             StretchingTreeViewItem itm = AddTreeItem("Face_" + _countOfLoadedObjects, (StretchingTreeView)currentPanel);
-            if (_mapDefArr[_countOfLoadedObjects].getType() == OdTvMapperDef.MapperType.kDefault)
+            if (_mapDefArr[_countOfLoadedObjects].getType() == OdTvMapperDef_MapperType.kDefault)
                 itm.Foreground = new SolidColorBrush(Colors.Gray);
             itm.Tag = _countOfLoadedObjects;
             itm.Items.Add(null);
@@ -1008,7 +1008,7 @@ class TvMeshProperties : TvBaseGeometryProperties
         OdTvMapperDef map = (OdTvMapperDef)cb.Tag;
         Grid grid = (Grid)cb.Parent;
         int ind = (int)((StretchingTreeViewItem)grid.Parent).Tag;
-        map.setProjection((OdTvMapperDef.Projection)cb.SelectedIndex);
+        map.setProjection((OdTvMapperDef_Projection)cb.SelectedIndex);
         if (!_intArr.Contains(ind))
         {
             if (!isChanged) isChanged = true;
@@ -1026,7 +1026,7 @@ class TvMeshProperties : TvBaseGeometryProperties
         Grid grid = (Grid)cb.Parent;
         int ind = (int)((StretchingTreeViewItem)grid.Parent).Tag;
         int newInd = cb.SelectedIndex == 0 ? 1 : cb.SelectedIndex == 1 ? 2 : 4;
-        map.setAutoTransform((OdTvMapperDef.AutoTransform)newInd);
+        map.setAutoTransform((OdTvMapperDef_AutoTransform)newInd);
         if (!_intArr.Contains(ind))
         {
             if (!isChanged) isChanged = true;
@@ -1462,9 +1462,9 @@ class TvMeshProperties : TvBaseGeometryProperties
     {
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvMeshData Mesh = GeomId.openAsMesh();
-        _vectorArr = new OdTvVectorArray();
+        _vectorArr = new OdGeVector3dVector();
         _intArr = new OdInt32Array();
-        _bufVectorArr = new OdTvVectorArray();
+        _bufVectorArr = new OdGeVector3dVector();
         Mesh.getVertexNormalsViaRange(0, (int)Mesh.getVerticesCount(), _vectorArr);
         if (_vectorArr.Count == 0)
         {

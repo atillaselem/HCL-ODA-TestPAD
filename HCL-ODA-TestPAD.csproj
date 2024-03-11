@@ -12,7 +12,7 @@
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <OutputPath>$(SolutionDir)Build\$(Configuration)\</OutputPath>
     <UseWindowsForms>True</UseWindowsForms>
-    <AssemblyVersion>2023.12.05</AssemblyVersion>
+    <AssemblyVersion>2024.01.16</AssemblyVersion>
     <Platforms>x64;x86</Platforms>
   </PropertyGroup>
 
@@ -182,12 +182,16 @@
   </ItemGroup>
  
   <ItemGroup>
-      <Reference Include="TD_SwigCoreMgd">
-      <HintPath>..\..\..\HCL\ThirdParty\TeighaLibraries\$(Platform)\TD_SwigCoreMgd.dll</HintPath>
+    <Reference Include="OdSwig_TD_RootIntegrated_Mgd">
+      <HintPath>ThirdParty\TeighaLibraries\$(Platform)\OdSwig_TD_RootIntegrated_Mgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="TV_SwigDbMgd">
-      <HintPath>..\..\..\HCL\ThirdParty\TeighaLibraries\$(Platform)\TV_SwigDbMgd.dll</HintPath>
+    <Reference Include="OdSwig_TV_VisualizeTools_Mgd">
+      <HintPath>ThirdParty\TeighaLibraries\$(Platform)\OdSwig_TV_VisualizeTools_Mgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="OdSwig_TV_Visualize_Mgd">
+      <HintPath>ThirdParty\TeighaLibraries\$(Platform)\OdSwig_TV_Visualize_Mgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Wpf.TabControl">

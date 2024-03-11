@@ -1,9 +1,7 @@
-﻿// Copyright © 2018 by Hilti Corporation – all rights reserved
+// Copyright © 2018 by Hilti Corporation – all rights reserved
 
 using System;
 using System.Windows.Input;
-using HCL_ODA_TestPAD.HCL;
-using HCL_ODA_TestPAD.HCL.Exceptions;
 
 namespace HCL_ODA_TestPAD.UserActions.States
 {

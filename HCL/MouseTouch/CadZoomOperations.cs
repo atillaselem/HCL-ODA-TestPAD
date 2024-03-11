@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using HCL_ODA_TestPAD.HCL.Exceptions;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.HCL.MouseTouch;
 
@@ -15,7 +15,7 @@ public sealed class CadZoomOperations : ICadZoomOperations
     }
     public void Zoom(double scale)
     {
-        using var odTvGsView = _odTvGsViewId.openObject(OpenMode.kForWrite);
+        using var odTvGsView = _odTvGsViewId.openObject(OdTv_OpenMode.kForWrite);
         odTvGsView.zoom(scale);
     }
     public void ZoomToArea(OdGePoint3d point1, OdGePoint3d point2)
@@ -30,7 +30,7 @@ public sealed class CadZoomOperations : ICadZoomOperations
         }
         try
         {
-            using var odTvGsView = _odTvGsViewId.openObject(OpenMode.kForWrite);
+            using var odTvGsView = _odTvGsViewId.openObject(OdTv_OpenMode.kForWrite);
             using var worldToEye = odTvGsView.eyeToWorldMatrix().invert(); 
             using var temp1 = point1.transformBy(worldToEye);
             using var temp2 = point2.transformBy(worldToEye);

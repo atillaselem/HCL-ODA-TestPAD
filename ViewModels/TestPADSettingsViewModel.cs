@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using HCL_ODA_TestPAD.Mvvm;
-using HCL_ODA_TestPAD.Services;
 using HCL_ODA_TestPAD.Settings;
 using Prism.Events;
 

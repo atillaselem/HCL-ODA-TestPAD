@@ -1,6 +1,4 @@
-﻿using HCL_ODA_TestPAD.ViewModels.Base;
 using Prism.Events;
-using Teigha.Visualize;
 
 namespace HCL_ODA_TestPAD.Mvvm.Events
 {

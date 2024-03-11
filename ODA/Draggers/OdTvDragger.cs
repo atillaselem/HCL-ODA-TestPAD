@@ -26,8 +26,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers;
 
@@ -200,7 +200,7 @@ public abstract class OdTvDragger
 
             //remove entities from the model
             MemoryTransaction mtr = MM.StartTransaction();
-            OdTvModel model = TvDraggerModelId.openObject(OpenMode.kForWrite);
+            OdTvModel model = TvDraggerModelId.openObject(OdTv_OpenMode.kForWrite);
             if (model != null)
                 model.clearEntities();
             MM.StopTransaction(mtr);
@@ -291,7 +291,7 @@ public abstract class OdTvDragger
     {
         MemoryTransaction mtr = MM.StartTransaction();
         if (TvView != null)
-            TvView.openObject(OpenMode.kForWrite).addModel(TvDraggerModelId);
+            TvView.openObject(OdTv_OpenMode.kForWrite).addModel(TvDraggerModelId);
         MM.StopTransaction(mtr);
     }
     /// <summary>
@@ -301,7 +301,7 @@ public abstract class OdTvDragger
     {
         MemoryTransaction mtr = MM.StartTransaction();
         if (TvView != null)
-            TvView.openObject(OpenMode.kForWrite).eraseModel(TvDraggerModelId);
+            TvView.openObject(OdTv_OpenMode.kForWrite).eraseModel(TvDraggerModelId);
         MM.StopTransaction(mtr);
     }
     /// <summary>

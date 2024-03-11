@@ -21,8 +21,8 @@
 // acknowledge and accept the above terms.
 ///////////////////////////////////////////////////////////////////////////////
 
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Markups;
 
@@ -66,7 +66,7 @@ public abstract class OdTvMarkupDragger : OdTvDragger
         if (parentId == null || removed == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        parentId.openAsSubEntity(OpenMode.kForWrite).removeGeometryData(removed);
+        parentId.openAsSubEntity(OdTv_OpenMode.kForWrite).removeGeometryData(removed);
         removed = null;
         MM.StopTransaction(mtr);
     }
@@ -86,7 +86,7 @@ public abstract class OdTvMarkupDragger : OdTvDragger
             OdTvEntity curEntity = id.openObject();
             // find first visible entity or just by name
             if (findVisible && curEntity.getName() != name
-                && curEntity.getVisibility().getType() != OdTvVisibilityDef.VisibilityType.kInvisible)
+                && curEntity.getVisibility().getType() != OdTvVisibilityDef_VisibilityType.kInvisible)
             {
                 MM.StopTransaction(mtr);
                 return id;
@@ -112,11 +112,11 @@ public abstract class OdTvMarkupDragger : OdTvDragger
         while (!it.done())
         {
             id = it.getGeometryData();
-            if (findVisible && id.getType() == OdTvGeometryDataType.kSubEntity
+            if (findVisible && id.getType() == OdTv_OdTvGeometryDataType.kSubEntity
               && id.openAsSubEntity().getName() != name
-              && id.openAsSubEntity().getVisibility().getType() != OdTvVisibilityDef.VisibilityType.kInvisible)
+              && id.openAsSubEntity().getVisibility().getType() != OdTvVisibilityDef_VisibilityType.kInvisible)
                 return id;
-            else if (id.getType() == OdTvGeometryDataType.kSubEntity &&
+            else if (id.getType() == OdTv_OdTvGeometryDataType.kSubEntity &&
               id.openAsSubEntity().getName() == name)
                 return id;
 

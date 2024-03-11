@@ -23,8 +23,8 @@
 using HCL_ODA_TestPAD.ODA.WCS;
 using System;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Construct;
 
@@ -138,7 +138,7 @@ public class OdTvBaseConstructDragger : OdTvDragger
                 // if it was a dragger with view - we should add the result to the auto regeneration map
                 if (_entityId != null)
                 {
-                    OdTvEntity pEn = _entityId.openObject(OpenMode.kForWrite);
+                    OdTvEntity pEn = _entityId.openObject(OdTv_OpenMode.kForWrite);
                     if (pEn != null)
                     {
                         pEn.setAutoRegen(true);
@@ -283,23 +283,23 @@ public class OdTvBaseConstructDragger : OdTvDragger
         if (_activeModelId == null || _newGeometryId == null)
             return;
 
-        OdTvModel model = _activeModelId.openObject(OpenMode.kForWrite);
+        OdTvModel model = _activeModelId.openObject(OdTv_OpenMode.kForWrite);
         OdTvEntityId entityId = model.appendEntity();
-        OdTvEntity pEn = entityId.openObject(OpenMode.kForWrite);
+        OdTvEntity pEn = entityId.openObject(OdTv_OpenMode.kForWrite);
         pEn.setColor(TvDraggerColor);
 
         switch (_newGeometryId.getType())
         {
-            case OdTvGeometryDataType.kPolyline:
+            case OdTv_OdTvGeometryDataType.kPolyline:
                 {
                     OdTvPolylineData pLine = _newGeometryId.openAsPolyline();
-                    OdTvPointArray arr = new OdTvPointArray();
+                    OdGePoint3dVector arr = new OdGePoint3dVector();
                     pLine.getPoints(arr);
                     pEn.appendPolyline(arr);
                     pLine.Dispose();
                     break;
                 }
-            case OdTvGeometryDataType.kCircle:
+            case OdTv_OdTvGeometryDataType.kCircle:
                 {
                     OdTvCircleData pCirc = _newGeometryId.openAsCircle();
                     OdGePoint3d center = new OdGePoint3d();
@@ -310,7 +310,7 @@ public class OdTvBaseConstructDragger : OdTvDragger
                     pCirc.Dispose();
                     break;
                 }
-            case OdTvGeometryDataType.kInfiniteLine:
+            case OdTv_OdTvGeometryDataType.kInfiniteLine:
                 {
                     OdTvInfiniteLineData pInf = _newGeometryId.openAsInfiniteLine();
                     pEn.appendInfiniteLine(pInf.getFirst(), pInf.getSecond(), pInf.getType());

@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -172,7 +172,7 @@ class TvBaseGeometryProperties : BasePaletteProperties
                 geom.setLinetype(GetLinetypeDef(cb.SelectedItem.ToString()));
                 break;
             case ComboboxType.DisplayMode:
-                geom.setTargetDisplayMode((OdTvGeometryData.TargetDisplayMode)cb.SelectedIndex);
+                geom.setTargetDisplayMode((OdTvGeometryData_TargetDisplayMode)cb.SelectedIndex);
                 break;
         }
         Update();

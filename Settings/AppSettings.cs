@@ -1,7 +1,7 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using HCL_ODA_TestPAD.HCL.CadUnits;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
-using static Teigha.Visualize.OdTvGsDevice;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.Settings;
 
@@ -97,7 +97,7 @@ public record AppSettings
     [Category("Regeneration")]
     [DisplayName("RegenMode")]
     [Description("Set Regeneration Mode")]
-    public RegenMode RegenMode { get; init; }
+    public OdTvGsDevice_RegenMode RegenMode { get; init; }
     #endregion
 
     #region Performance

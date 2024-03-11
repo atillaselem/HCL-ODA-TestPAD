@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -157,7 +157,7 @@ class TvGridProperties : TvBaseGeometryProperties
             return;
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvGridData grid = GeomId.openAsGrid();
-        grid.setType((OdTvGridData.Type)cb.SelectedIndex);
+        grid.setType((OdTvGridData_Type)cb.SelectedIndex);
         Update();
         MM.StopTransaction(mtr);
     }

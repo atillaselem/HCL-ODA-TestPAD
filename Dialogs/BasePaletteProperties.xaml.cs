@@ -30,8 +30,8 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
@@ -176,7 +176,7 @@ public partial class BasePaletteProperties : UserControl
         Grid.SetRow(lbl, layots[0]);
         Grid.SetColumn(lbl, layots[1]);
         Colorpicker clrp = new Colorpicker(color, TvDeviceId, isObjColor);
-        if (color.getType() == OdTvColorDef.ColorType.kDefault)
+        if (color.getType() == OdTvColorDef_ColorType.kDefault)
             lbl.Foreground = new SolidColorBrush() { Color = Colors.Gray };
         Grid.SetRow(clrp, layots[2]);
         Grid.SetColumn(clrp, layots[3]);
@@ -190,7 +190,7 @@ public partial class BasePaletteProperties : UserControl
         Label lbl = new Label() { Content = label };
         Grid.SetColumn(lbl, 0);
         Colorpicker clrp = new Colorpicker(color, TvDeviceId, isObjColor);
-        if (color.getType() == OdTvColorDef.ColorType.kDefault)
+        if (color.getType() == OdTvColorDef_ColorType.kDefault)
             lbl.Foreground = new SolidColorBrush() { Color = Colors.Gray };
         Grid.SetColumn(clrp, 1);
         parent.Items.Add(CreateGridWithElements(2, lbl, clrp));
@@ -201,7 +201,7 @@ public partial class BasePaletteProperties : UserControl
         bool isLayer = false)
     {
         return AddLabelAndComboBox(label, GetLinetypesList(isLayer), GetLinetypeName(linetype), grid, arr,
-            linetype.getType() == OdTvLinetypeDef.LinetypeType.kDefault);
+            linetype.getType() == OdTvLinetypeDef_LinetypeType.kDefault);
     }
     protected string GetLinetypeName(OdTvLinetypeDef ltDef)
     {
@@ -209,14 +209,14 @@ public partial class BasePaletteProperties : UserControl
         string name = "";
         switch (ltDef.getType())
         {
-            case OdTvLinetypeDef.LinetypeType.kId:
+            case OdTvLinetypeDef_LinetypeType.kId:
                 name = ltDef.getLinetype().openObject().getName();
                 if (name == null) name = "";
                 break;
-            case OdTvLinetypeDef.LinetypeType.kPredefined:
+            case OdTvLinetypeDef_LinetypeType.kPredefined:
                 name = ltDef.getPredefinedLinetype().ToString().Remove(0, 1);
                 break;
-            case OdTvLinetypeDef.LinetypeType.kInherited:
+            case OdTvLinetypeDef_LinetypeType.kInherited:
                 name = ltDef.getInheritedLinetype().ToString().Remove(0, 1);
                 break;
         }
@@ -227,13 +227,13 @@ public partial class BasePaletteProperties : UserControl
     protected ComboBox AddLayerDef(string label, OdTvLayerDef layer, Grid grid, int[] arr)
     {
         return AddLabelAndComboBox(label, GetLayersList(), GetLayerName(layer), grid, arr,
-            layer.getType() == OdTvLayerDef.LayerType.kDefault);
+            layer.getType() == OdTvLayerDef_LayerType.kDefault);
     }
     protected string GetLayerName(OdTvLayerDef layer)
     {
         MemoryTransaction mtr = MM.StartTransaction();
         string name = "";
-        if (layer.getType() == OdTvLayerDef.LayerType.kId)
+        if (layer.getType() == OdTvLayerDef_LayerType.kId)
             name = layer.getLayer().openObject().getName();
         MM.StopTransaction(mtr);
         return name;
@@ -241,8 +241,8 @@ public partial class BasePaletteProperties : UserControl
 
     protected CheckBox AddVisibilityDef(string label, OdTvVisibilityDef vis, Grid grid, int[] arr, HorizontalAlignment align = HorizontalAlignment.Left)
     {
-        return AddLabelAndCheckBox(label, vis.getType() != OdTvVisibilityDef.VisibilityType.kInvisible, grid, arr, false,
-            vis.getType() == OdTvVisibilityDef.VisibilityType.kDefault);
+        return AddLabelAndCheckBox(label, vis.getType() != OdTvVisibilityDef_VisibilityType.kInvisible, grid, arr, false,
+            vis.getType() == OdTvVisibilityDef_VisibilityType.kDefault);
     }
     protected OdTvLinetypeDef GetLinetypeDef(string name)
     {
@@ -254,37 +254,37 @@ public partial class BasePaletteProperties : UserControl
                 lt.setDefault();
                 break;
             case "ByBlock":
-                lt = new OdTvLinetypeDef(InheritedAttribute.kByBlock);
+                lt = new OdTvLinetypeDef(OdTv_InheritedAttribute.kByBlock);
                 break;
             case "ByLayer":
-                lt = new OdTvLinetypeDef(InheritedAttribute.kByLayer);
+                lt = new OdTvLinetypeDef(OdTv_InheritedAttribute.kByLayer);
                 break;
             case "Solid":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kSolid);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kSolid);
                 break;
             case "DashDot":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kDashDot);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kDashDot);
                 break;
             case "Dashed":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kDashed);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kDashed);
                 break;
             case "Dotted":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kDotted);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kDotted);
                 break;
             case "Dash2Dot":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kDash2Dot);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kDash2Dot);
                 break;
             case "Dash3Dot":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kDash3Dot);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kDash3Dot);
                 break;
             case "LongDash":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kLongDash);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kLongDash);
                 break;
             case "LongDashShortDash":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kLongDashShortDash);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kLongDashShortDash);
                 break;
             case "LongDash2ShortDash":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kLongDash2ShortDash);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kLongDash2ShortDash);
                 break;
             default:
                 {
@@ -354,10 +354,10 @@ public partial class BasePaletteProperties : UserControl
         string name = "";
         switch (matDef.getType())
         {
-            case OdTvMaterialDef.MaterialType.kId:
+            case OdTvMaterialDef_MaterialType.kId:
                 name = matDef.getMaterial().openObject().getName();
                 break;
-            case OdTvMaterialDef.MaterialType.kInherited:
+            case OdTvMaterialDef_MaterialType.kInherited:
                 name = matDef.getInheritedMaterial().ToString().Remove(0, 1);
                 break;
         }
@@ -369,7 +369,7 @@ public partial class BasePaletteProperties : UserControl
     {
         MemoryTransaction mtr = MM.StartTransaction();
         string name = "";
-        if (txtDef.getType() == OdTvTextStyleDef.TextStyleType.kId)
+        if (txtDef.getType() == OdTvTextStyleDef_TextStyleType.kId)
             name = txtDef.getTextStyle().openObject().getName();
         MM.StopTransaction(mtr);
         return name;
@@ -378,20 +378,20 @@ public partial class BasePaletteProperties : UserControl
     protected TextBox AddLineweightDef(string label, OdTvLineWeightDef lineWeight, Grid grid, int[] arr)
     {
         return AddLabelAndTextBox(label, lineWeight.getValue().ToString(), grid, arr, false,
-            lineWeight.getType() == OdTvLineWeightDef.LineWeightType.kDefault, true);
+            lineWeight.getType() == OdTvLineWeightDef_LineWeightType.kDefault, true);
     }
     protected TextBox AddTransparencyDef(string label, OdTvTransparencyDef trDef, Grid grid, int[] arr)
     {
         return AddLabelAndTextBox(label, trDef.getValue().ToString(), grid, arr, false,
-            trDef.getType() == OdTvTransparencyDef.TransparencyType.kDefault);
+            trDef.getType() == OdTvTransparencyDef_TransparencyType.kDefault);
     }
     protected ComboBox AddMatrialDef(string label, OdTvMaterialDef material, Grid grid, int[] arr)
     {
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvResult rc = OdTvResult.tvMissingObject;
-        OdTvMaterial mat = material.getMaterial().openObject(OpenMode.kForWrite, ref rc);
+        OdTvMaterial mat = material.getMaterial().openObject(OdTv_OpenMode.kForWrite, ref rc);
         ComboBox cb = AddLabelAndComboBox(label, GetMaterialsList(), rc == OdTvResult.tvOk ? mat.getName() : "", grid, arr,
-            material.getType() == OdTvMaterialDef.MaterialType.kDefault);
+            material.getType() == OdTvMaterialDef_MaterialType.kDefault);
         MM.StopTransaction(mtr);
         return cb;
     }
@@ -400,10 +400,10 @@ public partial class BasePaletteProperties : UserControl
     {
         MemoryTransaction mtr = MM.StartTransaction();
         ComboBox cb = AddLabelAndComboBox(label, GetTextStylesList(),
-            txtStyle.getType() == OdTvTextStyleDef.TextStyleType.kId
+            txtStyle.getType() == OdTvTextStyleDef_TextStyleType.kId
                 ? txtStyle.getTextStyle().openObject().getName()
                 : "", grid, arr,
-            txtStyle.getType() == OdTvTextStyleDef.TextStyleType.kDefault);
+            txtStyle.getType() == OdTvTextStyleDef_TextStyleType.kDefault);
         MM.StopTransaction(mtr);
         return cb;
     }

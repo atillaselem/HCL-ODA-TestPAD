@@ -1,6 +1,7 @@
-﻿using HCL_ODA_TestPAD.ODA.Draggers;
+using HCL_ODA_TestPAD.ODA.Draggers;
 using HCL_ODA_TestPAD.ODA.ModelBrowser;
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 
 namespace HCL_ODA_TestPAD.ViewModels.Base;
 

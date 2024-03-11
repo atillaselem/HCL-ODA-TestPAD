@@ -1,7 +1,6 @@
-﻿using HCL_ODA_TestPAD.Mvvm.Events;
+using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.Performance;
 using System;
-using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;

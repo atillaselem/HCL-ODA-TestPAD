@@ -23,8 +23,8 @@
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -59,7 +59,7 @@ class TvInfiniteLineProperties : TvBaseGeometryProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        GeomId.openAsInfiniteLine().setType((OdTvInfiniteLineData.Type)cb.SelectedIndex);
+        GeomId.openAsInfiniteLine().setType((OdTvInfiniteLineData_Type)cb.SelectedIndex);
         Update();
         MM.StopTransaction(mtr);
     }

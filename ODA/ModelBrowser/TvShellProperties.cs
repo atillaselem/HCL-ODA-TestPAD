@@ -26,8 +26,8 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
 using ComboBox = System.Windows.Controls.ComboBox;
@@ -69,9 +69,9 @@ class TvShellProperties : TvBaseGeometryProperties
     private int _scrollHeight = 0;
 
     // temp arrays
-    private OdTvPointArray _pointArr;
-    private OdTvVectorArray _vectorArr;
-    private OdTvVectorArray _bufVectorArr;
+    private OdGePoint3dVector _pointArr;
+    private OdGeVector3dVector _vectorArr;
+    private OdGeVector3dVector _bufVectorArr;
     private OdInt32Array _intArr;
     private OdTvColorDefArray _colorDefArr;
     private OdTvColorDefArray _bufColorDefArray;
@@ -115,7 +115,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _layerDefArr = new OdTvLayerDefArray();
         _ltDefArr = new OdTvLinetypeDefArray();
         _visDefArr = new OdTvVisibilityDefArray();
-        _vectorArr = new OdTvVectorArray();
+        _vectorArr = new OdGeVector3dVector();
         _mapDefArr = new OdTvMapperDefArray();
         _matDefArr = new OdTvMaterialDefArray();
         _transpDefArr = new OdTvTransparencyDefArray();
@@ -192,7 +192,7 @@ class TvShellProperties : TvBaseGeometryProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        GeomId.openAsShell().setVertexOrientation((OrientationType)cb.SelectedIndex);
+        GeomId.openAsShell().setVertexOrientation((OdTv_OrientationType)cb.SelectedIndex);
         Update();
         MM.StopTransaction(mtr);
     }
@@ -203,7 +203,7 @@ class TvShellProperties : TvBaseGeometryProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        GeomId.openAsShell().setBackFaceCulling((OdTvShellData.FaceCulling)cb.SelectedIndex);
+        GeomId.openAsShell().setBackFaceCulling((OdTvShellData_FaceCulling)cb.SelectedIndex);
         Update();
         MM.StopTransaction(mtr);
     }
@@ -290,7 +290,7 @@ class TvShellProperties : TvBaseGeometryProperties
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         OdInt32Array faces = new OdInt32Array();
-        _pointArr = new OdTvPointArray();
+        _pointArr = new OdGePoint3dVector();
         shell.getParam(_pointArr, faces);
 
         if (!CheckCountOfObject(_pointArr.Count))
@@ -375,7 +375,7 @@ class TvShellProperties : TvBaseGeometryProperties
     {
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
-        OdTvPointArray points = new OdTvPointArray();
+        OdGePoint3dVector points = new OdGePoint3dVector();
         _intArr = new OdInt32Array();
         shell.getParam(points, _intArr);
 
@@ -913,9 +913,9 @@ class TvShellProperties : TvBaseGeometryProperties
     {
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
-        _vectorArr = new OdTvVectorArray();
+        _vectorArr = new OdGeVector3dVector();
         _intArr = new OdInt32Array();
-        _bufVectorArr = new OdTvVectorArray();
+        _bufVectorArr = new OdGeVector3dVector();
         shell.getFaceNormalsViaRange(0, (int)shell.getFacesCount(), _vectorArr);
         if (_vectorArr.Count == 0)
         {
@@ -1064,7 +1064,7 @@ class TvShellProperties : TvBaseGeometryProperties
         for (int i = 0; i < CountOfLoadedObjects; i++, _countOfLoadedObjects++)
         {
             StretchingTreeViewItem itm = AddTreeItem("Face_" + _countOfLoadedObjects, (StretchingTreeView)currentPanel);
-            if (_mapDefArr[_countOfLoadedObjects].getType() == OdTvMapperDef.MapperType.kDefault)
+            if (_mapDefArr[_countOfLoadedObjects].getType() == OdTvMapperDef_MapperType.kDefault)
                 itm.Foreground = new SolidColorBrush(Colors.Gray);
             itm.Tag = _countOfLoadedObjects;
             itm.Items.Add(null);
@@ -1105,7 +1105,7 @@ class TvShellProperties : TvBaseGeometryProperties
         OdTvMapperDef map = (OdTvMapperDef)cb.Tag;
         Grid grid = (Grid)cb.Parent;
         int ind = (int)((StretchingTreeViewItem)grid.Parent).Tag;
-        map.setProjection((OdTvMapperDef.Projection)cb.SelectedIndex);
+        map.setProjection((OdTvMapperDef_Projection)cb.SelectedIndex);
         if (!_intArr.Contains(ind))
         {
             if (!isChanged) isChanged = true;
@@ -1123,7 +1123,7 @@ class TvShellProperties : TvBaseGeometryProperties
         Grid grid = (Grid)cb.Parent;
         int ind = (int)((StretchingTreeViewItem)grid.Parent).Tag;
         int newInd = cb.SelectedIndex == 0 ? 1 : cb.SelectedIndex == 1 ? 2 : 4;
-        map.setAutoTransform((OdTvMapperDef.AutoTransform)newInd);
+        map.setAutoTransform((OdTvMapperDef_AutoTransform)newInd);
         if (!_intArr.Contains(ind))
         {
             if (!isChanged) isChanged = true;
@@ -1559,9 +1559,9 @@ class TvShellProperties : TvBaseGeometryProperties
     {
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
-        _vectorArr = new OdTvVectorArray();
+        _vectorArr = new OdGeVector3dVector();
         _intArr = new OdInt32Array();
-        _bufVectorArr = new OdTvVectorArray();
+        _bufVectorArr = new OdGeVector3dVector();
         shell.getVertexNormalsViaRange(0, (int)shell.getVerticesCount(), _vectorArr);
         if (_vectorArr.Count == 0)
         {

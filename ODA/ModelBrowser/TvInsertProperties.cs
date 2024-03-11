@@ -27,11 +27,11 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
 using CheckBox = System.Windows.Controls.CheckBox;
 using ComboBox = System.Windows.Controls.ComboBox;
 using TextBox = System.Windows.Controls.TextBox;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -130,7 +130,7 @@ class TvInsertProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvInsert ins = _insertId.openObjectAsInsert(OpenMode.kForWrite);
+        OdTvInsert ins = _insertId.openObjectAsInsert(OdTv_OpenMode.kForWrite);
         ins.setVisibility(new OdTvVisibilityDef(cb.IsChecked == true));
         Update();
         MM.StopTransaction(mtr);
@@ -204,7 +204,7 @@ class TvInsertProperties : BasePaletteProperties
             return;
         MemoryTransaction mtr = MM.StartTransaction();
         ControlData data = (ControlData)tb.Tag;
-        OdTvInsert ins = _insertId.openObjectAsInsert(OpenMode.kForWrite);
+        OdTvInsert ins = _insertId.openObjectAsInsert(OdTv_OpenMode.kForWrite);
         switch (data.ProperyType)
         {
             case TextType.Position:

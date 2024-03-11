@@ -1,19 +1,15 @@
-﻿using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.ODA;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.Splash;
 using HCL_ODA_TestPAD.Utility;
 using HCL_ODA_TestPAD.ViewModels;
-using Prism.Commands;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 using System;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using Teigha.Visualize;
 
 namespace HCL_ODA_TestPAD;
 
@@ -38,7 +34,7 @@ public partial class MainWindow : Window
         try
         {
             TeighaActivate();
-            TV_Globals.odTvInitialize();
+            TV_Visualize_Globals.odTvInitialize();
         }
         catch (Exception ex)
         {
@@ -68,12 +64,12 @@ public partial class MainWindow : Window
 
     private void TeighaActivate()
     {
-        Teigha.Core.Globals.odActivate(ActivationData.userInfo, ActivationData.userSignature);
+        TD_RootIntegrated_Globals.odActivate(ActivationData.userInfo, ActivationData.userSignature);
     }
 
     private void TeighaDeactivate()
     {
-        Teigha.Core.Globals.odCleanUpStaticData();
+        TD_RootIntegrated_Globals.odCleanUpStaticData();
     }
 
     // Clear all devices before close, need for correct finish odTvUninitialize()
@@ -96,7 +92,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            TV_Globals.odTvUninitialize();
+            TV_Visualize_Globals.odTvUninitialize();
             TeighaDeactivate();
         }
         catch (Exception ex)

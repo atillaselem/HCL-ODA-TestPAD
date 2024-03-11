@@ -1,15 +1,12 @@
-﻿// Copyright © 2018 by Hilti Corporation – all rights reserved
+// Copyright © 2018 by Hilti Corporation – all rights reserved
 
 using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using HCL_ODA_TestPAD.HCL;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels;
 using HCL_ODA_TestPAD.ViewModels.Base;
-using Microsoft.Extensions.Logging;
 using Prism.Events;
-using Teigha.Visualize;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace HCL_ODA_TestPAD.UserActions.States

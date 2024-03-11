@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -123,7 +123,7 @@ class TvLightProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLight light = _lightId.openObjectAsLight(OpenMode.kForWrite);
+        OdTvLight light = _lightId.openObjectAsLight(OdTv_OpenMode.kForWrite);
         OdTvLightAttenuation la = light.getLightAttenuation();
         la.setUseLimits(cb.IsChecked == true);
         light.setLightAttenuation(la);
@@ -137,9 +137,9 @@ class TvLightProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLight light = _lightId.openObjectAsLight(OpenMode.kForWrite);
+        OdTvLight light = _lightId.openObjectAsLight(OdTv_OpenMode.kForWrite);
         OdTvLightAttenuation atten = light.getLightAttenuation();
-        atten.setAttenuationType((OdTvLightAttenuation.AttenuationType)cb.SelectedIndex);
+        atten.setAttenuationType((OdTvLightAttenuation_AttenuationType)cb.SelectedIndex);
         light.setLightAttenuation(atten);
         Update();
         MM.StopTransaction(mtr);
@@ -148,7 +148,7 @@ class TvLightProperties : BasePaletteProperties
     private void Color_ColorChanged(object sender, OdTvColorDef newColor)
     {
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLight light = _lightId.openObjectAsLight(OpenMode.kForWrite);
+        OdTvLight light = _lightId.openObjectAsLight(OdTv_OpenMode.kForWrite);
         if (light.getLightColor() != newColor)
         {
             light.setLightColor(newColor);
@@ -163,7 +163,7 @@ class TvLightProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        _lightId.openObjectAsLight(OpenMode.kForWrite).setLightType((OdTvLight.LightType)cb.SelectedIndex + 1);
+        _lightId.openObjectAsLight(OdTv_OpenMode.kForWrite).setLightType((OdTvLight_LightType)cb.SelectedIndex + 1);
         Update();
         MM.StopTransaction(mtr);
     }
@@ -174,7 +174,7 @@ class TvLightProperties : BasePaletteProperties
         if (tb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLight light = _lightId.openObjectAsLight(OpenMode.kForWrite);
+        OdTvLight light = _lightId.openObjectAsLight(OdTv_OpenMode.kForWrite);
         ControlData data = (ControlData)tb.Tag;
         switch (data.ProperyType)
         {

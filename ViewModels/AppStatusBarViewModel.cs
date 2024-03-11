@@ -1,6 +1,5 @@
-﻿using HCL_ODA_TestPAD.Mvvm;
+using HCL_ODA_TestPAD.Mvvm;
 using HCL_ODA_TestPAD.Mvvm.Events;
-using Prism.Events;
 using System.Windows.Media;
 using System.Windows;
 using System;

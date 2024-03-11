@@ -25,8 +25,8 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 using HCL_ODA_TestPAD.ODA.ModelBrowser;
 using HCL_ODA_TestPAD.ViewModels.Base;
 
@@ -86,7 +86,7 @@ public partial class TvPropertiesPalette : UserControl
     private void Background_ColorChanged(object sender, OdTvColorDef newColor)
     {
         MemoryTransaction mtr = _mm.StartTransaction();
-        OdTvGsDevice dev = _devId.openObject(OpenMode.kForWrite);
+        OdTvGsDevice dev = _devId.openObject(OdTv_OpenMode.kForWrite);
         byte r, g, b;
         newColor.getColor(out r, out g, out b);
         uint color = BasePaletteProperties.ColorToUInt(newColor);
@@ -264,51 +264,51 @@ public partial class TvPropertiesPalette : UserControl
     {
         switch (id.getType())
         {
-            case OdTvGeometryDataType.kPolyline:
+            case OdTv_OdTvGeometryDataType.kPolyline:
                 TvPolylineProperties polylineProperties = new TvPolylineProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(polylineProperties);
                 break;
-            case OdTvGeometryDataType.kCircle:
+            case OdTv_OdTvGeometryDataType.kCircle:
                 TvCircleProperties circProperties = new TvCircleProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(circProperties);
                 break;
-            case OdTvGeometryDataType.kCircleWedge:
+            case OdTv_OdTvGeometryDataType.kCircleWedge:
                 TvCircWedgeProperties circWedgeProperties = new TvCircWedgeProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(circWedgeProperties);
                 break;
-            case OdTvGeometryDataType.kCircularArc:
+            case OdTv_OdTvGeometryDataType.kCircularArc:
                 TvCircArcProperties circArcProperties = new TvCircArcProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(circArcProperties);
                 break;
-            case OdTvGeometryDataType.kEllipse:
+            case OdTv_OdTvGeometryDataType.kEllipse:
                 TvEllipseProperties ellipseProperties = new TvEllipseProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(ellipseProperties);
                 break;
-            case OdTvGeometryDataType.kEllipticArc:
+            case OdTv_OdTvGeometryDataType.kEllipticArc:
                 TvEllipticArcProperties ellipArcProperties = new TvEllipticArcProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(ellipArcProperties);
                 break;
-            case OdTvGeometryDataType.kPolygon:
+            case OdTv_OdTvGeometryDataType.kPolygon:
                 TvPolygonProperties polygonProperties = new TvPolygonProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(polygonProperties);
                 break;
-            case OdTvGeometryDataType.kText:
+            case OdTv_OdTvGeometryDataType.kText:
                 TvTextProperties textProperties = new TvTextProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(textProperties);
                 break;
-            case OdTvGeometryDataType.kShell:
+            case OdTv_OdTvGeometryDataType.kShell:
                 TvShellProperties shellProperties = new TvShellProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(shellProperties);
                 break;
-            case OdTvGeometryDataType.kSphere:
+            case OdTv_OdTvGeometryDataType.kSphere:
                 TvSphereProperties sphereProperties = new TvSphereProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(sphereProperties);
                 break;
-            case OdTvGeometryDataType.kCylinder:
+            case OdTv_OdTvGeometryDataType.kCylinder:
                 TvCylinderProperties cylinderProperties = new TvCylinderProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(cylinderProperties);
                 break;
-            case OdTvGeometryDataType.kSubInsert:
+            case OdTv_OdTvGeometryDataType.kSubInsert:
                 {
                     MemoryTransaction mtr = MemoryManager.GetMemoryManager().StartTransaction();
                     OdTvInsertData ins = id.openAsInsert();
@@ -316,35 +316,35 @@ public partial class TvPropertiesPalette : UserControl
                     MemoryManager.GetMemoryManager().StopTransaction(mtr);
                     break;
                 }
-            case OdTvGeometryDataType.kSubEntity:
+            case OdTv_OdTvGeometryDataType.kSubEntity:
                 TvEntityProperties subEntProperties = new TvEntityProperties(id, cnt, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(subEntProperties);
                 break;
-            case OdTvGeometryDataType.kNurbs:
+            case OdTv_OdTvGeometryDataType.kNurbs:
                 TvNurbsProperties nurbsProperties = new TvNurbsProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(nurbsProperties);
                 break;
-            case OdTvGeometryDataType.kRasterImage:
+            case OdTv_OdTvGeometryDataType.kRasterImage:
                 TvRasterImageDataProperties imgProperties = new TvRasterImageDataProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(imgProperties);
                 break;
-            case OdTvGeometryDataType.kInfiniteLine:
+            case OdTv_OdTvGeometryDataType.kInfiniteLine:
                 TvInfiniteLineProperties infiniteLineProperties = new TvInfiniteLineProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(infiniteLineProperties);
                 break;
-            case OdTvGeometryDataType.kMesh:
+            case OdTv_OdTvGeometryDataType.kMesh:
                 TvMeshProperties meshProperties = new TvMeshProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(meshProperties);
                 break;
-            case OdTvGeometryDataType.kPointCloud:
+            case OdTv_OdTvGeometryDataType.kPointCloud:
                 TvPointCloudProperties pointCloudProperties = new TvPointCloudProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(pointCloudProperties);
                 break;
-            case OdTvGeometryDataType.kGrid:
+            case OdTv_OdTvGeometryDataType.kGrid:
                 TvGridProperties gridProperties = new TvGridProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(gridProperties);
                 break;
-            case OdTvGeometryDataType.kColoredShape:
+            case OdTv_OdTvGeometryDataType.kColoredShape:
                 TvColoredShapeProperties shapeProperties = new TvColoredShapeProperties(id, _devId, _renderArea);
                 PropertiesPaletteList.Children.Add(shapeProperties);
                 break;

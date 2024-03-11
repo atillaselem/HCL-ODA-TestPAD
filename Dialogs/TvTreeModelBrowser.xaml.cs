@@ -25,8 +25,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 using MessageBox = System.Windows.Forms.MessageBox;
 using Orientation = System.Windows.Controls.Orientation;
 using UserControl = System.Windows.Controls.UserControl;
@@ -114,7 +114,7 @@ public partial class TvTreeModelBrowser : UserControl
 
         for (; !iter.done(); iter.step())
         {
-            if(selectionOpt.getLevel() == OdTvSelectionOptions.Level.kEntity)
+            if(selectionOpt.getLevel() == OdTvSelectionOptions_Level.kEntity)
             {
                 OdTvEntityId enId = iter.getEntity();
                 if (enId.isNull())
@@ -124,7 +124,7 @@ public partial class TvTreeModelBrowser : UserControl
 
                 // check entity existing
                 ulong entityHandle = 0;
-                if (enId.getType() == OdTvEntityId.EntityTypes.kEntity)
+                if (enId.getType() == OdTvEntityId_EntityTypes.kEntity)
                     entityHandle = enId.openObject().getDatabaseHandle();
                 else
                     entityHandle = enId.openObjectAsInsert().getDatabaseHandle();
@@ -284,7 +284,7 @@ public partial class TvTreeModelBrowser : UserControl
     private void AddEntity(OdTvEntityId enId, TvTreeItem parent)
     {
         MemoryTransaction mtr = MM.StartTransaction();
-        if (enId.getType() == OdTvEntityId.EntityTypes.kEntity)
+        if (enId.getType() == OdTvEntityId_EntityTypes.kEntity)
         {
             OdTvEntity en = enId.openObject();
             string name = en.getName();
@@ -299,7 +299,7 @@ public partial class TvTreeModelBrowser : UserControl
                 child.Items.Add(null);
             }
         }
-        else if (enId.getType() == OdTvEntityId.EntityTypes.kLight)
+        else if (enId.getType() == OdTvEntityId_EntityTypes.kLight)
         {
             string name = enId.openObjectAsLight().getName();
             new TvTreeItem("Light<" + (name.Length > 0 ? name : _lightNum++.ToString()) + ">",
@@ -338,7 +338,7 @@ public partial class TvTreeModelBrowser : UserControl
     private void AddGeometry(OdTvGeometryDataId id, TvTreeItem parent)
     {
         MemoryTransaction mtr = MM.StartTransaction();
-        if (id.getType() == OdTvGeometryDataType.kSubEntity)
+        if (id.getType() == OdTv_OdTvGeometryDataType.kSubEntity)
         {
             OdTvEntity en = id.openAsSubEntity();
             TvTreeItem child = new TvTreeItem("SubEntity<" + en.getName() + ">",
@@ -357,7 +357,7 @@ public partial class TvTreeModelBrowser : UserControl
         MM.StopTransaction(mtr);
     }
 
-    private string GetGeomNameFromType(OdTvGeometryDataType type)
+    private string GetGeomNameFromType(OdTv_OdTvGeometryDataType type)
     {
         string[] geomTypes = { "Undefinied", "Polyline", "Circle", "CircleWedge", "CircularArc", "Ellipse", "EllipticArc", "Polygon", "Text", "Shell", "Sphere", "Cylinder"
             , "Insert", "SubEntity", "Nurbs", "RasterImage", "InfiniteLine", "Mesh", "PointCloud", "Grid", "ColoredShape"};

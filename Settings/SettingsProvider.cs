@@ -1,8 +1,5 @@
-﻿using System.Configuration;
 using System.IO;
-using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.Utility;
-using Newtonsoft.Json;
 
 namespace HCL_ODA_TestPAD.Settings;
 

@@ -23,8 +23,8 @@
 
 using HCL_ODA_TestPAD.ODA.WCS;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Markups;
 
@@ -45,7 +45,7 @@ public class OdTvHandleMarkupDragger : OdTvMarkupDragger
     private OdTvGeometryDataId _handleEntityId = null;
     private OdTvGeometryDataId _handleId = null;
 
-    private OdTvPointArray _points;
+    private OdGePoint3dVector _points;
 
     private MemoryTransaction _startTr;
 
@@ -55,22 +55,22 @@ public class OdTvHandleMarkupDragger : OdTvMarkupDragger
         NeedFreeDrag = true;
 
         _startTr = MM.StartTransaction();
-        _points = new OdTvPointArray();
+        _points = new OdGePoint3dVector();
 
         MemoryTransaction mtr = MM.StartTransaction();
         // create main entity
-        OdTvModel pModel = markupModelId.openObject(OpenMode.kForWrite);
+        OdTvModel pModel = markupModelId.openObject(OdTv_OpenMode.kForWrite);
         _entityId = FindMarkupEntity(NameOfMarkupTempEntity, true);
         if (_entityId == null)
         {
             _entityId = pModel.appendEntity(NameOfMarkupTempEntity);
-            _entityId.openObject(OpenMode.kForWrite).setColor(MarkupColor);
+            _entityId.openObject(OdTv_OpenMode.kForWrite).setColor(MarkupColor);
         }
 
         // crate rectangles subEntity if not exist
         _handleFoldId = FindSubEntity(_entityId.openObject().getGeometryDataIterator(), NameOfMarkupHandleFold);
         if (_handleFoldId == null)
-            _handleFoldId = _entityId.openObject(OpenMode.kForWrite).appendSubEntity(NameOfMarkupHandleFold);
+            _handleFoldId = _entityId.openObject(OdTv_OpenMode.kForWrite).appendSubEntity(NameOfMarkupHandleFold);
 
         MM.StopTransaction(mtr);
     }
@@ -119,7 +119,7 @@ public class OdTvHandleMarkupDragger : OdTvMarkupDragger
         if (_handleEntityId != null)
         {
             MemoryTransaction mtr = MM.StartTransaction();
-            _handleEntityId.openAsSubEntity(OpenMode.kForWrite).setLineWeight(LineWeight);
+            _handleEntityId.openAsSubEntity(OdTv_OpenMode.kForWrite).setLineWeight(LineWeight);
             MM.StopTransaction(mtr);
             MM.StopTransaction(_startTr);
         }
@@ -156,7 +156,7 @@ public class OdTvHandleMarkupDragger : OdTvMarkupDragger
         if (!_isSuccess && _handleEntityId != null)
         {
             MemoryTransaction mtr = MM.StartTransaction();
-            _handleFoldId.openAsSubEntity(OpenMode.kForWrite).removeGeometryData(_handleEntityId);
+            _handleFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite).removeGeometryData(_handleEntityId);
             TvDeviceId.openObject().update();
             MM.StopTransaction(mtr);
         }
@@ -176,14 +176,14 @@ public class OdTvHandleMarkupDragger : OdTvMarkupDragger
         // update or create entity
         if (_handleEntityId == null)
         {
-            _handleEntityId = _handleFoldId.openAsSubEntity(OpenMode.kForWrite).appendSubEntity();
-            OdTvEntity handleEnt = _handleEntityId.openAsSubEntity(OpenMode.kForWrite);
+            _handleEntityId = _handleFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite).appendSubEntity();
+            OdTvEntity handleEnt = _handleEntityId.openAsSubEntity(OdTv_OpenMode.kForWrite);
             _handleId = handleEnt.appendPolyline(_points);
         }
         else
         {
             OdTvGeometryData pFrame = _handleId.openObject();
-            if (pFrame == null || pFrame.getType() != OdTvGeometryDataType.kPolyline)
+            if (pFrame == null || pFrame.getType() != OdTv_OdTvGeometryDataType.kPolyline)
                 return;
             OdTvPolylineData polyline = pFrame.getAsPolyline();
             polyline.setPoints(_points);

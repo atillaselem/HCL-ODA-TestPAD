@@ -27,8 +27,9 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 
 namespace HCL_ODA_TestPAD.Dialogs;
 
@@ -83,7 +84,7 @@ public partial class LoadMarkupDialog : Window
         while (!pEnIt.done())
         {
             OdTvEntityId entId = pEnIt.getEntity();
-            OdTvEntity pEnt = entId.openObject(OpenMode.kForWrite);
+            OdTvEntity pEnt = entId.openObject(OdTv_OpenMode.kForWrite);
             if (entId.IsEqual(_currentNode.EntityId))
             {
                 OdTvUserData usrData = pEnt.getUserData(HclCadImageViewModel.AppTvId);
@@ -98,21 +99,21 @@ public partial class LoadMarkupDialog : Window
                     exView.setView(new OdGePoint3d(viewParams.PositionX, viewParams.PositionY, viewParams.PositionZ),
                         new OdGePoint3d(viewParams.TargetX, viewParams.TargetY, viewParams.TargetZ),
                         new OdGeVector3d(viewParams.UpVectorX, viewParams.UpVectorY, viewParams.UpVectorZ),
-                        viewParams.Width, viewParams.Height, (OdTvGsView.Projection)viewParams.Projection);
-                    exView.setRenderMode((OdTvGsView.RenderMode)viewParams.RenderMode);
+                        viewParams.Width, viewParams.Height, (OdTvGsView_Projection)viewParams.Projection);
+                    exView.setRenderMode((OdTvGsView_RenderMode)viewParams.RenderMode);
                     _wpfView.SetAnimation(exView.getAnimation());
                 }
                 else
                 {
-                    OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+                    OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
                     if (view != null)
                     {
                         view.setView(
                             new OdGePoint3d(viewParams.PositionX, viewParams.PositionY, viewParams.PositionZ),
                             new OdGePoint3d(viewParams.TargetX, viewParams.TargetY, viewParams.TargetZ),
                             new OdGeVector3d(viewParams.UpVectorX, viewParams.UpVectorY, viewParams.UpVectorZ),
-                            viewParams.Width, viewParams.Height, (OdTvGsView.Projection) viewParams.Projection);
-                        view.setMode((OdTvGsView.RenderMode) viewParams.RenderMode);
+                            viewParams.Width, viewParams.Height, (OdTvGsView_Projection) viewParams.Projection);
+                        view.setMode((OdTvGsView_RenderMode) viewParams.RenderMode);
                     }
                 }
                 pEnt.setVisibility(new OdTvVisibilityDef(true));
@@ -133,7 +134,7 @@ public partial class LoadMarkupDialog : Window
             return;
 
         MemoryTransaction mtr = MM.StartTransaction();
-        _markupModelId.openObject(OpenMode.kForWrite).removeEntity(_currentNode.EntityId);
+        _markupModelId.openObject(OdTv_OpenMode.kForWrite).removeEntity(_currentNode.EntityId);
         List.Items.Remove(_currentNode);
         _currentNode = null;
         MM.StopTransaction(mtr);

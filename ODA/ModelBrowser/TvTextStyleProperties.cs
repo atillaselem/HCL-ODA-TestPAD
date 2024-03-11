@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -142,7 +142,7 @@ class TvTextStyleProperties : BasePaletteProperties
         if (tb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvTextStyle txtStyle = _textStyleId.openObject(OpenMode.kForWrite);
+        OdTvTextStyle txtStyle = _textStyleId.openObject(OdTv_OpenMode.kForWrite);
         TextParams param = (TextParams)tb.Tag;
         double val = double.Parse(tb.Text);
         switch (param)
@@ -158,7 +158,7 @@ class TvTextStyleProperties : BasePaletteProperties
                 break;
         }
 
-        TvDeviceId.openObject().regen(OdTvGsDevice.RegenMode.kRegenAll);
+        TvDeviceId.openObject().regen(OdTvGsDevice_RegenMode.kRegenAll);
         Update();
         MM.StopTransaction(mtr);
 
@@ -170,7 +170,7 @@ class TvTextStyleProperties : BasePaletteProperties
         if (cb != null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvTextStyle txtStyle = _textStyleId.openObject(OpenMode.kForWrite);
+        OdTvTextStyle txtStyle = _textStyleId.openObject(OdTv_OpenMode.kForWrite);
         BoolParams param = (BoolParams)cb.Tag;
         bool flag = cb.IsChecked == true;
         switch (param)
@@ -215,8 +215,8 @@ class TvTextStyleProperties : BasePaletteProperties
                 txtStyle.setStriked(flag);
                 break;
         }
-        TvDeviceId.openObject(OpenMode.kForWrite).regen(OdTvGsDevice.RegenMode.kRegenAll);
-        TvDeviceId.openObject(OpenMode.kForWrite).viewAt(0).openObject().regen();
+        TvDeviceId.openObject(OdTv_OpenMode.kForWrite).regen(OdTvGsDevice_RegenMode.kRegenAll);
+        TvDeviceId.openObject(OdTv_OpenMode.kForWrite).viewAt(0).openObject().regen();
 
         MM.StopTransaction(mtr);
     }
@@ -227,8 +227,8 @@ class TvTextStyleProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        _textStyleId.openObject(OpenMode.kForWrite).setAlignmentMode((OdTvTextStyle.AlignmentType)cb.SelectedIndex);
-        TvDeviceId.openObject().regen(OdTvGsDevice.RegenMode.kRegenAll);
+        _textStyleId.openObject(OdTv_OpenMode.kForWrite).setAlignmentMode((OdTvTextStyle_AlignmentType)cb.SelectedIndex);
+        TvDeviceId.openObject().regen(OdTvGsDevice_RegenMode.kRegenAll);
         Update();
         MM.StopTransaction(mtr);
     }

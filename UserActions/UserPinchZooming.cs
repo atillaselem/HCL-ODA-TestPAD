@@ -1,4 +1,4 @@
-﻿// Copyright © 2018 by Hilti Corporation – all rights reserved
+// Copyright © 2018 by Hilti Corporation – all rights reserved
 
 using System;
 using System.Collections.Generic;
@@ -10,8 +10,7 @@ using HCL_ODA_TestPAD.HCL.Exceptions;
 using HCL_ODA_TestPAD.HCL.MouseTouch;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels.Base;
-using Teigha.Visualize;
-using static HCL_ODA_TestPAD.HCL.MouseTouch.ZoomHelper;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.UserActions
 {
@@ -32,7 +31,7 @@ namespace HCL_ODA_TestPAD.UserActions
         public UserPinchZooming(ICadImageViewControl viewControl, OdTvGsDeviceId odTvGsDeviceId, AppSettings appSettings)
         {
             _viewControl = viewControl;
-            using var odTvGsDevice = odTvGsDeviceId.openObject(OpenMode.kForRead);
+            using var odTvGsDevice = odTvGsDeviceId.openObject(OdTv_OpenMode.kForRead);
             _odTvGsViewId = odTvGsDevice.getActiveView();
             _cadZoomOperations = new CadZoomOperations(_odTvGsViewId);
             _appSettings = appSettings;
@@ -72,7 +71,7 @@ namespace HCL_ODA_TestPAD.UserActions
             if (_appSettings.Interactivity)
             {
                 //start Interactivity
-                using var odTvGsView = _odTvGsViewId.openObject(OpenMode.kForRead);
+                using var odTvGsView = _odTvGsViewId.openObject(OdTv_OpenMode.kForRead);
                 odTvGsView.beginInteractivity(_appSettings.InteractiveFPS);
             }
             return false;
@@ -152,7 +151,7 @@ namespace HCL_ODA_TestPAD.UserActions
             //end Interactivity
             if (_appSettings.Interactivity)
             {
-                using var odTvGsView = _odTvGsViewId.openObject(OpenMode.kForRead);
+                using var odTvGsView = _odTvGsViewId.openObject(OdTv_OpenMode.kForRead);
                 odTvGsView.endInteractivity();
             }
         }

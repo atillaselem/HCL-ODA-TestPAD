@@ -1,16 +1,17 @@
-﻿using HCL_ODA_TestPAD.ViewModels;
+using HCL_ODA_TestPAD.ViewModels;
 using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Teigha.Visualize;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using HCL_ODA_TestPAD.ODA.Draggers;
 using HCL_ODA_TestPAD.ODA.ModelBrowser;
-using Teigha.Core;
 using HCL_ODA_TestPAD.UserActions.States;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 
 namespace HCL_ODA_TestPAD.UserControls;
 
@@ -134,8 +135,8 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
 
     private void ToggleAsyncPBO(bool enable)
     {
-        using var dev = _vmAdapter.TvGsDeviceId.openObject(OpenMode.kForWrite);
-        dev.setOption(OdTvGsDevice.Options.kAsyncReadback, enable ? 2 : 0);
+        using var dev = _vmAdapter.TvGsDeviceId.openObject(OdTv_OpenMode.kForWrite);
+        dev.setOption(OdTvGsDevice_Options.kAsyncReadback, enable ? 2 : 0);
     }
 
     protected override void OnMouseMove(MouseEventArgs e)
@@ -200,7 +201,7 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
         UserInteractionChanged("ZoomToArea");
     }
 
-    public void SetRenderModeButton(OdTvGsView.RenderMode mode)
+    public void SetRenderModeButton(OdTvGsView_RenderMode mode)
     {
         VM.SetRenderModeButton(mode);
     }
@@ -280,7 +281,7 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
         _vmAdapter.Regen();
     }
 
-    public void Regen(OdTvGsDevice.RegenMode rm)
+    public void Regen(OdTvGsDevice_RegenMode rm)
     {
         _vmAdapter.Regen(rm);
     }
@@ -295,17 +296,17 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
         _vmAdapter.SaveMarkup();
     }
 
-    public void Set3DView(OdTvExtendedView.e3DViewType type)
+    public void Set3DView(OdTvExtendedView_e3DViewType type)
     {
         _vmAdapter.Set3DView(type);
     }
 
-    public void SetProjectionType(OdTvGsView.Projection projection)
+    public void SetProjectionType(OdTvGsView_Projection projection)
     {
         _vmAdapter.SetProjectionType(projection);
     }
 
-    public void SetRenderMode(OdTvGsView.RenderMode renderMode)
+    public void SetRenderMode(OdTvGsView_RenderMode renderMode)
     {
         _vmAdapter.SetRenderMode(renderMode);
     }

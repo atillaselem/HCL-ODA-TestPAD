@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -46,13 +46,13 @@ class TvPointCloudProperties : TvBaseGeometryProperties
     // need for elements wothout child
     private bool _isScrollableControl = false;
 
-    private OdTvPointArray _pointsArr;
-    private OdTvPointArray _bufPointsArr;
+    private OdGePoint3dVector _pointsArr;
+    private OdGePoint3dVector _bufPointsArr;
     private OdInt32Array _intArr;
     private OdTvRGBColorDefArray _colorArr;
     private OdTvRGBColorDefArray _bufColorArr;
-    private OdTvVectorArray _vecArr;
-    private OdTvVectorArray _bufVecArr;
+    private OdGeVector3dVector _vecArr;
+    private OdGeVector3dVector _bufVecArr;
 
     public TvPointCloudProperties(OdTvGeometryDataId id, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(id, devId, renderArea)
@@ -70,7 +70,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         Button colors = AddLabelAndButton("Points colors", "...", MainGrid, new[] { row, 0, row++, 1 }, _colorArr.Count == 0);
         colors.Click += ShowVerticesColors_Click;
         _colorArr = null;
-        _vecArr = new OdTvVectorArray();
+        _vecArr = new OdGeVector3dVector();
         cloud.getPointNormalsViaRange(0, cloud.getPointsCount(), _vecArr);
         Button normals = AddLabelAndButton("Points normals", "...", MainGrid, new[] { row, 0, row++, 1 }, _vecArr.Count == 0);
         normals.Click += ShowVertexNormals_Click;
@@ -129,7 +129,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         OdTvPointCloudData cloud = GeomId.openAsPointCloud();
         _pointsArr = cloud.getParam();
         _intArr = new OdInt32Array();
-        _bufPointsArr = new OdTvPointArray();
+        _bufPointsArr = new OdGePoint3dVector();
 
         if (!CheckCountOfObject(_pointsArr.Count))
         {
@@ -299,9 +299,9 @@ class TvPointCloudProperties : TvBaseGeometryProperties
     {
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvPointCloudData cloud = GeomId.openAsPointCloud();
-        _vecArr = new OdTvVectorArray();
+        _vecArr = new OdGeVector3dVector();
         _intArr = new OdInt32Array();
-        _bufVecArr = new OdTvVectorArray();
+        _bufVecArr = new OdGeVector3dVector();
         cloud.getPointNormalsViaRange(0, cloud.getPointsCount(), _vecArr);
         if (_vecArr.Count == 0)
         {

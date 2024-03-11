@@ -23,8 +23,8 @@
 
 using HCL_ODA_TestPAD.ODA.WCS;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Markups;
 
@@ -57,7 +57,7 @@ public class OdTvRectMarkupDragger : OdTvMarkupDragger
 
         MemoryTransaction mtr = MM.StartTransaction();
         // create main entity
-        OdTvModel pModel = markupModelId.openObject(OpenMode.kForWrite);
+        OdTvModel pModel = markupModelId.openObject(OdTv_OpenMode.kForWrite);
         if (pModel == null)
             return;
 
@@ -65,12 +65,12 @@ public class OdTvRectMarkupDragger : OdTvMarkupDragger
         if (_entityId == null)
         {
             _entityId = pModel.appendEntity(NameOfMarkupTempEntity);
-            _entityId.openObject(OpenMode.kForWrite).setColor(MarkupColor);
+            _entityId.openObject(OdTv_OpenMode.kForWrite).setColor(MarkupColor);
         }
 
         // crate rectangles subEntity if not exist
         _rectFoldId = FindSubEntity(_entityId.openObject().getGeometryDataIterator(), NameOfMarkupRectFold) ??
-                      _entityId.openObject(OpenMode.kForWrite).appendSubEntity(NameOfMarkupRectFold);
+                      _entityId.openObject(OdTv_OpenMode.kForWrite).appendSubEntity(NameOfMarkupRectFold);
 
 
         MM.StopTransaction(mtr);
@@ -151,7 +151,7 @@ public class OdTvRectMarkupDragger : OdTvMarkupDragger
         if (!_isSuccess && _rectEntityId != null)
         {
             MemoryTransaction mtr = MM.StartTransaction();
-            _rectFoldId.openAsSubEntity(OpenMode.kForWrite).removeGeometryData(_rectEntityId);
+            _rectFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite).removeGeometryData(_rectEntityId);
             TvDeviceId.openObject().update();
             MM.StopTransaction(mtr);
         }
@@ -185,14 +185,14 @@ public class OdTvRectMarkupDragger : OdTvMarkupDragger
         // update or create entity
         if (isNeedCreate)
         {
-            _rectEntityId = _rectFoldId.openAsSubEntity(OpenMode.kForWrite).appendSubEntity("RectEntity");
-            OdTvEntity rectEnt = _rectEntityId.openAsSubEntity(OpenMode.kForWrite);
+            _rectEntityId = _rectFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite).appendSubEntity("RectEntity");
+            OdTvEntity rectEnt = _rectEntityId.openAsSubEntity(OdTv_OpenMode.kForWrite);
             _rectId = rectEnt.appendPolygon(_points);
         }
         else
         {
             OdTvGeometryData pFrame = _rectId.openObject();
-            if (pFrame == null || pFrame.getType() != OdTvGeometryDataType.kPolygon)
+            if (pFrame == null || pFrame.getType() != OdTv_OdTvGeometryDataType.kPolygon)
                 return;
             OdTvPolygonData polygon = pFrame.getAsPolygon();
             polygon.setPoints(_points);

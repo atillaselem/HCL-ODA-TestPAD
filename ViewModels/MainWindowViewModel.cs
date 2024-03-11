@@ -1,10 +1,11 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 using System.IO;
 using HCL_ODA_TestPAD.Mvvm.Commands;
 using HCL_ODA_TestPAD.ODA.ModelBrowser;
@@ -857,31 +858,31 @@ public class MainWindowViewModel : BindableBase
         switch (param.ToString())
         {
             case "2D Wireframe":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.k2DOptimized);
+                _hclGLES2_Control.SetRenderMode(OdTvGsView_RenderMode.k2DOptimized);
                 break;
             case "3D Wireframe":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.kWireframe);
+                _hclGLES2_Control.SetRenderMode(OdTvGsView_RenderMode.kWireframe);
                 break;
             case "HiddenLine":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.kHiddenLine);
+                _hclGLES2_Control.SetRenderMode(OdTvGsView_RenderMode.kHiddenLine);
                 break;
             case "Shaded":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.kFlatShaded);
+                _hclGLES2_Control.SetRenderMode(OdTvGsView_RenderMode.kFlatShaded);
                 break;
             case "Gouraud shaded":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.kGouraudShaded);
+                _hclGLES2_Control.SetRenderMode(OdTvGsView_RenderMode.kGouraudShaded);
                 break;
             case "Shaded with edges":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.kFlatShadedWithWireframe);
+                _hclGLES2_Control.SetRenderMode(OdTvGsView_RenderMode.kFlatShadedWithWireframe);
                 break;
             case "Gouraud shaded with edges":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.kGouraudShadedWithWireframe);
+                _hclGLES2_Control.SetRenderMode(OdTvGsView_RenderMode.kGouraudShadedWithWireframe);
                 break;
         }
         //_hclGLES2_Control.Focus();
     }
 
-    public void SetRenderModeButton(OdTvGsView.RenderMode mode)
+    public void SetRenderModeButton(OdTvGsView_RenderMode mode)
     {
         AppMainWindow.Wireframe2DBtn.IsChecked = false;
         AppMainWindow.Wireframe3DBtn.IsChecked = false;
@@ -892,22 +893,22 @@ public class MainWindowViewModel : BindableBase
         //MainWindow.GouraudShadedWithEdgesBtn.IsChecked = false;
         switch (mode)
         {
-            case OdTvGsView.RenderMode.k2DOptimized:
+            case OdTvGsView_RenderMode.k2DOptimized:
                 AppMainWindow.Wireframe2DBtn.IsChecked = true;
                 break;
-            case OdTvGsView.RenderMode.kWireframe:
+            case OdTvGsView_RenderMode.kWireframe:
                 AppMainWindow.Wireframe3DBtn.IsChecked = true;
                 break;
-            case OdTvGsView.RenderMode.kHiddenLine:
+            case OdTvGsView_RenderMode.kHiddenLine:
                 AppMainWindow.HiddenLineBtn.IsChecked = true;
                 break;
-            case OdTvGsView.RenderMode.kFlatShaded:
+            case OdTvGsView_RenderMode.kFlatShaded:
                 AppMainWindow.ShadedBtn.IsChecked = true;
                 break;
             //case OdTvGsView.RenderMode.kGouraudShaded:
             //    MainWindow.GouraudShadedBtn.IsChecked = true;
             //    break;
-            case OdTvGsView.RenderMode.kFlatShadedWithWireframe:
+            case OdTvGsView_RenderMode.kFlatShadedWithWireframe:
                 AppMainWindow.ShadedWithEdgesBtn.IsChecked = true;
                 break;
             //case OdTvGsView.RenderMode.kGouraudShadedWithWireframe:
@@ -944,10 +945,10 @@ public class MainWindowViewModel : BindableBase
         switch (param.ToString())
         {
             case "RegenAll":
-                _hclGLES2_Control.Regen(OdTvGsDevice.RegenMode.kRegenAll);
+                _hclGLES2_Control.Regen(OdTvGsDevice_RegenMode.kRegenAll);
                 break;
             case "RegenVisible":
-                _hclGLES2_Control.Regen(OdTvGsDevice.RegenMode.kRegenVisible);
+                _hclGLES2_Control.Regen(OdTvGsDevice_RegenMode.kRegenVisible);
                 break;
             case "RegenView":
                 _hclGLES2_Control.Regen();
@@ -968,34 +969,34 @@ public class MainWindowViewModel : BindableBase
         switch (param.ToString())
         {
             case "Top":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kTop);
+                _hclGLES2_Control.Set3DView(OdTvExtendedView_e3DViewType.kTop);
                 break;
             case "Bottom":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kBottom);
+                _hclGLES2_Control.Set3DView(OdTvExtendedView_e3DViewType.kBottom);
                 break;
             case "Left":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kLeft);
+                _hclGLES2_Control.Set3DView(OdTvExtendedView_e3DViewType.kLeft);
                 break;
             case "Right":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kRight);
+                _hclGLES2_Control.Set3DView(OdTvExtendedView_e3DViewType.kRight);
                 break;
             case "Front":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kFront);
+                _hclGLES2_Control.Set3DView(OdTvExtendedView_e3DViewType.kFront);
                 break;
             case "Back":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kBack);
+                _hclGLES2_Control.Set3DView(OdTvExtendedView_e3DViewType.kBack);
                 break;
             case "SW Isometric":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kSW);
+                _hclGLES2_Control.Set3DView(OdTvExtendedView_e3DViewType.kSW);
                 break;
             case "SE Isometric":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kSE);
+                _hclGLES2_Control.Set3DView(OdTvExtendedView_e3DViewType.kSE);
                 break;
             case "NE Isometric":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kNE);
+                _hclGLES2_Control.Set3DView(OdTvExtendedView_e3DViewType.kNE);
                 break;
             case "NW Isometric":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kNW);
+                _hclGLES2_Control.Set3DView(OdTvExtendedView_e3DViewType.kNW);
                 break;
         }
         //_hclGLES2_Control.Focus();
@@ -1015,12 +1016,12 @@ public class MainWindowViewModel : BindableBase
             case "Isometric":
                 AppMainWindow.PerspectiveBtn.IsChecked = false;
                 AppMainWindow.IsometricBtn.IsChecked = true;
-                _hclGLES2_Control.SetProjectionType(OdTvGsView.Projection.kParallel);
+                _hclGLES2_Control.SetProjectionType(OdTvGsView_Projection.kParallel);
                 break;
             case "Perspective":
                 AppMainWindow.IsometricBtn.IsChecked = false;
                 AppMainWindow.PerspectiveBtn.IsChecked = true;
-                _hclGLES2_Control.SetProjectionType(OdTvGsView.Projection.kPerspective);
+                _hclGLES2_Control.SetProjectionType(OdTvGsView_Projection.kPerspective);
                 break;
         }
         //_hclGLES2_Control.Focus();
@@ -1138,8 +1139,8 @@ public class MainWindowViewModel : BindableBase
         if (itm.NodeData.Type == TvBrowserItemType.Entity)
         {
             OdTvEntityId enId = itm.NodeData.EntityId;
-            if (WpfView != null && (enId.getType() == OdTvEntityId.EntityTypes.kEntity
-                                    || enId.getType() == OdTvEntityId.EntityTypes.kInsert))
+            if (WpfView != null && (enId.getType() == OdTvEntityId_EntityTypes.kEntity
+                                    || enId.getType() == OdTvEntityId_EntityTypes.kInsert))
             {
                 WpfView.AddEntityToSet(enId);
             }

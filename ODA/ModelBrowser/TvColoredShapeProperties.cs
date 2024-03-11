@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -46,7 +46,7 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
     // need for elements wothout child
     private bool _isScrollableControl = false;
 
-    private OdTvPointArray _pointsArr;
+    private OdGePoint3dVector _pointsArr;
     private OdInt32Array _intArr;
     private OdTvRGBColorDefArray _colorArr;
 
@@ -118,7 +118,7 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
     {
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvColoredShapeData shape = GeomId.openAsColoredShape();
-        _pointsArr = new OdTvPointArray();
+        _pointsArr = new OdGePoint3dVector();
         OdInt32Array intArr = new OdInt32Array();
         shape.get(_pointsArr, intArr);
 
@@ -275,7 +275,7 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
     {
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvColoredShapeData shape = GeomId.openAsColoredShape();
-        OdTvPointArray points = new OdTvPointArray();
+        OdGePoint3dVector points = new OdGePoint3dVector();
         _intArr = new OdInt32Array();
         shape.get(points, _intArr);
 

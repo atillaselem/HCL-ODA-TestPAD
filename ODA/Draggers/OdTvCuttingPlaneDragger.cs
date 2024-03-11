@@ -21,14 +21,14 @@
 // acknowledge and accept the above terms.
 ///////////////////////////////////////////////////////////////////////////////
 using System;
-using Teigha.Core;
-using Teigha.Visualize;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using HCL_ODA_TestPAD.ODA.WCS;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using HCL_ODA_TestPAD.ViewModels;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers;
 
@@ -73,7 +73,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
     {
         _wpfView = wpfView;
         IsCanFinish = false;
-        _selectionOptions.setMode(OdTvSelectionOptions.Mode.kPoint);
+        _selectionOptions.setMode(OdTvSelectionOptions_Mode.kPoint);
 
         _cuttingPlanesViewId = wpfView.CuttingPlanesViewId;
         _cuttingPlanesModelId = wpfView.CuttingPlaneModelId;
@@ -132,7 +132,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
         //fill map with entities used for the visualization of the cutting planes
         if (!_cuttingPlanesModelId.isNull())
         {
-            OdTvModel pModel = _cuttingPlanesModelId.openObject(OpenMode.kForWrite);
+            OdTvModel pModel = _cuttingPlanesModelId.openObject(OdTv_OpenMode.kForWrite);
             if (pModel != null)
             {
                 OdTvEntitiesIterator pIt = pModel.getEntitiesIterator();
@@ -157,7 +157,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
         MemoryTransaction mtr = MM.StartTransaction();
 
         //first of all we need the active view to perform selection
-        OdTvGsView pView = _cuttingPlanesViewId.openObject(OpenMode.kForWrite);
+        OdTvGsView pView = _cuttingPlanesViewId.openObject(OdTv_OpenMode.kForWrite);
         if (pView == null)
         {
             MM.StopTransaction(mtr);
@@ -203,7 +203,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
         if (_state == CuttingState.WaitingForCutPlSelect)
         {
             //first of all we need the active view to perform selection
-            OdTvGsView pView = _cuttingPlanesViewId.openObject(OpenMode.kForWrite);
+            OdTvGsView pView = _cuttingPlanesViewId.openObject(OdTv_OpenMode.kForWrite);
             if (pView == null)
             {
                 MM.StopTransaction(mtr);
@@ -211,7 +211,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
             }
             // highlight thecutting plane
             OdTvSelectionOptions selOpt = new OdTvSelectionOptions();
-            selOpt.setMode(OdTvSelectionOptions.Mode.kPoint);
+            selOpt.setMode(OdTvSelectionOptions_Mode.kPoint);
             OdTvDCPoint[] pnt = new OdTvDCPoint[1];
             pnt[0] = new OdTvDCPoint(x, y);
             // check about something selected
@@ -257,11 +257,11 @@ class OdTvCuttingPlaneDragger : OdTvDragger
                 MM.StopTransaction(mtr);
                 return DraggerResult.NothingToDo;
             }
-            OdTvEntity pEntity = _selectedCuttingPlaneEntityId.openObject(OpenMode.kForWrite);
+            OdTvEntity pEntity = _selectedCuttingPlaneEntityId.openObject(OdTv_OpenMode.kForWrite);
             int index = -1;
             if (!_cuttingPlanesDict.TryGetValue(pEntity.getName(), out index))
                 index = -1;
-            OdTvGsView pView = TvView.openObject(OpenMode.kForWrite);
+            OdTvGsView pView = TvView.openObject(OdTv_OpenMode.kForWrite);
             if (pView == null || index < 0)
             {
                 MM.StopTransaction(mtr);
@@ -330,7 +330,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
         // reset cutting plane color
         if (!_selectedCuttingPlaneEntityId.isNull())
         {
-            OdTvEntity pSelectedCuttingPlaneEntity = _selectedCuttingPlaneEntityId.openObject(OpenMode.kForWrite);
+            OdTvEntity pSelectedCuttingPlaneEntity = _selectedCuttingPlaneEntityId.openObject(OdTv_OpenMode.kForWrite);
             pSelectedCuttingPlaneEntity.setColor(new OdTvColorDef(175, 175, 175));
             pSelectedCuttingPlaneEntity.setLineWeight(new OdTvLineWeightDef(OD_TV_CUTTINGPLANE_EDGE_DEFAULT_LINEWEIGHT));
         }
@@ -406,7 +406,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
                 _selectedCuttingPlaneEntityId = pSelectIter.getEntity();
                 if (!_selectedCuttingPlaneEntityId.isNull())
                 {
-                    OdTvEntity pSelectedCuttingPlaneEntity = _selectedCuttingPlaneEntityId.openObject(OpenMode.kForWrite);
+                    OdTvEntity pSelectedCuttingPlaneEntity = _selectedCuttingPlaneEntityId.openObject(OdTv_OpenMode.kForWrite);
                     int cuttingPlaneIndex = -1;
                     if (!_cuttingPlanesDict.TryGetValue(pSelectedCuttingPlaneEntity.getName(), out cuttingPlaneIndex))
                         cuttingPlaneIndex = -1;
@@ -467,7 +467,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
             return;
         MemoryTransaction mtr = MM.StartTransaction();
 
-        OdTvEntity pPlane = planeId.openObject(OpenMode.kForWrite);
+        OdTvEntity pPlane = planeId.openObject(OdTv_OpenMode.kForWrite);
 
         // perform highlight
         if (bHighlight)

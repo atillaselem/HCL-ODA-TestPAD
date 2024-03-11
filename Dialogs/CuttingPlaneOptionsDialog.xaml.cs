@@ -24,7 +24,7 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
 
 
 namespace HCL_ODA_TestPAD.Dialogs;
@@ -76,7 +76,7 @@ public partial class CuttingPlaneOptionsDialog : Window
         _wpfView.SectioningOptions.IsFilled = FillingEnabled.IsChecked ?? false;
         _wpfView.SectioningOptions.FillingColor = BasePaletteProperties.ColorToUInt(_fillColor.SelectedColor, Int32.Parse(AlphaTextBox.Text));
         _wpfView.SectioningOptions.FillingPatternEnabled = FillingPatternEnabled.IsChecked ?? false;
-        _wpfView.SectioningOptions.FillingPaternStyle = (OdTvGsView.CuttingPlaneFillStyle)FillPatternStyleCombobox.SelectedIndex;
+        _wpfView.SectioningOptions.FillingPaternStyle = (OdTvGsView_CuttingPlaneFillStyle)FillPatternStyleCombobox.SelectedIndex;
         _wpfView.SectioningOptions.FillingPatternColor = BasePaletteProperties.ColorToUInt(_fillPatternColor.SelectedColor);
         _wpfView.SectioningOptions.SaveToRegister();
         _wpfView.ApplySectioningOptions();

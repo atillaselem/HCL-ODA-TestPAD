@@ -1,11 +1,9 @@
-﻿using HCL_ODA_TestPAD.ODA.Draggers;
+using HCL_ODA_TestPAD.ODA.Draggers;
 using HCL_ODA_TestPAD.ODA.ModelBrowser;
-using HCL_ODA_TestPAD.ODA.WCS;
-using HCL_ODA_TestPAD.ViewModels;
 using HCL_ODA_TestPAD.ViewModels.Base;
-using System.Drawing;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 
 namespace HCL_ODA_TestPAD.UserControls
 {
@@ -42,12 +40,12 @@ namespace HCL_ODA_TestPAD.UserControls
         void Pan();
         void ZoomToArea(bool enable);
         void Regen();
-        void Regen(OdTvGsDevice.RegenMode rm);
+        void Regen(OdTvGsDevice_RegenMode rm);
         void SaveFile(string filePath);
         void SaveMarkup();
-        void Set3DView(OdTvExtendedView.e3DViewType type);
-        void SetProjectionType(OdTvGsView.Projection projection);
-        void SetRenderMode(OdTvGsView.RenderMode renderMode);
+        void Set3DView(OdTvExtendedView_e3DViewType type);
+        void SetProjectionType(OdTvGsView_Projection projection);
+        void SetRenderMode(OdTvGsView_RenderMode renderMode);
         void SetZoomStep(double dValue);
         void Zoom(ZoomType type);
     }

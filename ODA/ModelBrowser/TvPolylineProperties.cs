@@ -26,8 +26,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -127,7 +127,7 @@ class TvPolylineProperties : TvBaseGeometryProperties
     {
         MemoryTransaction mtr = MM.StartTransaction();
         OdTvPolylineData line = GeomId.openAsPolyline();
-        OdTvPointArray pnts = new OdTvPointArray();
+        OdGePoint3dVector pnts = new OdGePoint3dVector();
         line.getPoints(pnts);
 
         StretchingTreeView tree = new StretchingTreeView()

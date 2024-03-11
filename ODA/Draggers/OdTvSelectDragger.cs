@@ -24,8 +24,8 @@
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers;
 
@@ -79,7 +79,7 @@ public class OdTvSelectDragger : OdTvDragger
         // In this dragger we will be used a separate special view for drawing temporary objects like selection rectangles
         // Such technique will allow doesn't depend on the render mode at the current active view. Also we will not have any problems 
         // with linetype scale for our temporary objects
-        OdTvGsDevice dev = tvDeviceId.openObject(OpenMode.kForWrite);
+        OdTvGsDevice dev = tvDeviceId.openObject(OdTv_OpenMode.kForWrite);
         _tempViewId = dev.createView(TvSelectorView, false);
 
         // Get specific linetype for the selection rectangle boundary
@@ -94,7 +94,7 @@ public class OdTvSelectDragger : OdTvDragger
             OdTvLinetypeElementPtr ltSpace = new OdTvLinetypeElementPtr(space, OdRxObjMod.kOdRxObjAttach);
             OdTvLinetypeElementArray ltArr = new OdTvLinetypeElementArray() { ltDash, ltSpace };
 
-            _frameLinetypeId = dbId.openObject(OpenMode.kForWrite).createLinetype(TvSelectorLinetype, ltArr);
+            _frameLinetypeId = dbId.openObject(OdTv_OpenMode.kForWrite).createLinetype(TvSelectorLinetype, ltArr);
 
             GC.SuppressFinalize(ltDash);
             GC.SuppressFinalize(ltSpace);
@@ -114,7 +114,7 @@ public class OdTvSelectDragger : OdTvDragger
         //first of all we need the active view to perform selection
         if (_view == null && TvView != null)
         {
-            _view = TvView.openObject(OpenMode.kForWrite);
+            _view = TvView.openObject(OdTv_OpenMode.kForWrite);
         }
 
         //perform selection
@@ -127,7 +127,7 @@ public class OdTvSelectDragger : OdTvDragger
             _pts[1] = new OdTvDCPoint(_firstDevicePt.x, _firstDevicePt.y);
             //update base color
             UpdateBaseColor();
-            _opt.setMode(OdTvSelectionOptions.Mode.kPoint);
+            _opt.setMode(OdTvSelectionOptions_Mode.kPoint);
         }
         else
         {
@@ -135,9 +135,9 @@ public class OdTvSelectDragger : OdTvDragger
             _pts[1] = new OdTvDCPoint(x, y);
 
             if (_state == SelectState.kWindow)
-                _opt.setMode(OdTvSelectionOptions.Mode.kWindow);
+                _opt.setMode(OdTvSelectionOptions_Mode.kWindow);
             else
-                _opt.setMode(OdTvSelectionOptions.Mode.kCrossing);
+                _opt.setMode(OdTvSelectionOptions_Mode.kCrossing);
 
             // setup temporary view and model
             DisableTemporaryObjects();
@@ -187,7 +187,7 @@ public class OdTvSelectDragger : OdTvDragger
         // create temporary geometry if need
         OdTvEntity entity = null;
         if (_entityId != null && !_entityId.isNull())
-            entity = _entityId.openObject(OpenMode.kForWrite);
+            entity = _entityId.openObject(OdTv_OpenMode.kForWrite);
         UpdateFrame(entity == null, x, y);
         MM.StopTransaction(mtr);
 
@@ -225,7 +225,7 @@ public class OdTvSelectDragger : OdTvDragger
     {
         MemoryTransaction mtr = MM.StartTransaction();
         //get device
-        OdTvGsDevice dev = TvDeviceId.openObject(OpenMode.kForWrite);
+        OdTvGsDevice dev = TvDeviceId.openObject(OdTv_OpenMode.kForWrite);
         if (dev == null)
         {
             MM.StopTransaction(mtr);
@@ -236,7 +236,7 @@ public class OdTvSelectDragger : OdTvDragger
         dev.addView(_tempViewId);
 
         //get view ptr
-        OdTvGsView view = _tempViewId.openObject(OpenMode.kForWrite);
+        OdTvGsView view = _tempViewId.openObject(OdTv_OpenMode.kForWrite);
         if (view == null)
         {
             MM.StopTransaction(mtr);
@@ -255,12 +255,12 @@ public class OdTvSelectDragger : OdTvDragger
     {
         MemoryTransaction mtr = MM.StartTransaction();
         //remove view from the device
-        OdTvGsDevice dev = TvDeviceId.openObject(OpenMode.kForWrite);
+        OdTvGsDevice dev = TvDeviceId.openObject(OdTv_OpenMode.kForWrite);
         dev.removeView(_tempViewId);
         //erase draggers model fromview
-        _tempViewId.openObject(OpenMode.kForWrite).eraseModel(TvDraggerModelId);
+        _tempViewId.openObject(OdTv_OpenMode.kForWrite).eraseModel(TvDraggerModelId);
         //remove entities from the temporary model
-        TvDraggerModelId.openObject(OpenMode.kForWrite).clearEntities();
+        TvDraggerModelId.openObject(OdTv_OpenMode.kForWrite).clearEntities();
         dev.update();
         MM.StopTransaction(mtr);
     }
@@ -302,10 +302,10 @@ public class OdTvSelectDragger : OdTvDragger
         //update or create entity
         if (bCreate)
         {
-            OdTvModel model = TvDraggerModelId.openObject(OpenMode.kForWrite);
+            OdTvModel model = TvDraggerModelId.openObject(OdTv_OpenMode.kForWrite);
             _entityId = model.appendEntity();
             {
-                OdTvEntity entityNew = _entityId.openObject(OpenMode.kForWrite);
+                OdTvEntity entityNew = _entityId.openObject(OdTv_OpenMode.kForWrite);
 
                 //create frame
                 _frameId = entityNew.appendPolygon(new[] { pts[0], pts[1], pts[2], pts[3] });
@@ -328,7 +328,7 @@ public class OdTvSelectDragger : OdTvDragger
         else
         {
             OdTvGeometryData frame = _frameId.openObject();
-            if (frame == null || frame.getType() != OdTvGeometryDataType.kPolygon)
+            if (frame == null || frame.getType() != OdTv_OdTvGeometryDataType.kPolygon)
             {
                 MM.StopTransaction(mtr);
                 return;
@@ -341,13 +341,13 @@ public class OdTvSelectDragger : OdTvDragger
 
             if (bCrossing)
             {
-                _entityId.openObject(OpenMode.kForWrite).setColor(new OdTvColorDef(0, 255, 0));
-                _entityId.openObject(OpenMode.kForWrite).setLinetypeScale(0.03);
+                _entityId.openObject(OdTv_OpenMode.kForWrite).setColor(new OdTvColorDef(0, 255, 0));
+                _entityId.openObject(OdTv_OpenMode.kForWrite).setLinetypeScale(0.03);
                 _frameIdContourId.openObject().setLinetype(new OdTvLinetypeDef(_frameLinetypeId));
             }
             else
             {
-                _entityId.openObject(OpenMode.kForWrite).setColor(new OdTvColorDef(0, 0, 255));
+                _entityId.openObject(OdTv_OpenMode.kForWrite).setColor(new OdTvColorDef(0, 0, 255));
                 _frameIdContourId.openObject().setLinetype(new OdTvLinetypeDef());
             }
         }
@@ -385,14 +385,14 @@ public class OdTvSelectDragger : OdTvDragger
 
         if (ObjectSelected != null)
         {
-            if (sSet.getOptions().getMode() == OdTvSelectionOptions.Mode.kPoint)
+            if (sSet.getOptions().getMode() == OdTvSelectionOptions_Mode.kPoint)
                 ObjectSelected(sSet, _modelId);
             else
                 ObjectsSelected(sSet, _modelId);
         }
 
-        if (sSet.getOptions().getMode() == OdTvSelectionOptions.Mode.kWindow ||
-            sSet.getOptions().getMode() == OdTvSelectionOptions.Mode.kCrossing)
+        if (sSet.getOptions().getMode() == OdTvSelectionOptions_Mode.kWindow ||
+            sSet.getOptions().getMode() == OdTvSelectionOptions_Mode.kCrossing)
         {
             if (_sSet == null)
             {
@@ -414,7 +414,7 @@ public class OdTvSelectDragger : OdTvDragger
 
         if (ObjectSelected != null)
         {
-            if (sSet.getOptions().getMode() == OdTvSelectionOptions.Mode.kPoint)
+            if (sSet.getOptions().getMode() == OdTvSelectionOptions_Mode.kPoint)
                 ObjectSelected(sSet, _modelId);
             else
                 ObjectsSelected(sSet, _modelId);
@@ -426,7 +426,7 @@ public class OdTvSelectDragger : OdTvDragger
     private void Highlight(OdTvSelectionSetIterator pIter, bool bDoIt)
     {
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = TvView.openObject(OpenMode.kForWrite);
+        OdTvGsView view = TvView.openObject(OdTv_OpenMode.kForWrite);
         if (view == null)
         {
             MM.StopTransaction(mtr);

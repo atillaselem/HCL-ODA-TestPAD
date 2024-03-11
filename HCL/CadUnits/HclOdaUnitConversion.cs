@@ -1,6 +1,6 @@
-﻿using System;
-using Teigha.Core;
-using Teigha.Visualize;
+using System;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.HCL.CadUnits
 {
@@ -194,47 +194,47 @@ namespace HCL_ODA_TestPAD.HCL.CadUnits
             }
         }
 
-        public static UnitsValue MapOdaUnitsToHilti(Units modelUnits, double userDefCoef)
+        public static UnitsValue MapOdaUnitsToHilti(OdTv_Units modelUnits, double userDefCoef)
         {
             //Mapping Visulize Units to Drawings UnitsValue
             return modelUnits switch
             {
-                Units.kUserDefined => userDefCoef == CADModelConstants.UsFeetCoefValue ? UnitsValue.kUnitsUSSurveyFeet : UnitsValue.kUnitsUndefined,
-                Units.kMeters => UnitsValue.kUnitsMeters,
-                Units.kCentimeters => UnitsValue.kUnitsCentimeters,
-                Units.kMillimeters => UnitsValue.kUnitsMillimeters,
-                Units.kFeet => UnitsValue.kUnitsFeet,
-                Units.kInches => UnitsValue.kUnitsInches,
+                OdTv_Units.kUserDefined => userDefCoef == CADModelConstants.UsFeetCoefValue ? UnitsValue.kUnitsUSSurveyFeet : UnitsValue.kUnitsUndefined,
+                OdTv_Units.kMeters => UnitsValue.kUnitsMeters,
+                OdTv_Units.kCentimeters => UnitsValue.kUnitsCentimeters,
+                OdTv_Units.kMillimeters => UnitsValue.kUnitsMillimeters,
+                OdTv_Units.kFeet => UnitsValue.kUnitsFeet,
+                OdTv_Units.kInches => UnitsValue.kUnitsInches,
                 _ => UnitsValue.kUnitsUndefined,
             };
         }
 
-        public static Units MapHiltiUnitsToOda(UnitsValue unitsValue)
+        public static OdTv_Units MapHiltiUnitsToOda(UnitsValue unitsValue)
         {
             //Mapping Drawings UnitsValue to Visulize Units
             return unitsValue switch
             {
-                UnitsValue.kUnitsMeters => Units.kMeters,
-                UnitsValue.kUnitsCentimeters => Units.kCentimeters,
-                UnitsValue.kUnitsMillimeters => Units.kMillimeters,
-                UnitsValue.kUnitsFeet => Units.kFeet,
-                UnitsValue.kUnitsInches => Units.kInches,
-                UnitsValue.kUnitsUSSurveyFeet => Units.kUserDefined,
-                _ => Units.kMeters,
+                UnitsValue.kUnitsMeters => OdTv_Units.kMeters,
+                UnitsValue.kUnitsCentimeters => OdTv_Units.kCentimeters,
+                UnitsValue.kUnitsMillimeters => OdTv_Units.kMillimeters,
+                UnitsValue.kUnitsFeet => OdTv_Units.kFeet,
+                UnitsValue.kUnitsInches => OdTv_Units.kInches,
+                UnitsValue.kUnitsUSSurveyFeet => OdTv_Units.kUserDefined,
+                _ => OdTv_Units.kMeters,
             };
         }
 
-        public static SurveyUnits MapOdaUnitsToSurveyUnits(Units units, double userDefCoef)
+        public static SurveyUnits MapOdaUnitsToSurveyUnits(OdTv_Units units, double userDefCoef)
         {
             //Mapping Cad File Unit read from file to Survey Units shown in Settings Combobox
             return units switch
             {
-                Units.kMeters => SurveyUnits.meters,
-                Units.kCentimeters => SurveyUnits.centimeters,
-                Units.kMillimeters => SurveyUnits.millimeters,
-                Units.kFeet => SurveyUnits.feet,
-                Units.kInches => SurveyUnits.inches,
-                Units.kUserDefined => userDefCoef == CADModelConstants.UsFeetCoefValue ? SurveyUnits.usfeet : SurveyUnits.meters,
+                OdTv_Units.kMeters => SurveyUnits.meters,
+                OdTv_Units.kCentimeters => SurveyUnits.centimeters,
+                OdTv_Units.kMillimeters => SurveyUnits.millimeters,
+                OdTv_Units.kFeet => SurveyUnits.feet,
+                OdTv_Units.kInches => SurveyUnits.inches,
+                OdTv_Units.kUserDefined => userDefCoef == CADModelConstants.UsFeetCoefValue ? SurveyUnits.usfeet : SurveyUnits.meters,
                 _ => SurveyUnits.meters,
             };
         }

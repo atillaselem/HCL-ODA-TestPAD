@@ -23,8 +23,8 @@
 using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -63,7 +63,7 @@ class TvLinetypeProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        _ltId.openObject(OpenMode.kForWrite).setScaledToFit(cb.IsChecked == true);
+        _ltId.openObject(OdTv_OpenMode.kForWrite).setScaledToFit(cb.IsChecked == true);
         Update();
         MM.StopTransaction(mtr);
     }
@@ -154,7 +154,7 @@ class TvLinetypeProperties : BasePaletteProperties
             return;
         tb.Text = tb.Text.Replace(".", ",");
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLinetype lt = _ltId.openObject(OpenMode.kForWrite);
+        OdTvLinetype lt = _ltId.openObject(OdTv_OpenMode.kForWrite);
         OdTvLinetypeElementArray arr = new OdTvLinetypeElementArray();
         lt.getElements(arr);
         OdTvLinetypeElementPtr ltEl = arr[(int)tb.Tag];
@@ -171,7 +171,7 @@ class TvLinetypeProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLinetype lt = _ltId.openObject(OpenMode.kForWrite);
+        OdTvLinetype lt = _ltId.openObject(OdTv_OpenMode.kForWrite);
         OdTvLinetypeElementArray arr = new OdTvLinetypeElementArray();
         lt.getElements(arr);
         OdTvLinetypeElementPtr ltEl = arr[(int)cb.Tag];
@@ -190,7 +190,7 @@ class TvLinetypeProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLinetype lt = _ltId.openObject(OpenMode.kForWrite);
+        OdTvLinetype lt = _ltId.openObject(OdTv_OpenMode.kForWrite);
         OdTvLinetypeElementArray arr = new OdTvLinetypeElementArray();
         lt.getElements(arr);
         OdTvLinetypeElementPtr ltEl = arr[(int)cb.Tag];
@@ -209,7 +209,7 @@ class TvLinetypeProperties : BasePaletteProperties
         if (cb == null)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLinetype lt = _ltId.openObject(OpenMode.kForWrite);
+        OdTvLinetype lt = _ltId.openObject(OdTv_OpenMode.kForWrite);
         OdTvLinetypeElementArray arr = new OdTvLinetypeElementArray();
         lt.getElements(arr);
         OdTvLinetypeElementPtr ltEl = arr[(int)cb.Tag];
@@ -246,7 +246,7 @@ class TvLinetypeProperties : BasePaletteProperties
         tb.Text = tb.Text.Replace(".", ",");
         CoordData data = (CoordData)tb.Tag;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLinetype lt = _ltId.openObject(OpenMode.kForWrite);
+        OdTvLinetype lt = _ltId.openObject(OdTv_OpenMode.kForWrite);
         OdTvLinetypeElementArray arr = new OdTvLinetypeElementArray();
         lt.getElements(arr);
         OdTvLinetypeElementPtr ltEl = arr[data.Ind];
@@ -273,7 +273,7 @@ class TvLinetypeProperties : BasePaletteProperties
             return;
         tb.Text = tb.Text.Replace(".", ",");
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLinetype lt = _ltId.openObject(OpenMode.kForWrite);
+        OdTvLinetype lt = _ltId.openObject(OdTv_OpenMode.kForWrite);
         OdTvLinetypeElementArray arr = new OdTvLinetypeElementArray();
         lt.getElements(arr);
         OdTvLinetypeElementPtr ltEl = arr[(int)tb.Tag];

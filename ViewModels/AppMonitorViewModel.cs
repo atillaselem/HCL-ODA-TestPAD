@@ -2,7 +2,6 @@
 using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.Utility;
-using Prism.Events;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;

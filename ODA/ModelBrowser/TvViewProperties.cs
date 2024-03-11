@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -104,12 +104,12 @@ public class TvViewProperties : BasePaletteProperties
         if (tb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         if (view != null)
         {
             view.setView(SetPointCoordByType(view.position(), (CoordinateType)tb.Tag, tb.Text), view.target(),
                 view.upVector(), view.fieldWidth(), view.fieldHeight(),
-                view.isPerspective() ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+                view.isPerspective() ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
             Update();
         }
         MM.StopTransaction(mtr);
@@ -121,12 +121,12 @@ public class TvViewProperties : BasePaletteProperties
         if (tb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         if (view != null)
         {
             view.setView(view.position(), SetPointCoordByType(view.target(), (CoordinateType)tb.Tag, tb.Text),
                 view.upVector(), view.fieldWidth(), view.fieldHeight(),
-                view.isPerspective() ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+                view.isPerspective() ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
             Update();
         }
         MM.StopTransaction(mtr);
@@ -138,9 +138,9 @@ public class TvViewProperties : BasePaletteProperties
         if (tb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         view.setView(view.position(), view.target(), SetVectorCoordByType(view.upVector(), (CoordinateType)tb.Tag, tb.Text), view.fieldWidth(), view.fieldHeight(),
-            view.isPerspective() ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+            view.isPerspective() ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
         Update();
         MM.StopTransaction(mtr);
     }
@@ -151,9 +151,9 @@ public class TvViewProperties : BasePaletteProperties
         if (tb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         view.setView(view.position(), view.target(), view.upVector(), Convert.ToDouble(tb.Text), view.fieldHeight(),
-            view.isPerspective() ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+            view.isPerspective() ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
         Update();
         MM.StopTransaction(mtr);
     }
@@ -164,9 +164,9 @@ public class TvViewProperties : BasePaletteProperties
         if (tb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         view.setView(view.position(), view.target(), view.upVector(), view.fieldWidth(), Convert.ToDouble(tb.Text),
-            view.isPerspective() ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+            view.isPerspective() ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
         Update();
         MM.StopTransaction(mtr);
     }
@@ -177,7 +177,7 @@ public class TvViewProperties : BasePaletteProperties
         if (cb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        _viewId.openObject(OpenMode.kForWrite).setMode((OdTvGsView.RenderMode)cb.SelectedIndex);
+        _viewId.openObject(OdTv_OpenMode.kForWrite).setMode((OdTvGsView_RenderMode)cb.SelectedIndex);
         Update();
         MM.StopTransaction(mtr);
     }
@@ -188,9 +188,9 @@ public class TvViewProperties : BasePaletteProperties
         if (cb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         view.setView(view.position(), view.target(), view.upVector(), view.fieldWidth(), view.fieldHeight(),
-            cb.IsChecked == true ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+            cb.IsChecked == true ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
         Update();
         MM.StopTransaction(mtr);
     }
@@ -201,7 +201,7 @@ public class TvViewProperties : BasePaletteProperties
         if (tb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        _viewId.openObject(OpenMode.kForWrite).setLensLength(Convert.ToDouble(tb.Text));
+        _viewId.openObject(OdTv_OpenMode.kForWrite).setLensLength(Convert.ToDouble(tb.Text));
         Update();
         MM.StopTransaction(mtr);
     }
@@ -212,7 +212,7 @@ public class TvViewProperties : BasePaletteProperties
         if (cb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        _viewId.openObject(OpenMode.kForWrite).enableDefaultLighting(cb.IsChecked == true, _viewId.openObject().defaultLightingType());
+        _viewId.openObject(OdTv_OpenMode.kForWrite).enableDefaultLighting(cb.IsChecked == true, _viewId.openObject().defaultLightingType());
         Update();
         MM.StopTransaction(mtr);
     }
@@ -223,7 +223,7 @@ public class TvViewProperties : BasePaletteProperties
         if (cb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        _viewId.openObject(OpenMode.kForWrite).enableDefaultLighting(_viewId.openObject().defaultLightingEnabled(), (OdTvGsView.DefaultLightingType)cb.SelectedIndex + 1);
+        _viewId.openObject(OdTv_OpenMode.kForWrite).enableDefaultLighting(_viewId.openObject().defaultLightingEnabled(), (OdTvGsView_DefaultLightingType)cb.SelectedIndex + 1);
         Update();
         MM.StopTransaction(mtr);
     }
@@ -234,7 +234,7 @@ public class TvViewProperties : BasePaletteProperties
         if (cb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        _viewId.openObject(OpenMode.kForWrite).setLineWeightMode((OdTvGsView.LineWeightMode)cb.SelectedIndex);
+        _viewId.openObject(OdTv_OpenMode.kForWrite).setLineWeightMode((OdTvGsView_LineWeightMode)cb.SelectedIndex);
         Update();
         MM.StopTransaction(mtr);
     }
@@ -245,7 +245,7 @@ public class TvViewProperties : BasePaletteProperties
         if (tb == null || MainWindow.IsClosing)
             return;
         MemoryTransaction mtr = MM.StartTransaction();
-        _viewId.openObject(OpenMode.kForWrite).setLineWeightScale(Convert.ToDouble(tb.Text));
+        _viewId.openObject(OdTv_OpenMode.kForWrite).setLineWeightScale(Convert.ToDouble(tb.Text));
         Update();
         MM.StopTransaction(mtr);
     }
@@ -257,7 +257,7 @@ public class TvViewProperties : BasePaletteProperties
             return;
         MemoryTransaction mtr = MM.StartTransaction();
         double val = Convert.ToDouble(tb.Text.Replace(".", ","));
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         DcSizeType type = (DcSizeType)tb.Tag;
         if (val < 1)
         {

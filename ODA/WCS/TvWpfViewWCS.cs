@@ -20,12 +20,12 @@
 // By use of this software, its documentation or related materials, you 
 // acknowledge and accept the above terms.
 ///////////////////////////////////////////////////////////////////////////////
-using Teigha.Visualize;
-using Teigha.Core;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.WCS;
 
-public class TvWpfViewWCS
+public class TvWpfViewWcs
 {
     // Special model for WCS object
     private OdTvModelId _tvWcsModelId;
@@ -36,50 +36,50 @@ public class TvWpfViewWCS
     // View, associated with this view
     private OdTvGsViewId _wcsViewId;
 
-    private static int wcsViewNumber = 1;
+    private static int _wcsViewNumber = 1;
 
-    private MemoryManager MM = MemoryManager.GetMemoryManager();
+    private MemoryManager _mm = MemoryManager.GetMemoryManager();
 
-    public TvWpfViewWCS(OdTvDatabaseId tvDbId, OdTvGsViewId tvViewId)
+    public TvWpfViewWcs(OdTvDatabaseId tvDbId, OdTvGsViewId tvViewId)
     {
         _activeViewId = tvViewId;
 
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsDevice odTvGsDevice = _activeViewId.openObject().device().openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvGsDevice odTvGsDevice = _activeViewId.openObject().device().openObject(OdTv_OpenMode.kForWrite);
 
         // add wcs view
         OdTvResult rc = new OdTvResult();
         rc = OdTvResult.tvOk;
-        _wcsViewId = odTvGsDevice.createView("WcsView_" + wcsViewNumber, false, ref rc);
+        _wcsViewId = odTvGsDevice.createView("WcsView_" + _wcsViewNumber, false, ref rc);
         odTvGsDevice.addView(_wcsViewId);
 
-        _tvWcsModelId = tvDbId.openObject(OpenMode.kForWrite).createModel("$ODA_TVVIEWER_WCS_" + wcsViewNumber++);
-        OdTvGsView wcsView = _wcsViewId.openObject(OpenMode.kForWrite);
+        _tvWcsModelId = tvDbId.openObject(OdTv_OpenMode.kForWrite).createModel("$ODA_TVVIEWER_WCS_" + _wcsViewNumber++);
+        OdTvGsView wcsView = _wcsViewId.openObject(OdTv_OpenMode.kForWrite);
         wcsView.addModel(_tvWcsModelId);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
     
-    public void UpdateWCS()
+    public void UpdateWcs()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         OdTvGsView view = _activeViewId.openObject();
 
         // remove old wcs entities
-        OdTvModel wcsModel = _tvWcsModelId.openObject(OpenMode.kForWrite);
+        OdTvModel wcsModel = _tvWcsModelId.openObject(OdTv_OpenMode.kForWrite);
         wcsModel.clearEntities();
 
         //1.1 Add wcs entity
         OdTvEntityId wcsEntityId = wcsModel.appendEntity("WCS");
-        OdTvEntity wcsEntity = wcsEntityId.openObject(OpenMode.kForWrite);
+        OdTvEntity wcsEntity = wcsEntityId.openObject(OdTv_OpenMode.kForWrite);
 
         // define the start point for the WCS
         OdGePoint3d start = new OdGePoint3d(0d, 0d, 0d);
 
         // caculate axis lines length in wireframe and shaded modes
         double lineLength = 0.07;
-        if ((int)view.mode() != (int)OdGsView.RenderMode.kWireframe && (int)view.mode() != (int)OdGsView.RenderMode.k2DOptimized)
+        if ((int)view.mode() != (int)OdGsView_RenderMode.kWireframe && (int)view.mode() != (int)OdGsView_RenderMode.k2DOptimized)
             lineLength = 0.07;
 
         // create X axis and label
@@ -101,44 +101,44 @@ public class TvWpfViewWCS
         CreateWcsAxis(wcsZ, new OdTvColorDef(20, 57, 245), start, endz, "Z");
 
         _wcsViewId.openObject().device().openObject().invalidate();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
-    public bool IsNeedUpdateWCS(OdTvGsView.RenderMode oldmode, OdTvGsView.RenderMode newmode)
+    public bool IsNeedUpdateWcs(OdTvGsView_RenderMode oldmode, OdTvGsView_RenderMode newmode)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView wcsView = _wcsViewId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvGsView wcsView = _wcsViewId.openObject(OdTv_OpenMode.kForWrite);
         if (wcsView == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return false;
         }
 
         bool bOldModeWire = false;
-        if (oldmode == OdTvGsView.RenderMode.k2DOptimized || oldmode == OdTvGsView.RenderMode.kWireframe)
+        if (oldmode == OdTvGsView_RenderMode.k2DOptimized || oldmode == OdTvGsView_RenderMode.kWireframe)
             bOldModeWire = true;
 
         bool bNewModeWire = false;
-        if (newmode == OdTvGsView.RenderMode.k2DOptimized || newmode == OdTvGsView.RenderMode.kWireframe)
+        if (newmode == OdTvGsView_RenderMode.k2DOptimized || newmode == OdTvGsView_RenderMode.kWireframe)
             bNewModeWire = true;
 
-        wcsView.setMode(bNewModeWire ? OdTvGsView.RenderMode.kWireframe : OdTvGsView.RenderMode.kGouraudShaded);
+        wcsView.setMode(bNewModeWire ? OdTvGsView_RenderMode.kWireframe : OdTvGsView_RenderMode.kGouraudShaded);
 
         if (bOldModeWire != bNewModeWire)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return true;
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return false;
     }
 
     private void CreateWcsAxis(OdTvGeometryDataId wcsId, OdTvColorDef color, OdGePoint3d startPoint, OdGePoint3d endPoint, string axisName)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
-        OdTvEntity pWcs = wcsId.openAsSubEntity(OpenMode.kForWrite);
+        OdTvEntity pWcs = wcsId.openAsSubEntity(OdTv_OpenMode.kForWrite);
         pWcs.setColor(color);
 
         OdTvGsView view = _wcsViewId.openObject();
@@ -146,7 +146,7 @@ public class TvWpfViewWCS
         OdGePoint3d labelRefPoint = new OdGePoint3d(endPoint);
 
         // draw lines in wireframe and draw cylinders in shaded modes
-        if ((int)view.mode() == (int)OdGsView.RenderMode.k2DOptimized || (int)view.mode() == (int)OdGsView.RenderMode.kWireframe)
+        if ((int)view.mode() == (int)OdGsView_RenderMode.k2DOptimized || (int)view.mode() == (int)OdGsView_RenderMode.kWireframe)
         {
             //append axis
             pWcs.appendPolyline(startPoint, endPoint);
@@ -163,19 +163,19 @@ public class TvWpfViewWCS
             else if (axisName == "Z")
                 lastPoint.z += lastPointDist;
 
-            OdTvPointArray pnts = new OdTvPointArray();
+            OdGePoint3dVector pnts = new OdGePoint3dVector();
             pnts.Add(new OdGePoint3d(startPoint));
             pnts.Add(new OdGePoint3d(endPoint));
             pnts.Add(new OdGePoint3d(endPoint));
             pnts.Add(new OdGePoint3d(lastPoint));
 
-            OdGeDoubleArray radii = new OdGeDoubleArray(4);
+            OdDoubleArray radii = new OdDoubleArray(4);
             radii.Add(0.007);
             radii.Add(0.007);
             radii.Add(0.015);
             radii.Add(0d);
 
-            pWcs.appendShellFromCylinder(pnts, radii, OdTvCylinderData.Capping.kBoth, 50);
+            pWcs.appendShellFromCylinder(pnts, radii, OdTvCylinderData_Capping.kBoth, 50);
 
             // update label reference point
             labelRefPoint = lastPoint;
@@ -189,29 +189,29 @@ public class TvWpfViewWCS
         else if (axisName == "Z")
             labelRefPoint.z += 0.015;
 
-        OdTvEntityId wcsTextEntityId = _tvWcsModelId.openObject(OpenMode.kForWrite).appendEntity("TextEntity");
-        OdTvEntity textEntity = wcsTextEntityId.openObject(OpenMode.kForWrite);
+        OdTvEntityId wcsTextEntityId = _tvWcsModelId.openObject(OdTv_OpenMode.kForWrite).appendEntity("TextEntity");
+        OdTvEntity textEntity = wcsTextEntityId.openObject(OdTv_OpenMode.kForWrite);
         textEntity.setColor(color);
         textEntity.setAutoRegen(true);
 
         OdTvGeometryDataId labelTextId = textEntity.appendText(labelRefPoint, axisName);
         OdTvTextData labelText = labelTextId.openAsText();
-        labelText.setAlignmentMode(OdTvTextStyle.AlignmentType.kMiddleCenter);
+        labelText.setAlignmentMode(OdTvTextStyle_AlignmentType.kMiddleCenter);
         labelText.setTextSize(0.02);
         labelText.setNonRotatable(true);
 
-        if ((int)view.mode() != (int)OdGsView.RenderMode.k2DOptimized && (int)view.mode() != (int)OdGsView.RenderMode.kWireframe)
+        if ((int)view.mode() != (int)OdGsView_RenderMode.k2DOptimized && (int)view.mode() != (int)OdGsView_RenderMode.kWireframe)
             textEntity.setLineWeight(new OdTvLineWeightDef(4));
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
-    public void removeWCS()
+    public void RemoveWcs()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         // remove old wcs entities
-        _tvWcsModelId.openObject(OpenMode.kForWrite).clearEntities();
-        MM.StopTransaction(mtr);
+        _tvWcsModelId.openObject(OdTv_OpenMode.kForWrite).clearEntities();
+        _mm.StopTransaction(mtr);
     }
 
     public OdTvGsViewId GetWcsViewId()
@@ -224,12 +224,12 @@ public class TvWpfViewWCS
         return _activeViewId;
     }
 
-    public OdTvGsView GetWcsView(OpenMode mode)
+    public OdTvGsView GetWcsView(OdTv_OpenMode mode)
     {
         return _wcsViewId.openObject(mode);
     }
 
-    public OdTvGsView GetParentView(OpenMode mode)
+    public OdTvGsView GetParentView(OdTv_OpenMode mode)
     {
         return _activeViewId.openObject(mode);
     }

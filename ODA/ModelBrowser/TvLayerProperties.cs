@@ -23,21 +23,21 @@
 using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
 class TvLayerProperties : BasePaletteProperties
 {
-    private new MemoryManager MM = MemoryManager.GetMemoryManager();
+    private new MemoryManager _mm = MemoryManager.GetMemoryManager();
     private OdTvLayerId _layerId;
 
     public TvLayerProperties(OdTvLayerId lyrId, OdTvGsDeviceId devId, IOdaSectioning view)
         : base(devId, view)
     {
         _layerId = lyrId;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvLayer layer = _layerId.openObject();
         int row = 0;
         AddLabelAndTextBox("Name:", layer.getName(), MainGrid, new[] { row, 0, row++, 1 }, true);
@@ -54,7 +54,7 @@ class TvLayerProperties : BasePaletteProperties
         visibility.Click += Visibility_Click;
         ComboBox material = AddMatrialDef("Material:", layer.getMaterial(), MainGrid, new[] { row, 0, row++, 1 });
         material.SelectionChanged += Material_SelectionChanged;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Material_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -62,11 +62,11 @@ class TvLayerProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLayer layer = _layerId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLayer layer = _layerId.openObject(OdTv_OpenMode.kForWrite);
         layer.setMaterial(GetMaterialDef(cb.SelectedItem.ToString()));
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Visibility_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -74,10 +74,10 @@ class TvLayerProperties : BasePaletteProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        _layerId.openObject(OpenMode.kForWrite).setVisible(cb.IsChecked == true);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        _layerId.openObject(OdTv_OpenMode.kForWrite).setVisible(cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
     }
 
@@ -86,14 +86,14 @@ class TvLayerProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLayer layer = _layerId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLayer layer = _layerId.openObject(OdTv_OpenMode.kForWrite);
         if (!layer.getTransparency().getValue().Equals(double.Parse(tb.Text)))
         {
             layer.setTransparency(new OdTvTransparencyDef(double.Parse(tb.Text)));
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Lineweight_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -101,14 +101,14 @@ class TvLayerProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLayer layer = _layerId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLayer layer = _layerId.openObject(OdTv_OpenMode.kForWrite);
         if (layer.getLineWeight().getValue() != byte.Parse(tb.Text))
         {
             layer.setLineWeight(new OdTvLineWeightDef(byte.Parse(tb.Text)));
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Linetype_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -116,22 +116,22 @@ class TvLayerProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLayer layer = _layerId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLayer layer = _layerId.openObject(OdTv_OpenMode.kForWrite);
         layer.setLinetype(GetLinetypeDef(cb.SelectedItem.ToString()));
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Color_ColorChanged(object sender, OdTvColorDef newColor)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLayer layer = _layerId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLayer layer = _layerId.openObject(OdTv_OpenMode.kForWrite);
         if (layer.getColor() != newColor)
         {
             layer.setColor(newColor);
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

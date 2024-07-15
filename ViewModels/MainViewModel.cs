@@ -1,12 +1,12 @@
-﻿using HCL_ODA_TestPAD.Mvvm;
+using HCL_ODA_TestPAD.Mvvm;
 using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.ODA;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.Splash;
-using Prism.Events;
 using System;
 using System.Windows;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ViewModels;
 
@@ -40,12 +40,12 @@ public class MainViewModel : BindableBase
         Application.Current.Shutdown();
     }
 
-    public void ActivateODA()
+    public void ActivateOda()
     {
         try
         {
             TeighaActivate();
-            TV_Globals.odTvInitialize();
+            TV_Visualize_Globals.odTvInitialize();
         }
         catch (Exception ex)
         {
@@ -55,15 +55,15 @@ public class MainViewModel : BindableBase
 
     private void TeighaActivate()
     {
-        Teigha.Core.Globals.odActivate(ActivationData.userInfo, ActivationData.userSignature);
+        TD_RootIntegrated_Globals.odActivate(ActivationData.UserInfo, ActivationData.UserSignature);
     }
 
     public void TeighaDeactivate()
     {
         try
         {
-            TV_Globals.odTvUninitialize();
-            Teigha.Core.Globals.odCleanUpStaticData();
+            TV_Visualize_Globals.odTvUninitialize();
+            TD_RootIntegrated_Globals.odCleanUpStaticData();
         }
         catch (Exception ex)
         {
@@ -84,7 +84,7 @@ public class MainViewModel : BindableBase
     {
         if (_serviceFactory.AppSettings.ShowSplashScreen)
         {
-            SplashTestPAD.ShowSplashScreenEvents();
+            SplashTestPad.ShowSplashScreenEvents();
         }
     }
 }

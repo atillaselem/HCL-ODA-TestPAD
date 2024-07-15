@@ -16,14 +16,14 @@ namespace HCL_ODA_TestPAD.ViewModels
         private readonly IConsoleService _consoleService;
         public OdaDatabaseExplorerViewModel OdaDatabaseExplorerViewModel { get; }
         public AppMonitorViewModel AppMonitorViewModel { get; }
-        public TestPADSettingsViewModel TestPADSettingsViewModel { get; }
+        public TestPadSettingsViewModel TestPadSettingsViewModel { get; }
         public TabPagedCadImageViewModel TabbedCadModelViewModel { get; }
         public OverlayViewModel OverlayViewModel { get; }
         public OdaMenuViewModel OdaMenuViewModel { get; }
         private readonly ISettingsProvider _settingsProvider;
 
         public AppAvalonDockViewModel(OdaDatabaseExplorerViewModel odaDatabaseExplorerViewModel,
-            TestPADSettingsViewModel testPADSettingsViewModel,
+            TestPadSettingsViewModel testPadSettingsViewModel,
             TabPagedCadImageViewModel tabbedCadModelViewModel,   
             AppMonitorViewModel appMonitorViewModel,
             OverlayViewModel overlayViewModel,
@@ -33,7 +33,7 @@ namespace HCL_ODA_TestPAD.ViewModels
             ISettingsProvider settingsProvider)
         {
             OdaDatabaseExplorerViewModel = odaDatabaseExplorerViewModel;
-            TestPADSettingsViewModel = testPADSettingsViewModel;
+            TestPadSettingsViewModel = testPadSettingsViewModel;
             TabbedCadModelViewModel = tabbedCadModelViewModel;
             AppMonitorViewModel = appMonitorViewModel;
             OverlayViewModel = overlayViewModel;
@@ -48,7 +48,7 @@ namespace HCL_ODA_TestPAD.ViewModels
         {
             if (_settingsProvider.AppSettings.SaveDockLayout)
             {
-                var layoutFilePath = PathResolver.GetTargetPathUsingRelativePath(SettingsProvider.APP_DOCKPANELLAYOUT_FILE);
+                var layoutFilePath = PathResolver.GetTargetPathUsingRelativePath(SettingsProvider.AppDockpanellayoutFile);
                 using var writer = new StreamWriter(layoutFilePath);
                 var layoutSerializer = new XmlLayoutSerializer(dockingManagerFactory());
                 layoutSerializer.Serialize(writer);
@@ -56,7 +56,7 @@ namespace HCL_ODA_TestPAD.ViewModels
         }
         public void LoadDockLayout(Func<DockingManager> dockingManagerFactory)
         {
-            var layoutFilePath = PathResolver.GetTargetPathUsingRelativePath(SettingsProvider.APP_DOCKPANELLAYOUT_FILE);
+            var layoutFilePath = PathResolver.GetTargetPathUsingRelativePath(SettingsProvider.AppDockpanellayoutFile);
             if (File.Exists(layoutFilePath))
             {
                 using var reader = new StreamReader(layoutFilePath);

@@ -25,8 +25,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 using MessageBox = System.Windows.Forms.MessageBox;
 using Orientation = System.Windows.Controls.Orientation;
 using UserControl = System.Windows.Controls.UserControl;
@@ -42,10 +42,10 @@ namespace HCL_ODA_TestPAD.Dialogs;
 /// </summary>
 public partial class TvTreeModelBrowser : UserControl
 {
-    private MemoryManager MM = MemoryManager.GetMemoryManager();
+    private MemoryManager _mm = MemoryManager.GetMemoryManager();
     private OdTvDatabaseId _tvDbId = null;
 
-    private ResourceDictionary Resource = App.Current.Resources;
+    private ResourceDictionary _resource = App.Current.Resources;
 
     private IOdaSectioning _wpfView;
 
@@ -83,7 +83,7 @@ public partial class TvTreeModelBrowser : UserControl
 
         List<OdTvEntityId> entitiesForSelect = new List<OdTvEntityId>();
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         // expand models folder
         _modelsFoldItm.IsExpanded = true;
@@ -114,7 +114,7 @@ public partial class TvTreeModelBrowser : UserControl
 
         for (; !iter.done(); iter.step())
         {
-            if(selectionOpt.getLevel() == OdTvSelectionOptions.Level.kEntity)
+            if(selectionOpt.getLevel() == OdTvSelectionOptions_Level.kEntity)
             {
                 OdTvEntityId enId = iter.getEntity();
                 if (enId.isNull())
@@ -124,7 +124,7 @@ public partial class TvTreeModelBrowser : UserControl
 
                 // check entity existing
                 ulong entityHandle = 0;
-                if (enId.getType() == OdTvEntityId.EntityTypes.kEntity)
+                if (enId.getType() == OdTvEntityId_EntityTypes.kEntity)
                     entityHandle = enId.openObject().getDatabaseHandle();
                 else
                     entityHandle = enId.openObjectAsInsert().getDatabaseHandle();
@@ -135,7 +135,7 @@ public partial class TvTreeModelBrowser : UserControl
             }
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         if(entityItem != null)
         {
@@ -158,7 +158,7 @@ public partial class TvTreeModelBrowser : UserControl
         _wpfView = wpfview;
         ModelBrowser.Items.Clear();
         _tvDbId = id;
-        _dbItem = new TvTreeItem("Database", Resource["MbDbImg"] as BitmapImage, null, new TvNodeData(TvBrowserItemType.Database, id), _wpfView.VM);
+        _dbItem = new TvTreeItem("Database", _resource["MbDbImg"] as BitmapImage, null, new TvNodeData(TvBrowserItemType.Database, id), _wpfView.Vm);
         _dbItem.SetBold();
         ModelBrowser.Items.Add(_dbItem);
 
@@ -182,13 +182,13 @@ public partial class TvTreeModelBrowser : UserControl
 
     private void AddDevices(TvTreeItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvDevicesIterator it = _tvDbId.openObject().getDevicesIterator();
         TvTreeItem itm = null;
         if (!it.done())
         {
             TvNodeData nData = new TvNodeData(TvBrowserItemType.DevicesFold, null);
-            itm = new TvTreeItem("Devices", Resource["MbDeviceImg"] as BitmapImage, parent, nData, _wpfView.VM);
+            itm = new TvTreeItem("Devices", _resource["MbDeviceImg"] as BitmapImage, parent, nData, _wpfView.Vm);
             itm.SetBold();
 
             int cnt = 0;
@@ -196,7 +196,7 @@ public partial class TvTreeModelBrowser : UserControl
             {
                 TvNodeData nDatadev = new TvNodeData(TvBrowserItemType.Devices, it.getDevice());
                 nData.CountOfChild = it.getDevice().openObject().numViews();
-                TvTreeItem deviceNode = new TvTreeItem("Device<" + it.getDevice().openObject().getName() + ">", Resource["MbDeviceImg"] as BitmapImage, itm, nDatadev, _wpfView.VM);
+                TvTreeItem deviceNode = new TvTreeItem("Device<" + it.getDevice().openObject().getName() + ">", _resource["MbDeviceImg"] as BitmapImage, itm, nDatadev, _wpfView.Vm);
                 AddViews(it.getDevice().openObject(), deviceNode);
                 cnt++;
                 it.step();
@@ -205,26 +205,26 @@ public partial class TvTreeModelBrowser : UserControl
             nData.CountOfChild = cnt;
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddViews(OdTvGsDevice device, TvTreeItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         int numViews = device.numViews();
         for (int i = 0; i < numViews; i++)
         {
             new TvTreeItem("View<" + device.viewAt(i).openObject().getName() + ">",
-                Resource["MbViewImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Views, device.viewAt(i)), _wpfView.VM);
+                _resource["MbViewImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Views, device.viewAt(i)), _wpfView.Vm);
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddModels(TvTreeItem parent)
     {
         _modelsFoldItm = null;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvModelsIterator it = _tvDbId.openObject().getModelsIterator();
         if (!it.done())
         {
@@ -237,18 +237,18 @@ public partial class TvTreeModelBrowser : UserControl
             }
             nData.CountOfChild = cnt;
 
-            _modelsFoldItm = new TvTreeItem("Models", Resource["MbModelFoldImg"] as BitmapImage, parent, nData, _wpfView.VM);
+            _modelsFoldItm = new TvTreeItem("Models", _resource["MbModelFoldImg"] as BitmapImage, parent, nData, _wpfView.Vm);
             _modelsFoldItm.Expanded += TvTreeItem_Expanded;
             _modelsFoldItm.SetBold();
             _modelsFoldItm.Items.Add(null);
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddEntities(object id, TvTreeItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvEntitiesIterator it = null;
         if (parent.NodeData.Type == TvBrowserItemType.Blocks)
         {
@@ -278,18 +278,18 @@ public partial class TvTreeModelBrowser : UserControl
             it.step();
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddEntity(OdTvEntityId enId, TvTreeItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
-        if (enId.getType() == OdTvEntityId.EntityTypes.kEntity)
+        MemoryTransaction mtr = _mm.StartTransaction();
+        if (enId.getType() == OdTvEntityId_EntityTypes.kEntity)
         {
             OdTvEntity en = enId.openObject();
             string name = en.getName();
             TvTreeItem child = new TvTreeItem("Entity<" + (name.Length > 0 ? name : _entityNum++.ToString()) + ">",
-                Resource["MbEntityImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Entity, enId, _wpfView.TvGsDeviceId), _wpfView.VM);
+                _resource["MbEntityImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Entity, enId, _wpfView.TvGsDeviceId), _wpfView.Vm);
             ulong hndl = enId.openObject().getDatabaseHandle();
             if(!parent.NodeData.EntitiesDictionary.ContainsKey(hndl))
                 parent.NodeData.EntitiesDictionary.Add(hndl, child);
@@ -299,27 +299,27 @@ public partial class TvTreeModelBrowser : UserControl
                 child.Items.Add(null);
             }
         }
-        else if (enId.getType() == OdTvEntityId.EntityTypes.kLight)
+        else if (enId.getType() == OdTvEntityId_EntityTypes.kLight)
         {
             string name = enId.openObjectAsLight().getName();
             new TvTreeItem("Light<" + (name.Length > 0 ? name : _lightNum++.ToString()) + ">",
-                Resource["MbLightImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Light, enId), _wpfView.VM);
+                _resource["MbLightImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Light, enId), _wpfView.Vm);
         }
         else
         {
             string name = enId.openObjectAsInsert().getName();
             TvTreeItem child = new TvTreeItem("Insert<" + (name.Length > 0 ? name : _insertNum++.ToString()) + ">",
-                Resource["MbEntityImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Insert, enId), _wpfView.VM);
+                _resource["MbEntityImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Insert, enId), _wpfView.Vm);
             ulong hndl = enId.openObjectAsInsert().getDatabaseHandle();
             if (!parent.NodeData.EntitiesDictionary.ContainsKey(hndl))
                 parent.NodeData.EntitiesDictionary.Add(hndl, child);
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddGeometries(OdTvGeometryDataIterator it, TvTreeItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         int index = 1;
         while (!it.done())
         {
@@ -332,17 +332,17 @@ public partial class TvTreeModelBrowser : UserControl
             index++;
             it.step();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddGeometry(OdTvGeometryDataId id, TvTreeItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
-        if (id.getType() == OdTvGeometryDataType.kSubEntity)
+        MemoryTransaction mtr = _mm.StartTransaction();
+        if (id.getType() == OdTv_OdTvGeometryDataType.kSubEntity)
         {
             OdTvEntity en = id.openAsSubEntity();
             TvTreeItem child = new TvTreeItem("SubEntity<" + en.getName() + ">",
-                Resource["MbGeomImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Geometry, id, _wpfView.TvGsDeviceId), _wpfView.VM);
+                _resource["MbGeomImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Geometry, id, _wpfView.TvGsDeviceId), _wpfView.Vm);
             if (!en.getGeometryDataIterator().done())
             {
                 child.Expanded += TvTreeItem_Expanded;
@@ -352,12 +352,12 @@ public partial class TvTreeModelBrowser : UserControl
         else
         {
             new TvTreeItem("<" + GetGeomNameFromType(id.getType()) + ">",
-                Resource["MbGeomImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Geometry, id, _wpfView.TvGsDeviceId), _wpfView.VM);
+                _resource["MbGeomImg"] as BitmapImage, parent, new TvNodeData(TvBrowserItemType.Geometry, id, _wpfView.TvGsDeviceId), _wpfView.Vm);
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
-    private string GetGeomNameFromType(OdTvGeometryDataType type)
+    private string GetGeomNameFromType(OdTv_OdTvGeometryDataType type)
     {
         string[] geomTypes = { "Undefinied", "Polyline", "Circle", "CircleWedge", "CircularArc", "Ellipse", "EllipticArc", "Polygon", "Text", "Shell", "Sphere", "Cylinder"
             , "Insert", "SubEntity", "Nurbs", "RasterImage", "InfiniteLine", "Mesh", "PointCloud", "Grid", "ColoredShape"};
@@ -367,7 +367,7 @@ public partial class TvTreeModelBrowser : UserControl
     private void AddBlocks(TvTreeItem parent)
     {
         TvTreeItem itm = null;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvBlocksIterator it = _tvDbId.openObject().getBlocksIterator();
         if (!it.done())
         {
@@ -380,17 +380,17 @@ public partial class TvTreeModelBrowser : UserControl
             }
             nData.CountOfChild = cnt;
 
-            itm = new TvTreeItem("Blocks", Resource["MbBlockImg"] as BitmapImage, parent, nData, _wpfView.VM);
+            itm = new TvTreeItem("Blocks", _resource["MbBlockImg"] as BitmapImage, parent, nData, _wpfView.Vm);
             itm.Expanded += TvTreeItem_Expanded;
             itm.Items.Add(null);
             itm.SetBold();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddBlock(OdTvBlockId id, TvTreeItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvBlock block = id.openObject();
         TvNodeData nData = new TvNodeData(TvBrowserItemType.Blocks, id);
 
@@ -403,20 +403,20 @@ public partial class TvTreeModelBrowser : UserControl
         }
         nData.CountOfChild = cnt;
 
-        TvTreeItem child = new TvTreeItem("Block<" + id.openObject().getName() + ">", Resource["MbBlockImg"] as BitmapImage
-            , parent, nData, _wpfView.VM);
+        TvTreeItem child = new TvTreeItem("Block<" + id.openObject().getName() + ">", _resource["MbBlockImg"] as BitmapImage
+            , parent, nData, _wpfView.Vm);
         if (!block.getEntitiesIterator().done())
         {
             child.Expanded += TvTreeItem_Expanded;
             child.Items.Add(null);
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddLinetypes(TvTreeItem parent)
     {
         TvTreeItem itm = null;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvLinetypesIterator it = _tvDbId.openObject().getLinetypesIterator();
         if (!it.done())
         {
@@ -429,26 +429,26 @@ public partial class TvTreeModelBrowser : UserControl
             }
             nData.CountOfChild = cnt;
 
-            itm = new TvTreeItem("Linetypes", Resource["MbLinetypeImg"] as BitmapImage, parent, nData, _wpfView.VM);
+            itm = new TvTreeItem("Linetypes", _resource["MbLinetypeImg"] as BitmapImage, parent, nData, _wpfView.Vm);
             itm.SetBold();
             itm.Items.Add(null);
             itm.Expanded += TvTreeItem_Expanded;
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddLinetype(OdTvLinetypeId id, TvTreeItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
-        new TvTreeItem("Linetype<" + id.openObject().getName() + ">", Resource["MbLinetypeImg"] as BitmapImage
-            , parent, new TvNodeData(TvBrowserItemType.Linetypes, id), _wpfView.VM);
-        MM.StopTransaction(mtr);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        new TvTreeItem("Linetype<" + id.openObject().getName() + ">", _resource["MbLinetypeImg"] as BitmapImage
+            , parent, new TvNodeData(TvBrowserItemType.Linetypes, id), _wpfView.Vm);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddTextStyles(TvTreeItem parent)
     {
         TvTreeItem itm = null;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvTextStylesIterator it = _tvDbId.openObject().getTextStylesIterator();
         if (!it.done())
         {
@@ -461,26 +461,26 @@ public partial class TvTreeModelBrowser : UserControl
             }
             nData.CountOfChild = cnt;
 
-            itm = new TvTreeItem("TextStyles", Resource["MbTxtStyleImg"] as BitmapImage, parent, nData, _wpfView.VM);
+            itm = new TvTreeItem("TextStyles", _resource["MbTxtStyleImg"] as BitmapImage, parent, nData, _wpfView.Vm);
             itm.SetBold();
             itm.Items.Add(null);
             itm.Expanded += TvTreeItem_Expanded;
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddTextStyle(OdTvTextStyleId id, TvTreeItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
-        new TvTreeItem("TextStyle<" + id.openObject().getName() + ">", Resource["MbTxtStyleImg"] as BitmapImage
-            , parent, new TvNodeData(TvBrowserItemType.TextStyles, id), _wpfView.VM);
-        MM.StopTransaction(mtr);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        new TvTreeItem("TextStyle<" + id.openObject().getName() + ">", _resource["MbTxtStyleImg"] as BitmapImage
+            , parent, new TvNodeData(TvBrowserItemType.TextStyles, id), _wpfView.Vm);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddLayers(TvTreeItem parent)
     {
         TvTreeItem itm = null;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvLayersIterator it = _tvDbId.openObject().getLayersIterator();
         if (!it.done())
         {
@@ -493,26 +493,26 @@ public partial class TvTreeModelBrowser : UserControl
             }
             nData.CountOfChild = cnt;
 
-            itm = new TvTreeItem("Layers", Resource["MbLayersImg"] as BitmapImage, parent, nData, _wpfView.VM);
+            itm = new TvTreeItem("Layers", _resource["MbLayersImg"] as BitmapImage, parent, nData, _wpfView.Vm);
             itm.SetBold();
             itm.Items.Add(null);
             itm.Expanded += TvTreeItem_Expanded;
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddLayer(OdTvLayerId id, TvTreeItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
-        new TvTreeItem("Layer<" + id.openObject().getName() + ">", Resource["MbLayerImg"] as BitmapImage
-            , parent, new TvNodeData(TvBrowserItemType.Layers, id), _wpfView.VM);
-        MM.StopTransaction(mtr);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        new TvTreeItem("Layer<" + id.openObject().getName() + ">", _resource["MbLayerImg"] as BitmapImage
+            , parent, new TvNodeData(TvBrowserItemType.Layers, id), _wpfView.Vm);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddMaterials(TvTreeItem parent)
     {
         TvTreeItem itm = null;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvMaterialsIterator it = _tvDbId.openObject().getMaterialsIterator();
         if (!it.done())
         {
@@ -525,26 +525,26 @@ public partial class TvTreeModelBrowser : UserControl
             }
             nData.CountOfChild = cnt;
 
-            itm = new TvTreeItem("Materials", Resource["MbMaterialsFoldImg"] as BitmapImage, parent, nData, _wpfView.VM);
+            itm = new TvTreeItem("Materials", _resource["MbMaterialsFoldImg"] as BitmapImage, parent, nData, _wpfView.Vm);
             itm.Items.Add(null);
             itm.SetBold();
             itm.Expanded += TvTreeItem_Expanded;
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddMaterial(OdTvMaterialId id, TvTreeItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
-        new TvTreeItem("Material<" + id.openObject().getName() + ">", Resource["MbMaterialImg"] as BitmapImage
-            , parent, new TvNodeData(TvBrowserItemType.Materials, id), _wpfView.VM);
-        MM.StopTransaction(mtr);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        new TvTreeItem("Material<" + id.openObject().getName() + ">", _resource["MbMaterialImg"] as BitmapImage
+            , parent, new TvNodeData(TvBrowserItemType.Materials, id), _wpfView.Vm);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddRasterImages(TvTreeItem parent)
     {
         TvTreeItem itm = null;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvRasterImagesIterator it = _tvDbId.openObject().getRasterImagesIterator();
         if (!it.done() && it.getRasterImage().openObject().getSourceFileName().Length > 0)
         {
@@ -557,20 +557,20 @@ public partial class TvTreeModelBrowser : UserControl
             }
             nData.CountOfChild = cnt;
 
-            itm = new TvTreeItem("Raster Images", Resource["MbImagesFoldImg"] as BitmapImage, parent, nData, _wpfView.VM);
+            itm = new TvTreeItem("Raster Images", _resource["MbImagesFoldImg"] as BitmapImage, parent, nData, _wpfView.Vm);
             itm.SetBold();
             itm.Items.Add(null);
             itm.Expanded += TvTreeItem_Expanded;
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AddRasterImage(OdTvRasterImageId id, TvTreeItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
-        new TvTreeItem("RasterImage<" + id.openObject().getSourceFileName() + ">", Resource["MbImageImg"] as BitmapImage
-            , parent, new TvNodeData(TvBrowserItemType.RasterImages, id), _wpfView.VM);
-        MM.StopTransaction(mtr);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        new TvTreeItem("RasterImage<" + id.openObject().getSourceFileName() + ">", _resource["MbImageImg"] as BitmapImage
+            , parent, new TvNodeData(TvBrowserItemType.RasterImages, id), _wpfView.Vm);
+        _mm.StopTransaction(mtr);
     }
 
     private void TvTreeItem_Expanded(object sender, RoutedEventArgs e)
@@ -584,7 +584,7 @@ public partial class TvTreeModelBrowser : UserControl
             case TvBrowserItemType.MaterialsFold:
                 {
                     itm.Items.Clear();
-                    MemoryTransaction mtr = MM.StartTransaction();
+                    MemoryTransaction mtr = _mm.StartTransaction();
                     OdTvMaterialsIterator it = _tvDbId.openObject().getMaterialsIterator();
                     int ind = 1;
                     while (!it.done())
@@ -598,12 +598,12 @@ public partial class TvTreeModelBrowser : UserControl
                         ind++;
                         it.step();
                     }
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     break;
                 }
             case TvBrowserItemType.LinetypesFold:
                 {
-                    MemoryTransaction mtr = MM.StartTransaction();
+                    MemoryTransaction mtr = _mm.StartTransaction();
                     itm.Items.Clear();
                     OdTvLinetypesIterator it = _tvDbId.openObject().getLinetypesIterator();
                     int ind = 1;
@@ -618,13 +618,13 @@ public partial class TvTreeModelBrowser : UserControl
                         ind++;
                         it.step();
                     }
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     break;
                 }
             case TvBrowserItemType.TextStylesFold:
                 {
                     itm.Items.Clear();
-                    MemoryTransaction mtr = MM.StartTransaction();
+                    MemoryTransaction mtr = _mm.StartTransaction();
                     OdTvTextStylesIterator it = _tvDbId.openObject().getTextStylesIterator();
                     int ind = 1;
                     while (!it.done())
@@ -638,29 +638,29 @@ public partial class TvTreeModelBrowser : UserControl
                         ind++;
                         it.step();
                     }
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     break;
                 }
             case TvBrowserItemType.Models:
                 {
-                    MemoryTransaction mtr = MM.StartTransaction();
+                    MemoryTransaction mtr = _mm.StartTransaction();
                     itm.Items.Clear();
                     if (itm.NodeData.ModelId != null && itm.NodeData.ModelId.openObject() != null)
                         AddEntities(itm.NodeData.ModelId, itm);
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     break;
                 }
             case TvBrowserItemType.ModelsFold:
                 {
                     itm.Items.Clear();
-                    MemoryTransaction mtr = MM.StartTransaction();
+                    MemoryTransaction mtr = _mm.StartTransaction();
                     OdTvModelsIterator it = _tvDbId.openObject().getModelsIterator();
                     while (!it.done())
                     {
                         TvNodeData nData = new TvNodeData(TvBrowserItemType.Models, it.getModel(), _wpfView.TvGsDeviceId);
 
                         OdTvModel model = it.getModel().openObject();
-                        TvTreeItem child = new TvTreeItem("Model<" + model.getName() + ">", Resource["MbModelFoldImg"] as BitmapImage, itm, nData, _wpfView.VM);
+                        TvTreeItem child = new TvTreeItem("Model<" + model.getName() + ">", _resource["MbModelFoldImg"] as BitmapImage, itm, nData, _wpfView.Vm);
                         itm.NodeData.ModelsDictionary.Add(it.getModel().openObject().getDatabaseHandle(), child);
 
                         OdTvEntitiesIterator enIt = model.getEntitiesIterator();
@@ -679,13 +679,13 @@ public partial class TvTreeModelBrowser : UserControl
                         }
                         it.step();
                     }
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     break;
                 }
             case TvBrowserItemType.RasterImagesFold:
                 {
                     itm.Items.Clear();
-                    MemoryTransaction mtr = MM.StartTransaction();
+                    MemoryTransaction mtr = _mm.StartTransaction();
                     OdTvRasterImagesIterator it = _tvDbId.openObject().getRasterImagesIterator();
                     int ind = 1;
                     while (!it.done())
@@ -699,21 +699,21 @@ public partial class TvTreeModelBrowser : UserControl
                         ind++;
                         it.step();
                     }
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     break;
                 }
             case TvBrowserItemType.Blocks:
                 {
                     itm.Items.Clear();
-                    MemoryTransaction mtr = MM.StartTransaction();
+                    MemoryTransaction mtr = _mm.StartTransaction();
                     AddEntities(itm.NodeData.BlockId, itm);
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     break;
                 }
             case TvBrowserItemType.BlocksFold:
                 {
                     itm.Items.Clear();
-                    MemoryTransaction mtr = MM.StartTransaction();
+                    MemoryTransaction mtr = _mm.StartTransaction();
                     OdTvBlocksIterator it = _tvDbId.openObject().getBlocksIterator();
                     int ind = 1;
                     while (!it.done())
@@ -727,13 +727,13 @@ public partial class TvTreeModelBrowser : UserControl
                         ind++;
                         it.step();
                     }
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     break;
                 }
             case TvBrowserItemType.LayersFold:
                 {
                     itm.Items.Clear();
-                    MemoryTransaction mtr = MM.StartTransaction();
+                    MemoryTransaction mtr = _mm.StartTransaction();
                     OdTvLayersIterator it = _tvDbId.openObject().getLayersIterator();
                     int ind = 1;
                     while (!it.done())
@@ -747,28 +747,28 @@ public partial class TvTreeModelBrowser : UserControl
                         ind++;
                         it.step();
                     }
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     break;
                 }
             case TvBrowserItemType.Entity:
                 {
                     itm.Items.Clear();
-                    MemoryTransaction mtr = MM.StartTransaction();
+                    MemoryTransaction mtr = _mm.StartTransaction();
                     if (itm.NodeData.EntityId != null && !itm.NodeData.EntityId.isNull())
                     {
                         if (itm.NodeData.EntityId != null && itm.NodeData.EntityId.openObject() != null)
                             AddGeometries(itm.NodeData.EntityId.openObject().getGeometryDataIterator(), itm);
                     }
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     break;
                 }
             case TvBrowserItemType.Geometry:
                 {
                     itm.Items.Clear();
-                    MemoryTransaction mtr = MM.StartTransaction();
+                    MemoryTransaction mtr = _mm.StartTransaction();
                     if (itm.NodeData.SubEntId != null && itm.NodeData.SubEntId.isValid())
                         AddGeometries(itm.NodeData.SubEntId.openAsSubEntity().getGeometryDataIterator(), itm);
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     break;
                 }
         }
@@ -782,7 +782,7 @@ public partial class TvTreeModelBrowser : UserControl
 
         Button btn = new Button
         {
-            Content = new Image() { Source = Resource["MbExpandImg"] as BitmapImage, Height = 9 },
+            Content = new Image() { Source = _resource["MbExpandImg"] as BitmapImage, Height = 9 },
             Width = 100,
             Height = 15,
             Tag = index,
@@ -794,7 +794,7 @@ public partial class TvTreeModelBrowser : UserControl
         {
             Margin = new Thickness(5, 0, 0, 0),
             Width = 30,
-            Content = new Image() { Source = Resource["MbExpandAllImg"] as BitmapImage },
+            Content = new Image() { Source = _resource["MbExpandAllImg"] as BitmapImage },
             Height = 15,
             Tag = -1,
             ToolTip = "Expand all"
@@ -829,7 +829,7 @@ public partial class TvTreeModelBrowser : UserControl
 
     private void LoadElements(TvTreeItem parent, int startInd, int endInd)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         switch (parent.NodeData.Type)
         {
@@ -862,7 +862,7 @@ public partial class TvTreeModelBrowser : UserControl
                 break;
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadByType<T>(T it, int startInd, int endInd, TvTreeItem parent) where T : OdTvIterator

@@ -27,11 +27,11 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
 using CheckBox = System.Windows.Controls.CheckBox;
 using ComboBox = System.Windows.Controls.ComboBox;
 using TextBox = System.Windows.Controls.TextBox;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -66,7 +66,7 @@ class TvInsertProperties : BasePaletteProperties
         if (entityId == null || entityId.isNull())
             return;
         _insertId = entityId;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvInsert ins = entityId.openObjectAsInsert();
         int row = 0;
         AddLabelAndTextBox("Name:", ins.getName(), MainGrid, new[] { row, 0, row++, 1 }, true);
@@ -121,7 +121,7 @@ class TvInsertProperties : BasePaletteProperties
 
         StretchingTreeViewItem misc = AddTreeItem("Misc", MainGrid, new[] { row, 0 });
         AddLabelAndTextBox("Count of child:", countOfChild.ToString(), misc, true);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Visibility_Click(object sender, RoutedEventArgs e)
@@ -129,11 +129,11 @@ class TvInsertProperties : BasePaletteProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvInsert ins = _insertId.openObjectAsInsert(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvInsert ins = _insertId.openObjectAsInsert(OdTv_OpenMode.kForWrite);
         ins.setVisibility(new OdTvVisibilityDef(cb.IsChecked == true));
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Linetype_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -141,12 +141,12 @@ class TvInsertProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvInsert ins = _insertId.openObjectAsInsert();
         if (GetLinetypeName(ins.getLinetype()) != cb.SelectedItem.ToString())
             ins.setLinetype(GetLinetypeDef(cb.SelectedItem.ToString()));
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Layer_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -154,12 +154,12 @@ class TvInsertProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvInsert ins = _insertId.openObjectAsInsert();
         if (GetLayerName(ins.getLayer()) != cb.SelectedItem.ToString())
             ins.setLayer(GetLayerDef(cb.SelectedItem.ToString()));
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Color_ColorChanged(object sender, OdTvColorDef newColor)
@@ -167,12 +167,12 @@ class TvInsertProperties : BasePaletteProperties
         Colorpicker cp = sender as Colorpicker;
         if (cp == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvInsert ins = _insertId.openObjectAsInsert();
         if (ins.getColor() != newColor)
             ins.setColor(newColor);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Transform_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -180,7 +180,7 @@ class TvInsertProperties : BasePaletteProperties
         DoubleTextBox dtb = sender as DoubleTextBox;
         if (dtb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvInsert ins = _insertId.openObjectAsInsert();
         OdGeMatrix3d matr = ins.getBlockTransform();
         SetMatrix(matr, (MatrixData)dtb.Tag, dtb.Text);
@@ -194,7 +194,7 @@ class TvInsertProperties : BasePaletteProperties
             System.Windows.Forms.MessageBox.Show("Invalid parameters of block transform", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void TextType_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -202,9 +202,9 @@ class TvInsertProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         ControlData data = (ControlData)tb.Tag;
-        OdTvInsert ins = _insertId.openObjectAsInsert(OpenMode.kForWrite);
+        OdTvInsert ins = _insertId.openObjectAsInsert(OdTv_OpenMode.kForWrite);
         switch (data.ProperyType)
         {
             case TextType.Position:
@@ -247,6 +247,6 @@ class TvInsertProperties : BasePaletteProperties
                 }
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace HCL_ODA_TestPAD.Functional
 {
@@ -94,7 +94,7 @@ namespace HCL_ODA_TestPAD.Functional
             return default;
         }
 
-        public TK Unwrap<TK>(Func<T, TK> selector)
+        public Tk Unwrap<Tk>(Func<T, Tk> selector)
         {
             if (HasValue)
                 return selector(Value);

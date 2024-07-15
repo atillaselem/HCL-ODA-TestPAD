@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Globalization;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -37,7 +37,7 @@ class TvRasterImageProperties : BasePaletteProperties
     public TvRasterImageProperties(OdTvRasterImageId imgId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         _imgId = imgId;
         OdTvRasterImage img = _imgId.openObject();
         int row = 0;
@@ -51,6 +51,6 @@ class TvRasterImageProperties : BasePaletteProperties
         itm.Items.Add(grid);
         AddLabelAndTextBox("X:", img.getSize().x.ToString(CultureInfo.InvariantCulture), grid, new[] { 0, 0, 0, 1 }, true);
         AddLabelAndTextBox("Y:", img.getSize().y.ToString(CultureInfo.InvariantCulture), grid, new[] { 1, 0, 1, 1 }, true);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

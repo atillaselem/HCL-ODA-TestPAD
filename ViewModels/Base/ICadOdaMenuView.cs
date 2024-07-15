@@ -1,8 +1,15 @@
-﻿using Teigha.Visualize;
+﻿using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 
 
 namespace HCL_ODA_TestPAD.ViewModels.Base
 {
+    public enum HclToolType
+    {
+        PLTStation,
+        Prism,
+        Points
+    }
     public enum ZoomType
     {
         ZoomIn,
@@ -27,10 +34,10 @@ namespace HCL_ODA_TestPAD.ViewModels.Base
         void Pan();
         void Orbit();
         void SetZoom(ZoomType type);
-        void Set3DView(OdTvExtendedView.e3DViewType type);
-        void SetRenderMode(OdTvGsView.RenderMode renderMode);
-        void SetProjectionType(OdTvGsView.Projection projection);
-        void Regen(OdTvGsDevice.RegenMode regenMode);
+        void Set3DView(OdTvExtendedView_e3DViewType type);
+        void SetRenderMode(OdTvGsView_RenderMode renderMode);
+        void SetProjectionType(OdTvGsView_Projection projection);
+        void Regen(OdTvGsDevice_RegenMode regenMode);
         void RegenView();
     }
 

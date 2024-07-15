@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using HCL_ODA_TestPAD.ViewModels;
+using System.Windows.Controls;
 
 namespace HCL_ODA_TestPAD.Views
 {
@@ -10,6 +11,13 @@ namespace HCL_ODA_TestPAD.Views
         public LoadingOverlay()
         {
             InitializeComponent();
+        }
+
+        private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var dataContext = (OverlayViewModel)this.DataContext;
+            dataContext.CancelTokenSource.Cancel();
+            dataContext.IsLoading = false;
         }
     }
 }

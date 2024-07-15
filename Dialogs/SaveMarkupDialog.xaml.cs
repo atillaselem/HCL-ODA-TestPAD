@@ -27,8 +27,8 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace HCL_ODA_TestPAD.Dialogs;
@@ -70,12 +70,12 @@ public struct SaveTvViewParams
         UpVectorZ = vec.z;
     }
 
-    public void SetProjection(OdTvGsView.Projection proj)
+    public void SetProjection(OdTvGsView_Projection proj)
     {
         Projection = (uint) proj;
     }
 
-    public void SetRenderMode(OdTvGsView.RenderMode mode)
+    public void SetRenderMode(OdTvGsView_RenderMode mode)
     {
         RenderMode = (uint) mode;
     }
@@ -98,7 +98,7 @@ public partial class SaveMarkupDialog : Window
     private string _oldName;
     private string _newName;
 
-    private MemoryManager MM = MemoryManager.GetMemoryManager();
+    private MemoryManager _mm = MemoryManager.GetMemoryManager();
 
     public SaveMarkupDialog(OdTvModelId markupModel, OdTvEntityId activeEntityId, OdTvGsViewId viewId)
     {
@@ -108,12 +108,12 @@ public partial class SaveMarkupDialog : Window
         _curEntityId = activeEntityId;
         _viewId = viewId;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         _oldName = _curEntityId.openObject().getName();
         txtBox.Text = _oldName == OdTvMarkupDragger.NameOfMarkupTempEntity ? "" : _oldName;
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void ButtonCancel_OnClick(object sender, RoutedEventArgs e)
@@ -143,15 +143,15 @@ public partial class SaveMarkupDialog : Window
             return;
         }
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
-        OdTvEntity pEn = _curEntityId.openObject(OpenMode.kForWrite);
+        OdTvEntity pEn = _curEntityId.openObject(OdTv_OpenMode.kForWrite);
         pEn.setName(_newName);
 
         OdTvGsView view = _viewId.openObject();
         if (view == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
@@ -159,8 +159,8 @@ public partial class SaveMarkupDialog : Window
         tvViewParam.SetPosition(view.position());
         tvViewParam.SetTarget(view.target());
         tvViewParam.SetUpVector(view.upVector());
-        tvViewParam.SetProjection(view.isPerspective() ? OdTvGsView.Projection.kPerspective
-            : OdTvGsView.Projection.kParallel);
+        tvViewParam.SetProjection(view.isPerspective() ? OdTvGsView_Projection.kPerspective
+            : OdTvGsView_Projection.kParallel);
         tvViewParam.SetRenderMode(view.mode());
         tvViewParam.SetSize(view.fieldWidth(), view.fieldHeight());
 
@@ -168,7 +168,7 @@ public partial class SaveMarkupDialog : Window
         IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(tvViewParam));
         Marshal.StructureToPtr(tvViewParam, ptr, false);
         int size = Marshal.SizeOf(typeof(SaveTvViewParams));
-        OdTvByteUserData data = new OdTvByteUserData(ptr, (uint)size, OdTvByteUserData.Ownership.kCopyOwn, true);
+        OdTvByteUserData data = new OdTvByteUserData(ptr, (uint)size, OdTvByteUserData_Ownership.kCopyOwn, true);
         pEn.appendUserData(data, HclCadImageViewModel.AppTvId);
         Marshal.FreeHGlobal(ptr);
 
@@ -182,10 +182,10 @@ public partial class SaveMarkupDialog : Window
             // objects
             while (!pIt2.done())
             {
-                OdTvEntity pObj = pIt2.getGeometryData().openAsSubEntity(OpenMode.kForWrite);
+                OdTvEntity pObj = pIt2.getGeometryData().openAsSubEntity(OdTv_OpenMode.kForWrite);
                 IntPtr ptr2 = Marshal.AllocHGlobal(sizeof(byte));
                 Marshal.WriteByte(ptr2, 1);
-                OdTvByteUserData bdata = new OdTvByteUserData(ptr2, sizeof(byte), OdTvByteUserData.Ownership.kCopyOwn, true);
+                OdTvByteUserData bdata = new OdTvByteUserData(ptr2, sizeof(byte), OdTvByteUserData_Ownership.kCopyOwn, true);
                 pObj.appendUserData(bdata, HclCadImageViewModel.AppTvId);
                 Marshal.FreeHGlobal(ptr2);
 
@@ -194,17 +194,17 @@ public partial class SaveMarkupDialog : Window
             pItF.step();
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         DialogResult = true;
     }
 
     private bool IsHaveSameName()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         if (_newName == OdTvMarkupDragger.NameOfMarkupTempEntity)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return true;
         }
 
@@ -214,7 +214,7 @@ public partial class SaveMarkupDialog : Window
             if (it.getEntity().openObject().getName() == _newName &&
                 !it.getEntity().IsEqual(_curEntityId))
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return true;
             }
             it.step();

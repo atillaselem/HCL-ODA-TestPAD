@@ -30,8 +30,8 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
@@ -54,7 +54,7 @@ public partial class BasePaletteProperties : UserControl
     public OdTvGsDeviceId TvDeviceId { get; private set; }
     public OdTvDatabaseId TvDatabaseId { get; private set; }
     protected IOdaSectioning _renderArea;
-    protected MemoryManager MM = MemoryManager.GetMemoryManager();
+    protected MemoryManager _mm = MemoryManager.GetMemoryManager();
 
     public enum CoordinateType
     {
@@ -65,10 +65,10 @@ public partial class BasePaletteProperties : UserControl
 
     public enum DcSizeType
     {
-        xMin,
-        xMax,
-        yMin,
-        yMax
+        XMin,
+        XMax,
+        YMin,
+        YMax
     }
 
     public struct MatrixData
@@ -103,7 +103,7 @@ public partial class BasePaletteProperties : UserControl
         MemoryTransaction mtr = MemoryManager.GetMemoryManager().StartTransaction();
         TvDatabaseId = id.openObject().getDatabase();
         _renderArea = renderArea;
-        MainGrid.MaxWidth = Scroller.IsVisible ? renderArea.VM.CurrentPropertiesWidth - 10 + Scroller.Width : renderArea.VM.CurrentPropertiesWidth - 10;
+        MainGrid.MaxWidth = Scroller.IsVisible ? renderArea.Vm.CurrentPropertiesWidth - 10 + Scroller.Width : renderArea.Vm.CurrentPropertiesWidth - 10;
         MemoryManager.GetMemoryManager().StopTransaction(mtr);
         SizeChanged += BasePaletteProperties_SizeChanged;
     }
@@ -112,19 +112,19 @@ public partial class BasePaletteProperties : UserControl
     {
         Visibility verticalScrollBarVisibility = Scroller.ComputedVerticalScrollBarVisibility;
         MainGrid.MaxWidth = verticalScrollBarVisibility == Visibility.Visible
-            ? _renderArea.VM.CurrentPropertiesWidth - 10 - SystemParameters.VerticalScrollBarWidth : _renderArea.VM.CurrentPropertiesWidth - 10;
+            ? _renderArea.Vm.CurrentPropertiesWidth - 10 - SystemParameters.VerticalScrollBarWidth : _renderArea.Vm.CurrentPropertiesWidth - 10;
     }
 
     protected void Update()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         //_renderArea.Focus();
         if (TvDeviceId != null && !TvDeviceId.isNull())
             TvDeviceId.openObject().update();
         if (_renderArea != null)
             //_renderArea.Invalidate();
             _renderArea.UpdateCadView();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     public static uint ColorToUInt(Color color)
@@ -176,7 +176,7 @@ public partial class BasePaletteProperties : UserControl
         Grid.SetRow(lbl, layots[0]);
         Grid.SetColumn(lbl, layots[1]);
         Colorpicker clrp = new Colorpicker(color, TvDeviceId, isObjColor);
-        if (color.getType() == OdTvColorDef.ColorType.kDefault)
+        if (color.getType() == OdTvColorDef_ColorType.kDefault)
             lbl.Foreground = new SolidColorBrush() { Color = Colors.Gray };
         Grid.SetRow(clrp, layots[2]);
         Grid.SetColumn(clrp, layots[3]);
@@ -190,7 +190,7 @@ public partial class BasePaletteProperties : UserControl
         Label lbl = new Label() { Content = label };
         Grid.SetColumn(lbl, 0);
         Colorpicker clrp = new Colorpicker(color, TvDeviceId, isObjColor);
-        if (color.getType() == OdTvColorDef.ColorType.kDefault)
+        if (color.getType() == OdTvColorDef_ColorType.kDefault)
             lbl.Foreground = new SolidColorBrush() { Color = Colors.Gray };
         Grid.SetColumn(clrp, 1);
         parent.Items.Add(CreateGridWithElements(2, lbl, clrp));
@@ -201,48 +201,48 @@ public partial class BasePaletteProperties : UserControl
         bool isLayer = false)
     {
         return AddLabelAndComboBox(label, GetLinetypesList(isLayer), GetLinetypeName(linetype), grid, arr,
-            linetype.getType() == OdTvLinetypeDef.LinetypeType.kDefault);
+            linetype.getType() == OdTvLinetypeDef_LinetypeType.kDefault);
     }
     protected string GetLinetypeName(OdTvLinetypeDef ltDef)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         string name = "";
         switch (ltDef.getType())
         {
-            case OdTvLinetypeDef.LinetypeType.kId:
+            case OdTvLinetypeDef_LinetypeType.kId:
                 name = ltDef.getLinetype().openObject().getName();
                 if (name == null) name = "";
                 break;
-            case OdTvLinetypeDef.LinetypeType.kPredefined:
+            case OdTvLinetypeDef_LinetypeType.kPredefined:
                 name = ltDef.getPredefinedLinetype().ToString().Remove(0, 1);
                 break;
-            case OdTvLinetypeDef.LinetypeType.kInherited:
+            case OdTvLinetypeDef_LinetypeType.kInherited:
                 name = ltDef.getInheritedLinetype().ToString().Remove(0, 1);
                 break;
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return name;
     }
 
     protected ComboBox AddLayerDef(string label, OdTvLayerDef layer, Grid grid, int[] arr)
     {
         return AddLabelAndComboBox(label, GetLayersList(), GetLayerName(layer), grid, arr,
-            layer.getType() == OdTvLayerDef.LayerType.kDefault);
+            layer.getType() == OdTvLayerDef_LayerType.kDefault);
     }
     protected string GetLayerName(OdTvLayerDef layer)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         string name = "";
-        if (layer.getType() == OdTvLayerDef.LayerType.kId)
+        if (layer.getType() == OdTvLayerDef_LayerType.kId)
             name = layer.getLayer().openObject().getName();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return name;
     }
 
     protected CheckBox AddVisibilityDef(string label, OdTvVisibilityDef vis, Grid grid, int[] arr, HorizontalAlignment align = HorizontalAlignment.Left)
     {
-        return AddLabelAndCheckBox(label, vis.getType() != OdTvVisibilityDef.VisibilityType.kInvisible, grid, arr, false,
-            vis.getType() == OdTvVisibilityDef.VisibilityType.kDefault);
+        return AddLabelAndCheckBox(label, vis.getType() != OdTvVisibilityDef_VisibilityType.kInvisible, grid, arr, false,
+            vis.getType() == OdTvVisibilityDef_VisibilityType.kDefault);
     }
     protected OdTvLinetypeDef GetLinetypeDef(string name)
     {
@@ -254,48 +254,48 @@ public partial class BasePaletteProperties : UserControl
                 lt.setDefault();
                 break;
             case "ByBlock":
-                lt = new OdTvLinetypeDef(InheritedAttribute.kByBlock);
+                lt = new OdTvLinetypeDef(OdTv_InheritedAttribute.kByBlock);
                 break;
             case "ByLayer":
-                lt = new OdTvLinetypeDef(InheritedAttribute.kByLayer);
+                lt = new OdTvLinetypeDef(OdTv_InheritedAttribute.kByLayer);
                 break;
             case "Solid":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kSolid);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kSolid);
                 break;
             case "DashDot":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kDashDot);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kDashDot);
                 break;
             case "Dashed":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kDashed);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kDashed);
                 break;
             case "Dotted":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kDotted);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kDotted);
                 break;
             case "Dash2Dot":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kDash2Dot);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kDash2Dot);
                 break;
             case "Dash3Dot":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kDash3Dot);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kDash3Dot);
                 break;
             case "LongDash":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kLongDash);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kLongDash);
                 break;
             case "LongDashShortDash":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kLongDashShortDash);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kLongDashShortDash);
                 break;
             case "LongDash2ShortDash":
-                lt = new OdTvLinetypeDef(OdTvLinetype.Predefined.kLongDash2ShortDash);
+                lt = new OdTvLinetypeDef(OdTvLinetype_Predefined.kLongDash2ShortDash);
                 break;
             default:
                 {
-                    MemoryTransaction mtr = MM.StartTransaction();
+                    MemoryTransaction mtr = _mm.StartTransaction();
                     for (OdTvLinetypesIterator it = TvDatabaseId.openObject().getLinetypesIterator(); !it.done(); it.step())
                         if (it.getLinetype().openObject().getName() == name)
                         {
                             lt = new OdTvLinetypeDef(it.getLinetype());
                             break;
                         }
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     break;
                 }
         }
@@ -307,14 +307,14 @@ public partial class BasePaletteProperties : UserControl
     {
         OdTvLayerDef lyDef = new OdTvLayerDef();
         lyDef.setDefault();
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         for (OdTvLayersIterator it = TvDatabaseId.openObject().getLayersIterator(); !it.done(); it.step())
             if (it.getLayer().openObject().getName() == name)
             {
                 lyDef = new OdTvLayerDef(it.getLayer());
                 break;
             }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return lyDef;
     }
 
@@ -322,14 +322,14 @@ public partial class BasePaletteProperties : UserControl
     {
         OdTvTextStyleDef txtDef = new OdTvTextStyleDef();
         txtDef.setDefault();
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         for (OdTvTextStylesIterator it = TvDatabaseId.openObject().getTextStylesIterator(); !it.done(); it.step())
             if (it.getTextStyle().openObject().getName() == name)
             {
                 txtDef = new OdTvTextStyleDef(it.getTextStyle());
                 break;
             }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return txtDef;
     }
 
@@ -337,81 +337,81 @@ public partial class BasePaletteProperties : UserControl
     {
         OdTvMaterialDef matDef = new OdTvMaterialDef();
         matDef.setDefault();
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         for (OdTvMaterialsIterator it = TvDatabaseId.openObject().getMaterialsIterator(); !it.done(); it.step())
             if (it.getMaterial().openObject().getName() == name)
             {
                 matDef = new OdTvMaterialDef(it.getMaterial());
                 break;
             }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return matDef;
     }
 
     protected string GetMaterialName(OdTvMaterialDef matDef)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         string name = "";
         switch (matDef.getType())
         {
-            case OdTvMaterialDef.MaterialType.kId:
+            case OdTvMaterialDef_MaterialType.kId:
                 name = matDef.getMaterial().openObject().getName();
                 break;
-            case OdTvMaterialDef.MaterialType.kInherited:
+            case OdTvMaterialDef_MaterialType.kInherited:
                 name = matDef.getInheritedMaterial().ToString().Remove(0, 1);
                 break;
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return name;
     }
 
     protected string GetTextStyleName(OdTvTextStyleDef txtDef)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         string name = "";
-        if (txtDef.getType() == OdTvTextStyleDef.TextStyleType.kId)
+        if (txtDef.getType() == OdTvTextStyleDef_TextStyleType.kId)
             name = txtDef.getTextStyle().openObject().getName();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return name;
     }
 
     protected TextBox AddLineweightDef(string label, OdTvLineWeightDef lineWeight, Grid grid, int[] arr)
     {
         return AddLabelAndTextBox(label, lineWeight.getValue().ToString(), grid, arr, false,
-            lineWeight.getType() == OdTvLineWeightDef.LineWeightType.kDefault, true);
+            lineWeight.getType() == OdTvLineWeightDef_LineWeightType.kDefault, true);
     }
     protected TextBox AddTransparencyDef(string label, OdTvTransparencyDef trDef, Grid grid, int[] arr)
     {
         return AddLabelAndTextBox(label, trDef.getValue().ToString(), grid, arr, false,
-            trDef.getType() == OdTvTransparencyDef.TransparencyType.kDefault);
+            trDef.getType() == OdTvTransparencyDef_TransparencyType.kDefault);
     }
     protected ComboBox AddMatrialDef(string label, OdTvMaterialDef material, Grid grid, int[] arr)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvResult rc = OdTvResult.tvMissingObject;
-        OdTvMaterial mat = material.getMaterial().openObject(OpenMode.kForWrite, ref rc);
+        OdTvMaterial mat = material.getMaterial().openObject(OdTv_OpenMode.kForWrite, ref rc);
         ComboBox cb = AddLabelAndComboBox(label, GetMaterialsList(), rc == OdTvResult.tvOk ? mat.getName() : "", grid, arr,
-            material.getType() == OdTvMaterialDef.MaterialType.kDefault);
-        MM.StopTransaction(mtr);
+            material.getType() == OdTvMaterialDef_MaterialType.kDefault);
+        _mm.StopTransaction(mtr);
         return cb;
     }
 
     protected ComboBox AddTextStyleDef(string label, OdTvTextStyleDef txtStyle, Grid grid, int[] arr)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         ComboBox cb = AddLabelAndComboBox(label, GetTextStylesList(),
-            txtStyle.getType() == OdTvTextStyleDef.TextStyleType.kId
+            txtStyle.getType() == OdTvTextStyleDef_TextStyleType.kId
                 ? txtStyle.getTextStyle().openObject().getName()
                 : "", grid, arr,
-            txtStyle.getType() == OdTvTextStyleDef.TextStyleType.kDefault);
-        MM.StopTransaction(mtr);
+            txtStyle.getType() == OdTvTextStyleDef_TextStyleType.kDefault);
+        _mm.StopTransaction(mtr);
         return cb;
     }
 
     protected OdTvMaterialId FindMaterial(string materialName)
     {
         OdTvMaterialId id = null;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         if (GetMaterialsList().Contains(materialName))
         {
             for (OdTvMaterialsIterator it = TvDatabaseId.openObject().getMaterialsIterator(); !it.done(); it.step())
@@ -421,7 +421,7 @@ public partial class BasePaletteProperties : UserControl
                     break;
                 }
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return id;
     }
 
@@ -651,13 +651,13 @@ public partial class BasePaletteProperties : UserControl
         StretchingTreeViewItem itm = AddTreeItem(label, grid, arr);
         Grid newGrid = CreateGrid(2, 4);
         TextBox xMin = AddLabelAndTextBox("xMin:", rect.xmin.ToString(), newGrid, new[] { 0, 0, 0, 1 }, isReadOnly, false, true);
-        xMin.Tag = DcSizeType.xMin;
+        xMin.Tag = DcSizeType.XMin;
         TextBox xMax = AddLabelAndTextBox("xMax:", rect.xmax.ToString(), newGrid, new[] { 1, 0, 1, 1 }, isReadOnly, false, true);
-        xMax.Tag = DcSizeType.xMax;
+        xMax.Tag = DcSizeType.XMax;
         TextBox yMin = AddLabelAndTextBox("yMin:", rect.ymin.ToString(), newGrid, new[] { 2, 0, 2, 1 }, isReadOnly, false, true);
-        yMin.Tag = DcSizeType.yMin;
+        yMin.Tag = DcSizeType.YMin;
         TextBox yMax = AddLabelAndTextBox("yMax:", rect.ymax.ToString(), newGrid, new[] { 3, 0, 3, 1 }, isReadOnly, false, true);
-        yMax.Tag = DcSizeType.yMax;
+        yMax.Tag = DcSizeType.YMax;
         itm.Items.Add(newGrid);
 
         return new[] { xMin, xMax, yMin, yMax };
@@ -892,7 +892,7 @@ public partial class BasePaletteProperties : UserControl
 
     protected List<string> GetTextStylesList()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         List<string> list = new List<string>() { "" };
         OdTvTextStylesIterator it = TvDatabaseId.openObject().getTextStylesIterator();
         while (!it.done())
@@ -900,13 +900,13 @@ public partial class BasePaletteProperties : UserControl
             list.Add(it.getTextStyle().openObject().getName());
             it.step();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return list;
     }
 
     protected List<string> GetLayersList()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         List<string> list = new List<string>() { "" };
         OdTvLayersIterator it = TvDatabaseId.openObject().getLayersIterator();
         while (!it.done())
@@ -914,13 +914,13 @@ public partial class BasePaletteProperties : UserControl
             list.Add(it.getLayer().openObject().getName());
             it.step();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return list;
     }
 
     protected List<string> GetLinetypesList(bool isLayer = false)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         List<string> list;
         if (!isLayer)
         {
@@ -950,13 +950,13 @@ public partial class BasePaletteProperties : UserControl
             it.step();
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return list;
     }
 
     protected List<string> GetMaterialsList()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         List<string> list = new List<string>() { "" };
         OdTvMaterialsIterator it = TvDatabaseId.openObject().getMaterialsIterator();
         while (!it.done())
@@ -964,7 +964,7 @@ public partial class BasePaletteProperties : UserControl
             list.Add(it.getMaterial().openObject().getName());
             it.step();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return list;
     }
 

@@ -1,4 +1,4 @@
-﻿namespace HCL_ODA_TestPAD.Functional
+namespace HCL_ODA_TestPAD.Functional
 {
     //public static implicit operator XElement(XmlBase xmlBase)
     //{

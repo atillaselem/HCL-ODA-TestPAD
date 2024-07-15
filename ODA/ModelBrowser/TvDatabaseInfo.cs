@@ -21,7 +21,7 @@
 // acknowledge and accept the above terms.
 ///////////////////////////////////////////////////////////////////////////////
 using System;
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -40,10 +40,10 @@ public class TvDatabaseInfo : OdTvFilerTimeProfiling
     public long VectorizingTime { get; set; }
     public long TvCreationTime { get; set; }
     public long FirstUpdateTime { get; set; }
-    public long CDACreationTime { get; set; }
+    public long CdaCreationTime { get; set; }
     public ProfilingType Type { get; set; }
 
-    public long TotalTime { get { return ImportTime + VectorizingTime + FirstUpdateTime + CDACreationTime; } }
+    public long TotalTime { get { return ImportTime + VectorizingTime + FirstUpdateTime + CdaCreationTime; } }
 
     public string FilePath { get; set; }
 
@@ -84,12 +84,12 @@ public class TvDatabaseInfo : OdTvFilerTimeProfiling
 
     public override void setCDATreeCreationTime(long time)
     {
-        CDACreationTime = time;
+        CdaCreationTime = time;
     }
 
     public override long getCDATreeCreationTime()
     {
-        return CDACreationTime;
+        return CdaCreationTime;
     }
 
 }

@@ -26,8 +26,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -50,7 +50,7 @@ class TvPolylineProperties : TvBaseGeometryProperties
     public TvPolylineProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
       : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvPolylineData line = GeomId.openAsPolyline();
         int row = 0;
         AddLabelAndTextBox("Number of points:", line.getPointsCount().ToString(), MainGrid, new[] { row, 0, row++, 1 }, true);
@@ -72,7 +72,7 @@ class TvPolylineProperties : TvBaseGeometryProperties
         StretchingTreeViewItem common = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(common);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Normal_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -80,7 +80,7 @@ class TvPolylineProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvPolylineData line = GeomId.openAsPolyline();
         OdGeVector3d oldVec = new OdGeVector3d();
         line.getNormal(oldVec);
@@ -90,7 +90,7 @@ class TvPolylineProperties : TvBaseGeometryProperties
             line.setNormal(newVec);
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Filled_Click(object sender, RoutedEventArgs e)
@@ -98,12 +98,12 @@ class TvPolylineProperties : TvBaseGeometryProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvPolylineData line = GeomId.openAsPolyline();
         bool bFilled;
         line.setThickness(line.getThickness(out bFilled), cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Thickness_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -111,7 +111,7 @@ class TvPolylineProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvPolylineData line = GeomId.openAsPolyline();
         double val = double.Parse(tb.Text);
         bool bFilled;
@@ -120,14 +120,14 @@ class TvPolylineProperties : TvBaseGeometryProperties
             line.setThickness(val);
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void ShowPoint_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvPolylineData line = GeomId.openAsPolyline();
-        OdTvPointArray pnts = new OdTvPointArray();
+        OdGePoint3dVector pnts = new OdGePoint3dVector();
         line.getPoints(pnts);
 
         StretchingTreeView tree = new StretchingTreeView()
@@ -171,7 +171,7 @@ class TvPolylineProperties : TvBaseGeometryProperties
             }
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Point_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)

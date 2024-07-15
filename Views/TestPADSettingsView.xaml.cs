@@ -11,19 +11,19 @@ namespace HCL_ODA_TestPAD.Views
     /// <summary>
     /// Interaction logic for TestPADSettingsView.xaml
     /// </summary>
-    public partial class TestPADSettingsView : UserControl
+    public partial class TestPadSettingsView : UserControl
     {
         //private readonly ISettingsProvider _trSettings;
-        public TestPADSettingsViewModel VM { get; set; }
-        public TestPADSettingsView()
+        public TestPadSettingsViewModel Vm { get; set; }
+        public TestPadSettingsView()
         {
             InitializeComponent();
             Loaded += UserControl_Loaded;
         }
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            VM = DataContext as TestPADSettingsViewModel;
-            if (VM != null)
+            Vm = DataContext as TestPadSettingsViewModel;
+            if (Vm != null)
             {
                 SubscribeAppEvents();
             }
@@ -34,7 +34,7 @@ namespace HCL_ODA_TestPAD.Views
             {
                 if (e.OriginalSource is PropertyItem propItem && (e.OldValue.ToString() != e.NewValue.ToString()))
                 {
-                    VM.TestPadSettings.OnDispatchChange(propItem.PropertyName, e.NewValue.ToString());
+                    Vm.TestPadSettings.OnDispatchChange(propItem.PropertyName, e.NewValue.ToString());
                 }
             }
             catch (Exception exception)
@@ -47,12 +47,12 @@ namespace HCL_ODA_TestPAD.Views
         /// </summary>
         public void SubscribeAppEvents()
         {
-            VM.EventFactory().GetEvent<SettingsUpdateEvent>().Subscribe(OnSettingsUpdateEvent);
+            Vm.EventFactory().GetEvent<SettingsUpdateEvent>().Subscribe(OnSettingsUpdateEvent);
         }
 
         private void OnSettingsUpdateEvent(AppSettings updatedAppSettings)
         {
-            VM.AppSettings = updatedAppSettings;
+            Vm.AppSettings = updatedAppSettings;
         }
 
         public void UnSubscribeAppEvents()

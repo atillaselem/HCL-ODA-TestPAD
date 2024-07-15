@@ -1,4 +1,4 @@
-﻿using HCL_ODA_TestPAD.Settings;
+using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
@@ -6,13 +6,15 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Teigha.Visualize;
+using HCL_ODA_TestPAD.HCL.UserActions.States;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 
 namespace HCL_ODA_TestPAD.Views
 {
     public partial class HclCadImageView : ICadImageViewControl, ICadOdaMenuView
     {
-        public HclCadImageViewModel VM { get; set; }
+        public HclCadImageViewModel Vm { get; set; }
         public Func<AppSettings> AppSettingsFactory { get; set; }
         public HclCadImageView()
         {
@@ -29,19 +31,19 @@ namespace HCL_ODA_TestPAD.Views
         private void VisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             var visible = (bool)e.NewValue;
-            if (visible && VM == null)
+            if (visible && Vm == null)
             {
-                VM = DataContext as HclCadImageViewModel;
-                if (VM != null)
+                Vm = DataContext as HclCadImageViewModel;
+                if (Vm != null)
                 {
                     //VM.AddDefaultViewOnLoad = true;
-                    VM.CadOdaMenuView = this;
-                    VM.ViewControl = this;
-                    VM.InitViewModel();
+                    Vm.CadOdaMenuView = this;
+                    Vm.ViewControl = this;
+                    Vm.InitViewModel();
                 }
-                VM?.VisibilityChanged((bool)e.NewValue);
-                VM.LoadFile(VM.CadImageFilePath);
-                VM.ShowCustomModels();
+                Vm?.VisibilityChanged((bool)e.NewValue);
+                Vm?.LoadFile(Vm.CadImageFilePath, new System.Threading.CancellationToken());
+                Vm?.ShowCustomModels();
             }
         }
         public void InvalidateControl()
@@ -54,9 +56,9 @@ namespace HCL_ODA_TestPAD.Views
         }
         protected override void OnRender(DrawingContext drawingContext)
         {
-            VM.Update();
+            Vm.Update();
         }
-        public void SetFileLoaded(bool isFileLoaded, string filePath, Action<string> emitEvent)
+        public void SetFileLoaded(bool isFileLoaded, string filePath, Action<string> emitEvent, bool isCancelled = false)
         {
             if (isFileLoaded)
             {
@@ -64,7 +66,7 @@ namespace HCL_ODA_TestPAD.Views
             }
             else
             {
-                emitEvent?.Invoke($"File : [{filePath}] unloaded.");
+                emitEvent?.Invoke($"File : {(isCancelled ? "cancelled" : "unloaded")}.");
             }
         }
 
@@ -72,65 +74,65 @@ namespace HCL_ODA_TestPAD.Views
 
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
         {
-            VM.RenderSizeChanged(sizeInfo);
+            Vm.RenderSizeChanged(sizeInfo);
         }
         #endregion
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
-            VM.MouseDown(e, e.GetPosition(this));
+            Vm.MouseDown(e, e.GetPosition(this));
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            VM.MouseMove(e, e.GetPosition(this));
+            Vm.MouseMove(e, e.GetPosition(this), UserInteraction.Idle);
         }
 
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
-            VM.MouseUp(e);
+            Vm.MouseUp(e);
         }
 
         protected override void OnMouseWheel(MouseWheelEventArgs e)
         {
-            VM.MouseWheel(e);
+            Vm.MouseWheel(e);
         }
         public void Pan()
         {
-            VM.Pan();
+            Vm.Pan();
         }
 
         public void Orbit()
         {
-            VM.Orbit();
+            Vm.Orbit();
         }
 
         public void SetZoom(ZoomType type)
         {
-            VM.Zoom(type);
+            Vm.Zoom(type);
         }
 
-        public void Set3DView(OdTvExtendedView.e3DViewType type)
+        public void Set3DView(OdTvExtendedView_e3DViewType type)
         {
-            VM.Set3DView(type);
+            Vm.Set3DView(type);
         }
 
-        public void SetRenderMode(OdTvGsView.RenderMode renderMode)
+        public void SetRenderMode(OdTvGsView_RenderMode renderMode)
         {
-            VM.SetRenderMode(renderMode);
+            Vm.SetRenderMode(renderMode);
         }
 
-        public void SetProjectionType(OdTvGsView.Projection projection)
+        public void SetProjectionType(OdTvGsView_Projection projection)
         {
-            VM.SetProjectionType(projection);
+            Vm.SetProjectionType(projection);
         }
 
-        public void Regen(OdTvGsDevice.RegenMode rm)
+        public void Regen(OdTvGsDevice_RegenMode rm)
         {
-            VM.Regen(rm);
+            Vm.Regen(rm);
         }
         public void RegenView()
         {
-            VM.Regen();
+            Vm.Regen();
         }
     }
 

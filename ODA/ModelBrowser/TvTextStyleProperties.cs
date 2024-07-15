@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -57,7 +57,7 @@ class TvTextStyleProperties : BasePaletteProperties
     public TvTextStyleProperties(OdTvTextStyleId txtStyleId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         _textStyleId = txtStyleId;
         OdTvTextStyle txtStyle = txtStyleId.openObject();
         int row = 0;
@@ -133,7 +133,7 @@ class TvTextStyleProperties : BasePaletteProperties
         striked.Click += BoolParam_Click;
         striked.Tag = BoolParams.Striked;
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void TextParam_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -141,8 +141,8 @@ class TvTextStyleProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvTextStyle txtStyle = _textStyleId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvTextStyle txtStyle = _textStyleId.openObject(OdTv_OpenMode.kForWrite);
         TextParams param = (TextParams)tb.Tag;
         double val = double.Parse(tb.Text);
         switch (param)
@@ -158,9 +158,9 @@ class TvTextStyleProperties : BasePaletteProperties
                 break;
         }
 
-        TvDeviceId.openObject().regen(OdTvGsDevice.RegenMode.kRegenAll);
+        TvDeviceId.openObject().regen(OdTvGsDevice_RegenMode.kRegenAll);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
     }
 
@@ -169,8 +169,8 @@ class TvTextStyleProperties : BasePaletteProperties
         CheckBox cb = sender as CheckBox;
         if (cb != null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvTextStyle txtStyle = _textStyleId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvTextStyle txtStyle = _textStyleId.openObject(OdTv_OpenMode.kForWrite);
         BoolParams param = (BoolParams)cb.Tag;
         bool flag = cb.IsChecked == true;
         switch (param)
@@ -215,10 +215,10 @@ class TvTextStyleProperties : BasePaletteProperties
                 txtStyle.setStriked(flag);
                 break;
         }
-        TvDeviceId.openObject(OpenMode.kForWrite).regen(OdTvGsDevice.RegenMode.kRegenAll);
-        TvDeviceId.openObject(OpenMode.kForWrite).viewAt(0).openObject().regen();
+        TvDeviceId.openObject(OdTv_OpenMode.kForWrite).regen(OdTvGsDevice_RegenMode.kRegenAll);
+        TvDeviceId.openObject(OdTv_OpenMode.kForWrite).viewAt(0).openObject().regen();
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AlignMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -226,10 +226,10 @@ class TvTextStyleProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        _textStyleId.openObject(OpenMode.kForWrite).setAlignmentMode((OdTvTextStyle.AlignmentType)cb.SelectedIndex);
-        TvDeviceId.openObject().regen(OdTvGsDevice.RegenMode.kRegenAll);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        _textStyleId.openObject(OdTv_OpenMode.kForWrite).setAlignmentMode((OdTvTextStyle_AlignmentType)cb.SelectedIndex);
+        TvDeviceId.openObject().regen(OdTvGsDevice_RegenMode.kRegenAll);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

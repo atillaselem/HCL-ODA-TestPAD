@@ -1,6 +1,7 @@
-﻿using HCL_ODA_TestPAD.ODA.Draggers;
+using HCL_ODA_TestPAD.ODA.Draggers;
 using HCL_ODA_TestPAD.ODA.ModelBrowser;
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 
 namespace HCL_ODA_TestPAD.ViewModels.Base;
 
@@ -14,7 +15,7 @@ public interface IOdaSectioning
     OdTvGsDeviceId TvGsDeviceId { get; set; }
     //double Width { get; set; }
     //double Height { get; set; }
-    MainWindowViewModel VM { get; set; }
+    MainWindowViewModel Vm { get; set; }
     void ApplySectioningOptions();
     void SetAnimation(OdTvAnimation odTvAnimation);
     void UpdateCadView(bool invalidate = false);

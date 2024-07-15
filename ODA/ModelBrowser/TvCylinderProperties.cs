@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -39,18 +39,18 @@ class TvCylinderProperties : TvBaseGeometryProperties
 
     private TypeOfPropety _type;
 
-    private OdTvPointArray _pointArr;
-    private OdGeDoubleArray _radii;
-    private int CountOfObjectsForLoad = 200;
-    private bool isChanged = false;
+    private OdGePoint3dVector _pointArr;
+    private OdDoubleArray _radii;
+    private int _countOfObjectsForLoad = 200;
+    private bool _isChanged = false;
     private int _countOfLoadedObjects = 0;
-    private UIElement currentPanel;
+    private UIElement _currentPanel;
     private bool _isScrollableControl;
 
     public TvCylinderProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvCylinderData cyl = GeomId.openAsCylinder();
         int row = 0;
         Button pnts = AddLabelAndButton("Points", "...", MainGrid, new[] { row, 0, row++, 1 });
@@ -63,7 +63,7 @@ class TvCylinderProperties : TvBaseGeometryProperties
 
         StretchingTreeViewItem cmn = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(cmn);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
     }
 
@@ -72,11 +72,11 @@ class TvCylinderProperties : TvBaseGeometryProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvCylinderData cyl = GeomId.openAsCylinder();
-        cyl.setCaps((OdTvCylinderData.Capping)cb.SelectedIndex);
+        cyl.setCaps((OdTvCylinderData_Capping)cb.SelectedIndex);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     protected override void ScrollDialog_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -104,7 +104,7 @@ class TvCylinderProperties : TvBaseGeometryProperties
 
     private void ShowPoints_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvCylinderData cyl = GeomId.openAsCylinder();
         _pointArr = cyl.getPoints();
 
@@ -112,11 +112,11 @@ class TvCylinderProperties : TvBaseGeometryProperties
         {
             _pointArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
-        currentPanel = new StretchingTreeView()
+        _currentPanel = new StretchingTreeView()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
@@ -128,23 +128,23 @@ class TvCylinderProperties : TvBaseGeometryProperties
         _isScrollableControl = true;
         LoadPoints();
 
-        if (CreateDialog("Cylinder points", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Cylinder points", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             cyl.setPoints(_pointArr);
             Update();
         }
         _pointArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadPoints()
     {
-        for (int i = 0; i < CountOfObjectsForLoad; i++, _countOfLoadedObjects++)
+        for (int i = 0; i < _countOfObjectsForLoad; i++, _countOfLoadedObjects++)
         {
             if (_countOfLoadedObjects >= _pointArr.Count)
                 return;
-            StretchingTreeViewItem itm = AddTreeItem("Point_" + _countOfLoadedObjects, (StretchingTreeView)currentPanel);
+            StretchingTreeViewItem itm = AddTreeItem("Point_" + _countOfLoadedObjects, (StretchingTreeView)_currentPanel);
             itm.Tag = _countOfLoadedObjects;
             itm.Items.Add(null);
             itm.Expanded += Point_Expanded;
@@ -178,14 +178,14 @@ class TvCylinderProperties : TvBaseGeometryProperties
         if (newPt != _pointArr[ind])
         {
             _pointArr[ind] = newPt;
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
     }
 
 
     private void ShowRadiuses_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvCylinderData cyl = GeomId.openAsCylinder();
         _radii = cyl.getRadii();
 
@@ -193,34 +193,34 @@ class TvCylinderProperties : TvBaseGeometryProperties
         {
             _radii.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.Radiuses;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _isScrollableControl = false;
         LoadRadiuses();
 
-        if (CreateDialog("Shell faces", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell faces", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             cyl.setRadii(_radii);
             Update();
         }
         _radii.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadRadiuses()
     {
-        for (int i = 0; i < CountOfObjectsForLoad; i++, _countOfLoadedObjects++)
+        for (int i = 0; i < _countOfObjectsForLoad; i++, _countOfLoadedObjects++)
         {
             if (_countOfLoadedObjects >= _radii.Count)
                 return;
 
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(26) });
             TextBox txtBox = AddLabelAndTextBox("Radius_" + _countOfLoadedObjects, _radii[_countOfLoadedObjects].ToString(),
                 grid, new[] { _countOfLoadedObjects, 0, _countOfLoadedObjects, 1 });
@@ -239,7 +239,7 @@ class TvCylinderProperties : TvBaseGeometryProperties
         if (!_radii[ind].Equals(double.Parse(tb.Text)))
         {
             _radii[ind] = double.Parse(tb.Text);
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
     }
 

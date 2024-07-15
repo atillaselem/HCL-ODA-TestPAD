@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -40,20 +40,20 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
 
     private TypeOfPropety _type;
     private int CountOfLoadedObjects = 200;
-    private bool isChanged = false;
-    private UIElement currentPanel;
+    private bool _isChanged = false;
+    private UIElement _currentPanel;
     private int _countOfLoadedObjects = 0;
     // need for elements wothout child
     private bool _isScrollableControl = false;
 
-    private OdTvPointArray _pointsArr;
+    private OdGePoint3dVector _pointsArr;
     private OdInt32Array _intArr;
     private OdTvRGBColorDefArray _colorArr;
 
     public TvColoredShapeProperties(OdTvGeometryDataId id, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(id, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvColoredShapeData shape = GeomId.openAsColoredShape();
         int row = 0;
         AddLabelAndTextBox("Number of points:", shape.getVerticesCount().ToString(), MainGrid, new[] { row, 0, row++, 1 }, true);
@@ -73,7 +73,7 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
 
         StretchingTreeViewItem common = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(common);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void DrawCont_Click(object sender, RoutedEventArgs e)
@@ -81,10 +81,10 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         GeomId.openAsColoredShape().setDrawContour(cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     protected override void ScrollDialog_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -116,9 +116,9 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
 
     private void ShowVertices_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvColoredShapeData shape = GeomId.openAsColoredShape();
-        _pointsArr = new OdTvPointArray();
+        _pointsArr = new OdGePoint3dVector();
         OdInt32Array intArr = new OdInt32Array();
         shape.get(_pointsArr, intArr);
 
@@ -126,13 +126,13 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
         {
             _pointsArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.Points;
 
-        currentPanel = new StretchingTreeView()
+        _currentPanel = new StretchingTreeView()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
@@ -142,14 +142,14 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
         };
         _isScrollableControl = true;
         LoadPoints();
-        if (CreateDialog("Vertices", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Vertices", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shape.set(_pointsArr, intArr);
             Update();
         }
         _pointsArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadPoints()
@@ -158,7 +158,7 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
         {
             if (_countOfLoadedObjects >= _pointsArr.Count)
                 return;
-            StretchingTreeViewItem itm = AddTreeItem("Vertex_" + _countOfLoadedObjects, (StretchingTreeView)currentPanel);
+            StretchingTreeViewItem itm = AddTreeItem("Vertex_" + _countOfLoadedObjects, (StretchingTreeView)_currentPanel);
             itm.Tag = _countOfLoadedObjects;
             itm.Items.Add(null);
             itm.Expanded += Vertex_Expanded;
@@ -192,7 +192,7 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
         if (newPt != _pointsArr[ind])
         {
             _pointsArr[ind] = newPt;
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
     }
 
@@ -202,7 +202,7 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
 
     private void ShowVerticesColors_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvColoredShapeData shape = GeomId.openAsColoredShape();
         _colorArr = new OdTvRGBColorDefArray();
         shape.getVertexColors(_colorArr);
@@ -213,24 +213,24 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
         {
             _colorArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.Colors;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _isScrollableControl = false;
         LoadVerticesColors();
 
-        if (CreateDialog("Vertices colors", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Vertices colors", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shape.setVertexColors(_colorArr);
             Update();
         }
         _colorArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadVerticesColors()
@@ -240,7 +240,7 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
             if (_countOfLoadedObjects >= _colorArr.Count)
                 return;
 
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(26) });
             OdTvRGBColorDef old = _colorArr[_countOfLoadedObjects];
             byte r, g, b;
@@ -263,7 +263,7 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
         if (_colorArr[ind] != newColorRgb)
         {
             _colorArr[ind] = newColorRgb;
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
     }
 
@@ -273,9 +273,9 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
 
     private void ShowFaces_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvColoredShapeData shape = GeomId.openAsColoredShape();
-        OdTvPointArray points = new OdTvPointArray();
+        OdGePoint3dVector points = new OdGePoint3dVector();
         _intArr = new OdInt32Array();
         shape.get(points, _intArr);
 
@@ -283,24 +283,24 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
         {
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.Faces;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _isScrollableControl = false;
         LoadFaces();
 
-        if (CreateDialog("Faces", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Faces", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shape.set(points, _intArr);
             Update();
         }
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadFaces()
@@ -310,7 +310,7 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
             if (_countOfLoadedObjects >= _intArr.Count)
                 return;
 
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(26) });
             TextBox txtBox = AddLabelAndTextBox("Face_" + _countOfLoadedObjects, _intArr[_countOfLoadedObjects].ToString(),
                 grid, new[] { _countOfLoadedObjects, 0, _countOfLoadedObjects, 1 });
@@ -329,7 +329,7 @@ class TvColoredShapeProperties : TvBaseGeometryProperties
         if (_intArr[ind] != int.Parse(tb.Text))
         {
             _intArr[ind] = int.Parse(tb.Text);
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
     }
     #endregion

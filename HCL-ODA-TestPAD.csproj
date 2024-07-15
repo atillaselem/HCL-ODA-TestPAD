@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <RootNamespace>HCL_ODA_TestPAD</RootNamespace>
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
@@ -12,7 +12,7 @@
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <OutputPath>$(SolutionDir)Build\$(Configuration)\</OutputPath>
     <UseWindowsForms>True</UseWindowsForms>
-    <AssemblyVersion>2023.12.05</AssemblyVersion>
+    <AssemblyVersion>2024.07.09</AssemblyVersion>
     <Platforms>x64;x86</Platforms>
   </PropertyGroup>
 
@@ -38,6 +38,25 @@
 
   <ItemGroup>
     <None Remove="appsettings.json" />
+    <None Remove="HCL\Visualize\Images\CatEye360.png" />
+    <None Remove="HCL\Visualize\Images\CatEyePrism.png" />
+    <None Remove="HCL\Visualize\Images\GlassPrism360.png" />
+    <None Remove="HCL\Visualize\Images\LaserPrism.png" />
+    <None Remove="HCL\Visualize\Images\MiniGlassPrism360.png" />
+    <None Remove="HCL\Visualize\Images\northing.png" />
+    <None Remove="HCL\Visualize\Images\OverAllPrism.png" />
+    <None Remove="HCL\Visualize\Images\Path-Start.png" />
+    <None Remove="HCL\Visualize\Images\POA101.png" />
+    <None Remove="HCL\Visualize\Images\POA102.png" />
+    <None Remove="HCL\Visualize\Images\POA103.png" />
+    <None Remove="HCL\Visualize\Images\Points.png" />
+    <None Remove="HCL\Visualize\Images\Prism.png" />
+    <None Remove="HCL\Visualize\Images\ReflectivePlate.png" />
+    <None Remove="HCL\Visualize\Images\ReflectiveSticker.png" />
+    <None Remove="HCL\Visualize\Images\SlidingPrism.png" />
+    <None Remove="HCL\Visualize\Images\station-plt.png" />
+    <None Remove="HCL\Visualize\Images\station-pos.png" />
+    <None Remove="HCL\Visualize\Images\WallPrism.png" />
     <None Remove="Images\Construct\circle_radius.png" />
     <None Remove="Images\Construct\line.png" />
     <None Remove="Images\Construct\ray.png" />
@@ -45,6 +64,7 @@
     <None Remove="Images\HCL\ContextMenu\close.png" />
     <None Remove="Images\HCL\ContextMenu\exit.png" />
     <None Remove="Images\HCL\ContextMenu\open.png" />
+    <None Remove="Images\HCL\ContextMenu\save.png" />
     <None Remove="Images\HCL\ContextMenu\settings.png" />
     <None Remove="Images\HCL\Navigation\Orbit.png" />
     <None Remove="Images\HCL\Navigation\Pan.png" />
@@ -57,6 +77,13 @@
     <None Remove="Images\HCL\RenderMode\hiddenline.png" />
     <None Remove="Images\HCL\RenderMode\shaded.png" />
     <None Remove="Images\HCL\RenderMode\shaded_edges.png" />
+    <None Remove="Images\HCL\Tools\360GlassPrism.png" />
+    <None Remove="Images\HCL\Tools\northing.png" />
+    <None Remove="Images\HCL\Tools\Path-Start.png" />
+    <None Remove="Images\HCL\Tools\Points.png" />
+    <None Remove="Images\HCL\Tools\Prism.png" />
+    <None Remove="Images\HCL\Tools\station-pos.png" />
+    <None Remove="Images\HCL\Tools\Station.png" />
     <None Remove="Images\HCL\View\Back.png" />
     <None Remove="Images\HCL\View\Bottom.png" />
     <None Remove="Images\HCL\View\Front.png" />
@@ -137,18 +164,39 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="6.5.0" />
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <EmbeddedResource Include="HCL\Visualize\Images\CatEye360.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\CatEyePrism.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\GlassPrism360.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\LaserPrism.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\MiniGlassPrism360.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\northing.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\OverAllPrism.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\Path-Start.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\POA101.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\POA102.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\POA103.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\prism.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\ReflectivePlate.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\ReflectiveSticker.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\SlidingPrism.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\station-plt.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\station-pos.png" />
+    <EmbeddedResource Include="HCL\Visualize\Images\WallPrism.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="8.0.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Prism.Wpf" Version="8.1.97" />
-    <PackageReference Include="Serilog.Extensions.Hosting" Version="5.0.1" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="3.4.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -159,6 +207,7 @@
     <Resource Include="Images\HCL\ContextMenu\close.png" />
     <Resource Include="Images\HCL\ContextMenu\exit.png" />
     <Resource Include="Images\HCL\ContextMenu\open.png" />
+    <Resource Include="Images\HCL\ContextMenu\save.png" />
     <Resource Include="Images\HCL\ContextMenu\settings.png" />
     <Resource Include="Images\HCL\Navigation\Orbit.png" />
     <Resource Include="Images\HCL\Navigation\Pan.png" />
@@ -171,6 +220,9 @@
     <Resource Include="Images\HCL\RenderMode\hiddenline.png" />
     <Resource Include="Images\HCL\RenderMode\shaded.png" />
     <Resource Include="Images\HCL\RenderMode\shaded_edges.png" />
+    <Resource Include="Images\HCL\Tools\Points.png" />
+    <Resource Include="Images\HCL\Tools\Prism.png" />
+    <Resource Include="Images\HCL\Tools\Station.png" />
     <Resource Include="Images\HCL\View\Back.png" />
     <Resource Include="Images\HCL\View\Bottom.png" />
     <Resource Include="Images\HCL\View\Front.png" />
@@ -182,12 +234,16 @@
   </ItemGroup>
  
   <ItemGroup>
-      <Reference Include="TD_SwigCoreMgd">
-      <HintPath>..\..\..\HCL\ThirdParty\TeighaLibraries\$(Platform)\TD_SwigCoreMgd.dll</HintPath>
+    <Reference Include="OdSwig_TD_RootIntegrated_Mgd">
+      <HintPath>ThirdParty\TeighaLibraries\$(Platform)\OdSwig_TD_RootIntegrated_Mgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="TV_SwigDbMgd">
-      <HintPath>..\..\..\HCL\ThirdParty\TeighaLibraries\$(Platform)\TV_SwigDbMgd.dll</HintPath>
+    <Reference Include="OdSwig_TV_VisualizeTools_Mgd">
+      <HintPath>ThirdParty\TeighaLibraries\$(Platform)\OdSwig_TV_VisualizeTools_Mgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="OdSwig_TV_Visualize_Mgd">
+      <HintPath>ThirdParty\TeighaLibraries\$(Platform)\OdSwig_TV_Visualize_Mgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Wpf.TabControl">

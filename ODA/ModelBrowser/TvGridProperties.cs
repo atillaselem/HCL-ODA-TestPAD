@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -61,7 +61,7 @@ class TvGridProperties : TvBaseGeometryProperties
     public TvGridProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGridData grid = GeomId.openAsGrid();
         int row = 0;
         TextBox[] origin = AddPoint3D("Origin", grid.getOrigin(), MainGrid, new[] { row, 0, row++, 1 });
@@ -113,13 +113,13 @@ class TvGridProperties : TvBaseGeometryProperties
 
         StretchingTreeViewItem cmn = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(cmn);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
     }
 
     private void Color_ColorChanged(object sender, OdTvColorDef newColor)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGridData grid = GeomId.openAsGrid();
         OdTvColorDef colorDef = new OdTvColorDef();
         bool enabled;
@@ -130,7 +130,7 @@ class TvGridProperties : TvBaseGeometryProperties
             grid.setMinorGridParams(enabled, newColor, div1, div2);
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
     }
 
@@ -139,7 +139,7 @@ class TvGridProperties : TvBaseGeometryProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGridData grid = GeomId.openAsGrid();
         OdTvColorDef colorDef = new OdTvColorDef();
         bool enabled;
@@ -147,7 +147,7 @@ class TvGridProperties : TvBaseGeometryProperties
         grid.getMinorGridParams(out enabled, colorDef, out div1, out div2);
         grid.setMinorGridParams(cb.IsChecked == true, colorDef, div1, div2);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Type_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -155,11 +155,11 @@ class TvGridProperties : TvBaseGeometryProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGridData grid = GeomId.openAsGrid();
-        grid.setType((OdTvGridData.Type)cb.SelectedIndex);
+        grid.setType((OdTvGridData_Type)cb.SelectedIndex);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void TextType_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -167,7 +167,7 @@ class TvGridProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGridData grid = GeomId.openAsGrid();
         int val = int.Parse(tb.Text);
         OdTvColorDef colorDef = new OdTvColorDef();
@@ -195,7 +195,7 @@ class TvGridProperties : TvBaseGeometryProperties
         }
 
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
     }
 
@@ -204,7 +204,7 @@ class TvGridProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGridData grid = GeomId.openAsGrid();
         NodeData data = (NodeData)tb.Tag;
 
@@ -228,6 +228,6 @@ class TvGridProperties : TvBaseGeometryProperties
         }
 
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

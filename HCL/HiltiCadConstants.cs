@@ -8,15 +8,24 @@ public static class HiltiCadConstants
     public const string MainContext = "Model";
 }
 
-public static class CADModelConstants
+public static class CadModelConstants
 {
+    public const string GradientBackground = "Gradient";
+    public const string SolidBackground = "Solid";
+
     public static readonly Color GradientColorTop = Color.FromArgb(108, 178, 224);
     public static readonly Color GradientColorMiddle = Color.FromArgb(163, 208, 236);
     public static readonly Color GradientColorBottom = Color.FromArgb(216, 235, 248);
     public static readonly Color LightColor = Color.White;
 
-    public static readonly Color HighlightColor = Color.FromArgb(210, 5, 30);
+    public static readonly Color HighlightColor = Color.FromArgb(171, 1, 21);
     public static readonly Color FaceHighlightColor = Color.FromArgb(255, 175, 0);
+    public static readonly Color DashedGreenColor = Color.FromArgb(131, 212, 162);
+    public static readonly Color CuttingPlaneFillColor = Color.FromArgb(82, 79, 83);
+    public static readonly Color StationingLinesColor = Color.FromArgb(25, 175, 55);
+    public static readonly Color StationingUnusedLinesColor = Color.FromArgb(unchecked((int)0xFF979598));
+
+    public static readonly Color OverrideColor = Color.FromArgb(125, 125, 125);
 
     //value from 0 to 255, 255 being fully transparent 
     public static readonly int FaceTransparency = 127;
@@ -114,15 +123,29 @@ public static class CADModelConstants
     /// <summary>
     /// Tag for PLT/POS tool image file name
     /// </summary>
-    public const string PLTIconName = "station-plt.png";
-    public const string POSIconName = "station-pos.png";
+    public const string PltIconName = "station-plt.png";
+    public const string PosIconName = "station-pos.png";
+    public const string HPLReflector_CatEye360 = "CatEye360.png";
+    public const string HPLReflector_CatEyePrism = "CatEyePrism.png";
+    public const string HPLReflector_GlassPrism360 = "GlassPrism360.png";
+    public const string HPLReflector_LaserPrism = "LaserPrism.png";
+    public const string HPLReflector_MiniGlassPrism360 = "MiniGlassPrism360.png";
+    public const string HPLReflector_OverAllPrism = "OverAllPrism.png";
+    public const string HPLReflector_POA101 = "POA101.png";
+    public const string HPLReflector_POA102 = "POA102.png";
+    public const string HPLReflector_POA103 = "POA103.png";
+    public const string HPLReflector_ReflectivePlate = "ReflectivePlate.png";
+    public const string HPLReflector_ReflectiveSticker = "ReflectiveSticker.png";
+    public const string HPLReflector_SlidingPrism = "SlidingPrism.png";
+    public const string HPLReflector_WallPrism = "WallPrism.png";
     public const string DashedStyle = "DashedStyle";
-
+    public const string ShortDash = "ShortDash";
+    public const string MidiumDashedStyle = "MidiumDashedStyle";
     /// <summary>
     /// In Visualize SDK "0" layer is not supported, "ZeroLayerName" is used instead so we need to perform manual layer name conversion
     /// </summary>
     public const string ZeroLayerName = "ZeroLayerName";
     public const string NumericalZeroLayerName = "0";
 
-    public const double extentsRange = 1E+20;
+    public const double ExtentsRange = 1E+20;
 }

@@ -25,8 +25,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -115,12 +115,12 @@ public class TvTreeItem : TreeViewItem
         {
             case "Unisolate":
                 if (NodeData != null && NodeData.ModelId != null && !NodeData.ModelId.isNull())
-                    NodeData.ModelId.openObject(OpenMode.kForWrite).unIsolate();
+                    NodeData.ModelId.openObject(OdTv_OpenMode.kForWrite).unIsolate();
                 break;
             case "Isolate":
                 {
                     OdTvModelId id = FindParentModel();
-                    OdTvModel model = id.openObject(OpenMode.kForWrite);
+                    OdTvModel model = id.openObject(OdTv_OpenMode.kForWrite);
                     if (NodeData.EntityId != null)
                         model.isolate(NodeData.EntityId, PerSession);
                     else if (NodeData.SubEntId != null)
@@ -132,7 +132,7 @@ public class TvTreeItem : TreeViewItem
             case "Hide":
                 {
                     OdTvModelId id = FindParentModel();
-                    OdTvModel model = id.openObject(OpenMode.kForWrite);
+                    OdTvModel model = id.openObject(OdTv_OpenMode.kForWrite);
                     if (NodeData.EntityId != null)
                         model.hide(NodeData.EntityId, PerSession);
                     else if (NodeData.SubEntId != null)

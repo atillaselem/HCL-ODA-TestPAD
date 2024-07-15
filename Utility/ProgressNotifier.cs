@@ -1,7 +1,6 @@
-﻿using HCL_ODA_TestPAD.Mvvm.Events;
+using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.Performance;
 using System;
-using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,12 +15,12 @@ namespace HCL_ODA_TestPAD.Utility
 
         private double _totalElapsedTime;
         public async void RunAsync<TEvent1, TEvent2>(CancellationTokenSource tokenSource,
-            Func<TEvent1> ProgressStepFactory, Func<TEvent2> ProgressMaxFactory)
+            Func<TEvent1> progressStepFactory, Func<TEvent2> progressMaxFactory)
             where TEvent1 : ProgressStepChangedEvent
             where TEvent2 : ProgressMaxChangedEvent
         {
             CancellationToken ct = tokenSource.Token;
-            ProgressMaxFactory().Publish(ProgressMax);
+            progressMaxFactory().Publish(ProgressMax);
             Console.WriteLine($"Progress Notifier Created");
             await Task.Run(() =>
             {
@@ -32,7 +31,7 @@ namespace HCL_ODA_TestPAD.Utility
                     if (_totalElapsedTime >= ProgressMax)
                     {
                         ProgressMax += 2000;
-                        ProgressMaxFactory().Publish(ProgressMax);
+                        progressMaxFactory().Publish(ProgressMax);
                     }
                     var elapsedMiliSec = profiler.ElapsedMiliSec();
                     if (elapsedMiliSec >= ProgressStep)

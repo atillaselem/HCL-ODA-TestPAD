@@ -166,6 +166,7 @@
                 <ColumnDefinition Width="100" />
                 <ColumnDefinition Width="100" />
                 <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="100" />
             </Grid.ColumnDefinitions>
 
             <buttons:DropDownButton
@@ -189,6 +190,14 @@
                                 <StackPanel Orientation="Horizontal">
                                     <Image Source="{StaticResource OpenImg}" Style="{StaticResource HclMenuIconImageStyle}" VerticalAlignment="Center"/>
                                     <Label Content="Open" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </MenuItem.Header>
+                        </MenuItem>
+                        <MenuItem x:Name="saveMenu" ToolTip="Save as .vsfx" Click="Save_Click">
+                            <MenuItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{StaticResource SaveImg}" Style="{StaticResource HclMenuIconImageStyle}" VerticalAlignment="Center"/>
+                                    <Label Content="Save" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </MenuItem.Header>
                         </MenuItem>
@@ -298,6 +307,20 @@
                 Grid.Column="6"
                 Background="Transparent"
                 BorderThickness="0"
+                Command="{Binding HclMenuCommand}"
+                Style="{StaticResource SimpleButtonStyle}">
+                <Label
+                    Content="HCL"
+                    FontFamily="Open Sans"
+                    FontSize="19"
+                    Foreground="#C6C9E0" />
+            </Button>
+
+            <Button
+                Grid.Row="0"
+                Grid.Column="7"
+                Background="Transparent"
+                BorderThickness="0"
                 Command="{Binding DrawingMenuCommand}"
                 Style="{StaticResource SimpleButtonStyle}"
                 Visibility="Collapsed">
@@ -310,7 +333,7 @@
 
             <Button
                 Grid.Row="0"
-                Grid.Column="7"
+                Grid.Column="8"
                 Background="Transparent"
                 BorderThickness="0"
                 Command="{Binding MarkupMenuCommand}"
@@ -325,7 +348,7 @@
 
             <Button
                 Grid.Row="0"
-                Grid.Column="8"
+                Grid.Column="9"
                 Background="Transparent"
                 BorderThickness="0"
                 Command="{Binding SectioningMenuCommand}"
@@ -340,7 +363,7 @@
 
             <Button
                 Grid.Row="0"
-                Grid.Column="9"
+                Grid.Column="10"
                 Background="Transparent"
                 BorderThickness="0"
                 Command="{Binding PanelsMenuCommand}"
@@ -646,6 +669,43 @@
                 ToolTip="RegenVisible">
                 <Image Source="{StaticResource RegenVisibleImg}" Style="{StaticResource ImageStyle}" />
             </Button>
+        </StackPanel>
+
+        <!--  HCL button panel  -->
+        <StackPanel
+            x:Name="HCLPanel"
+            Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="5"
+            Style="{StaticResource MenuStackPanelStyle}">
+
+            <ToggleButton
+                x:Name="HclToolStationBtn"
+                Command="{Binding HclCommand}"
+                CommandParameter="PLTStation"
+                Style="{StaticResource ToggleBtnStyle}"
+                ToolTip="PLT Station">
+                <Image Source="{StaticResource StationImg}" Style="{StaticResource HclImageStyle}" />
+            </ToggleButton>
+
+            <ToggleButton
+                x:Name="HclToolPrismBtn"
+                Command="{Binding HclCommand}"
+                CommandParameter="Prism"
+                Style="{StaticResource ToggleBtnStyle}"
+                ToolTip="Prism">
+                <Image Source="{StaticResource PrismImg}" Style="{StaticResource HclImageStyle}" />
+            </ToggleButton>
+
+            <ToggleButton
+                x:Name="HclToolPointsBtn"
+                Command="{Binding HclCommand}"
+                CommandParameter="Points"
+                Style="{StaticResource ToggleBtnStyle}"
+                ToolTip="Points">
+                <Image Source="{StaticResource PointsImg}" Style="{StaticResource HclImageStyle}" />
+            </ToggleButton>
+
         </StackPanel>
 
         <!--  Markup button panel  -->

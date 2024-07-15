@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace HCL_ODA_TestPAD.Functional.Extensions
 {

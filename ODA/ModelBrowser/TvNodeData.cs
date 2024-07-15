@@ -22,7 +22,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 using System.Collections.Generic;
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -125,7 +125,7 @@ public class TvNodeData
                 break;
             case TvBrowserItemType.Geometry:
                 GeomId = id as OdTvGeometryDataId;
-                if (GeomId != null && GeomId.getType() == OdTvGeometryDataType.kSubEntity)
+                if (GeomId != null && GeomId.getType() == OdTv_OdTvGeometryDataType.kSubEntity)
                 {
                     SubEntId = GeomId;
                     GeomId = null;

@@ -1,34 +1,38 @@
-﻿using HCL_ODA_TestPAD.ViewModels;
+using HCL_ODA_TestPAD.ViewModels;
 using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Teigha.Visualize;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using HCL_ODA_TestPAD.ODA.Draggers;
 using HCL_ODA_TestPAD.ODA.ModelBrowser;
-using Teigha.Core;
-using HCL_ODA_TestPAD.UserActions.States;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
+using System.IO;
+using System.Threading;
+using HCL_ODA_TestPAD.Mvvm.Events;
+using HCL_ODA_TestPAD.HCL.UserActions.States;
 
 namespace HCL_ODA_TestPAD.UserControls;
 
 /// <summary>
 /// Interaction logic for CadImageViewControl.xaml
 /// </summary>
-public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageViewControl
+public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageViewControl
 {
     private readonly IServiceFactory _serviceFactory;
 
     private readonly HclCadImageViewModel _vmAdapter;
     //public HclCadImageViewModel Adapter => _vmAdapter;
-    public MainWindowViewModel VM { get; set; }
-    public string FilePath => throw new NotImplementedException();
+    public MainWindowViewModel MainWindowVm { get; set; }
+    public string FilePath => _vmAdapter.FilePath;
     private IUserActionState _userActionState;
     private ActionZoomToScale _actionZoomToScale;
     private readonly IUserActionManager _userActionManager;
-
+    private readonly OverlayViewModel _overlayViewModel;
     public bool AddDefaultViewOnLoad
     {
         get => _vmAdapter.AddDefaultViewOnLoad;
@@ -40,10 +44,10 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     public OdTvSectioningOptions SectioningOptions { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     public OdTvDatabaseId TvDatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     
-    public DefaultCadImageViewControl(MainWindowViewModel vm, IServiceFactory serviceFactory)
+    public DefaultCadImageViewControl(MainWindowViewModel mainWindowVm, IServiceFactory serviceFactory, OverlayViewModel overlayViewModel)
     {
         InitializeComponent();
-        VM = vm;
+        MainWindowVm = mainWindowVm;
         _serviceFactory = serviceFactory;
         _vmAdapter = new HclCadImageViewModel(serviceFactory);
         IsVisibleChanged += VisibilityChanged;
@@ -54,6 +58,7 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
             serviceFactory.AppSettings,
             _vmAdapter);
         _userActionState = new ActionIdle(_userActionManager);
+        _overlayViewModel = overlayViewModel;
     }
 
     private void VisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -67,19 +72,22 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
         _vmAdapter.VisibilityChanged((bool)e.NewValue);
     }
 
-    public void SetFileLoaded(bool isFileLoaded, string filePath, Action<string> emitEvent)
+    public void SetFileLoaded(bool isFileLoaded, string filePath, Action<string> emitEvent, bool isCancelled = false)
     {
-        VM.FileIsExist = isFileLoaded;
+        MainWindowVm.FileIsExist = isFileLoaded;
         if (isFileLoaded)
         {
-            VM.PanCommand_Clicked();
+            MainWindowVm.PanCommand_Clicked();
             emitEvent?.Invoke($"File : [{filePath}] loaded successfully.");
             _vmAdapter.ShowCustomModels();
             _actionZoomToScale = new ActionZoomToScale(_userActionManager);
         }
         else
         {
-            emitEvent?.Invoke($"File : [{filePath}] unloaded.");
+            MainWindowVm.AppMainWindow.HclToolStationBtn.IsChecked = false;
+            MainWindowVm.AppMainWindow.HclToolPrismBtn.IsChecked = false;
+            MainWindowVm.AppMainWindow.HclToolPointsBtn.IsChecked = false;
+            emitEvent?.Invoke($"File : [{filePath}] {(isCancelled ? "cancelled" : "unloaded")}.");
         }
     }
 
@@ -129,19 +137,31 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     {
         ArgumentNullException.ThrowIfNull(e);
         _userActionState.ExecuteMouseTouchDown(e, this);
-        ToggleAsyncPBO(true);
+        if (MainWindowVm.AppMainWindow.HclToolStationBtn.IsChecked != null && MainWindowVm.AppMainWindow.HclToolStationBtn.IsChecked.Value && (e.MiddleButton == MouseButtonState.Pressed))
+        {
+            _vmAdapter.ChangeStationLocation(e.GetPosition(this));
+        }
+        else if (MainWindowVm.AppMainWindow.HclToolPrismBtn.IsChecked != null && MainWindowVm.AppMainWindow.HclToolPrismBtn.IsChecked.Value && (e.RightButton == MouseButtonState.Pressed))
+        {
+            _vmAdapter.ChangePrismLocation(e.GetPosition(this));
+        }
+        ToggleAsyncPbo(true);
     }
 
-    private void ToggleAsyncPBO(bool enable)
+    private void ToggleAsyncPbo(bool enable)
     {
-        using var dev = _vmAdapter.TvGsDeviceId.openObject(OpenMode.kForWrite);
-        dev.setOption(OdTvGsDevice.Options.kAsyncReadback, enable ? 2 : 0);
+        using var dev = _vmAdapter.TvGsDeviceId?.openObject(OdTv_OpenMode.kForWrite);
+        dev?.setOption(OdTvGsDevice_Options.kAsyncReadback, enable ? 2 : 0);
     }
 
     protected override void OnMouseMove(MouseEventArgs e)
     {
         ArgumentNullException.ThrowIfNull(e);
-        if (e.LeftButton != MouseButtonState.Pressed)
+        if (_userActionState.ActiveAction == UserInteraction.ZoomToArea)
+        {
+            using var _ = _vmAdapter.UpdateStatusBarCoordinates(e.GetPosition(this));
+        }
+        else if (e.LeftButton != MouseButtonState.Pressed)
         {
             return;
         }
@@ -151,7 +171,12 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     {
         ArgumentNullException.ThrowIfNull(e);
         _userActionState.ExecuteMouseTouchUp(e, this);
-        ToggleAsyncPBO(false);
+        if (_userActionState.ActiveAction == UserInteraction.ZoomToArea)
+        {
+            _vmAdapter.UpdateHclZoomTransformations();
+            _vmAdapter.UpdateCadView();
+        }
+        ToggleAsyncPbo(false);
     }
 
     protected override void OnMouseWheel(MouseWheelEventArgs e)
@@ -172,6 +197,7 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     protected override void OnTouchMove(TouchEventArgs e)
     {
         _actionZoomToScale.ExecuteMouseTouchMove(e, this);
+        _vmAdapter.UpdateHclZoomTransformations();
     }
     protected override void OnTouchUp(TouchEventArgs e)
     {
@@ -200,9 +226,9 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
         UserInteractionChanged("ZoomToArea");
     }
 
-    public void SetRenderModeButton(OdTvGsView.RenderMode mode)
+    public void SetRenderModeButton(OdTvGsView_RenderMode mode)
     {
-        VM.SetRenderModeButton(mode);
+        MainWindowVm.SetRenderModeButton(mode);
     }
 
     public void DrawCircMarkup()
@@ -239,7 +265,10 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     {
         _vmAdapter.ExportToPdf(fileName, is2D);
     }
-
+    public void SaveAsVsfx(string fileName)
+    {
+        _vmAdapter.SaveFileAsVsfx(fileName);
+    }
     public void FinishDragger()
     {
         _vmAdapter.FinishDragger();
@@ -280,7 +309,7 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
         _vmAdapter.Regen();
     }
 
-    public void Regen(OdTvGsDevice.RegenMode rm)
+    public void Regen(OdTvGsDevice_RegenMode rm)
     {
         _vmAdapter.Regen(rm);
     }
@@ -295,17 +324,17 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
         _vmAdapter.SaveMarkup();
     }
 
-    public void Set3DView(OdTvExtendedView.e3DViewType type)
+    public void Set3DView(OdTvExtendedView_e3DViewType type)
     {
         _vmAdapter.Set3DView(type);
     }
 
-    public void SetProjectionType(OdTvGsView.Projection projection)
+    public void SetProjectionType(OdTvGsView_Projection projection)
     {
         _vmAdapter.SetProjectionType(projection);
     }
 
-    public void SetRenderMode(OdTvGsView.RenderMode renderMode)
+    public void SetRenderMode(OdTvGsView_RenderMode renderMode)
     {
         _vmAdapter.SetRenderMode(renderMode);
     }
@@ -354,16 +383,50 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     {
         return _vmAdapter.ShowCuttingPlanes();
     }
-
-    public void LoadFile(string filepath)
+    private class FileProgressBar : IDisposable
     {
-        _vmAdapter.LoadFile(filepath);
+        private readonly HclCadImageViewModel _adapter;
+        private readonly OverlayViewModel _overlay;
+        public FileProgressBar(HclCadImageViewModel adapter, OverlayViewModel overlay, string filePath)
+        {
+            _adapter=adapter;
+            _overlay = overlay;
+            _overlay.IsLoading = true;
+            _overlay.Title = $"'{Path.GetFileName(filePath)}' is loading..";
+        }
+
+        public void OnRegisterCancel(Action action)
+        {
+            _overlay.CancelTokenSource = new CancellationTokenSource();
+            var cancellationToken = _overlay.CancelTokenSource.Token;
+            cancellationToken.Register(() =>
+            {
+                _adapter.OnFileLoadingCancelled();
+                action.Invoke();
+            });
+        }
+
+        public void Dispose()
+        {
+            _adapter.Refresh();
+            _overlay.IsLoading = false;
+        }
+    }
+    public async void LoadFile(string filepath)
+    {
+        using var progress = new FileProgressBar(_vmAdapter, _overlayViewModel, filepath);
+        progress.OnRegisterCancel(() =>
+        {
+            MainWindowVm.ClearRenderArea();
+            SetFileLoaded(false, filepath, (statusText) => _serviceFactory.EventSrv.GetEvent<AppStatusTextChanged>().Publish(statusText), true);
+        });
+        await _vmAdapter.LoadFile(filepath, _overlayViewModel.Token);
     }
 
     public void ShowCustomModels()
     {
-        _vmAdapter.ShowFPS();
-        _vmAdapter.ShowWCS();
+        _vmAdapter.ShowFps();
+        _vmAdapter.ShowWcs();
         //_vmAdapter.ShowCube();
     }
 
@@ -371,6 +434,9 @@ public partial class DefaultCadImageViewControl : IOpenGLES2Control, ICadImageVi
     {
         _vmAdapter.UpdateCadView();
     }
-
+    public void ShowTool(HclToolType type)
+    {
+        _vmAdapter.ShowTool(type);
+    }
 
 }

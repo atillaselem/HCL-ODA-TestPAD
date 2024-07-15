@@ -24,8 +24,8 @@
 
 using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -36,7 +36,7 @@ class TvSelectionInfo : BasePaletteProperties
     {
         if (devId == null || renderArea == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         int row = 0;
         uint nEntities = 0;
         uint nGeometryData = 0;
@@ -75,7 +75,7 @@ class TvSelectionInfo : BasePaletteProperties
         AddLabelAndTextBox("Number of faces:", nFaces.ToString(), MainGrid, new[] { row, 0, row++, 1 }, true);
         AddLabelAndTextBox("Number of edges:", nEdges.ToString(), MainGrid, new[] { row, 0, row++, 1 }, true);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
 }

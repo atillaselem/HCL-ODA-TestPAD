@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -40,24 +40,24 @@ class TvPointCloudProperties : TvBaseGeometryProperties
 
     private TypeOfPropety _type;
     private int CountOfLoadedObjects = 200;
-    private bool isChanged = false;
-    private UIElement currentPanel;
+    private bool _isChanged = false;
+    private UIElement _currentPanel;
     private int _countOfLoadedObjects = 0;
     // need for elements wothout child
     private bool _isScrollableControl = false;
 
-    private OdTvPointArray _pointsArr;
-    private OdTvPointArray _bufPointsArr;
+    private OdGePoint3dVector _pointsArr;
+    private OdGePoint3dVector _bufPointsArr;
     private OdInt32Array _intArr;
     private OdTvRGBColorDefArray _colorArr;
     private OdTvRGBColorDefArray _bufColorArr;
-    private OdTvVectorArray _vecArr;
-    private OdTvVectorArray _bufVecArr;
+    private OdGeVector3dVector _vecArr;
+    private OdGeVector3dVector _bufVecArr;
 
     public TvPointCloudProperties(OdTvGeometryDataId id, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(id, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvPointCloudData cloud = GeomId.openAsPointCloud();
         int row = 0;
         AddLabelAndTextBox("Number of points:", cloud.getPointsCount().ToString(), MainGrid, new[] { row, 0, row++, 1 }, true);
@@ -70,7 +70,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         Button colors = AddLabelAndButton("Points colors", "...", MainGrid, new[] { row, 0, row++, 1 }, _colorArr.Count == 0);
         colors.Click += ShowVerticesColors_Click;
         _colorArr = null;
-        _vecArr = new OdTvVectorArray();
+        _vecArr = new OdGeVector3dVector();
         cloud.getPointNormalsViaRange(0, cloud.getPointsCount(), _vecArr);
         Button normals = AddLabelAndButton("Points normals", "...", MainGrid, new[] { row, 0, row++, 1 }, _vecArr.Count == 0);
         normals.Click += ShowVertexNormals_Click;
@@ -78,7 +78,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
 
         StretchingTreeViewItem common = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(common);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     protected override void ScrollDialog_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -111,25 +111,25 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvPointCloudData cloud = GeomId.openAsPointCloud();
         if (cloud.getPointSize() != int.Parse(tb.Text))
         {
             cloud.setPointSize(int.Parse(tb.Text));
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     #region Vertices
 
     private void ShowVertices_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvPointCloudData cloud = GeomId.openAsPointCloud();
         _pointsArr = cloud.getParam();
         _intArr = new OdInt32Array();
-        _bufPointsArr = new OdTvPointArray();
+        _bufPointsArr = new OdGePoint3dVector();
 
         if (!CheckCountOfObject(_pointsArr.Count))
         {
@@ -137,13 +137,13 @@ class TvPointCloudProperties : TvBaseGeometryProperties
             _bufPointsArr.Clear();
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.Points;
 
-        currentPanel = new StretchingTreeView()
+        _currentPanel = new StretchingTreeView()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
@@ -153,7 +153,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         };
         _isScrollableControl = true;
         LoadPoints();
-        if (CreateDialog("Vertices", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Vertices", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             cloud.editPointsViaList(_intArr, _bufPointsArr);
             Update();
@@ -162,7 +162,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         _bufPointsArr.Clear();
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadPoints()
@@ -171,7 +171,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         {
             if (_countOfLoadedObjects >= _pointsArr.Count)
                 return;
-            StretchingTreeViewItem itm = AddTreeItem("Vertex_" + _countOfLoadedObjects, (StretchingTreeView)currentPanel);
+            StretchingTreeViewItem itm = AddTreeItem("Vertex_" + _countOfLoadedObjects, (StretchingTreeView)_currentPanel);
             itm.Tag = _countOfLoadedObjects;
             itm.Items.Add(null);
             itm.Expanded += Vertex_Expanded;
@@ -206,7 +206,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         {
             _bufPointsArr.Add(newPt);
             _intArr.Add(ind);
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
         else if (newPt != _pointsArr[ind])
             _bufPointsArr[_intArr.IndexOf(ind)] = newPt;
@@ -218,7 +218,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
 
     private void ShowVerticesColors_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvPointCloudData cloud = GeomId.openAsPointCloud();
         _intArr = new OdInt32Array();
         _colorArr = new OdTvRGBColorDefArray();
@@ -233,17 +233,17 @@ class TvPointCloudProperties : TvBaseGeometryProperties
             _bufColorArr.Clear();
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.Colors;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _isScrollableControl = false;
         LoadVerticesColors();
 
-        if (CreateDialog("Vertices colors", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Vertices colors", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             cloud.setPointColorsViaList(_intArr, _bufColorArr);
             Update();
@@ -252,7 +252,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         _bufColorArr.Clear();
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadVerticesColors()
@@ -262,7 +262,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
             if (_countOfLoadedObjects >= _colorArr.Count)
                 return;
 
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(26) });
             OdTvRGBColorDef old = _colorArr[_countOfLoadedObjects];
             byte r, g, b;
@@ -285,7 +285,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         {
             _intArr.Add(ind);
             _bufColorArr.Add(new OdTvRGBColorDef(r, g, b));
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
         else
             _bufColorArr[_intArr.IndexOf(ind)] = new OdTvRGBColorDef(r, g, b);
@@ -297,11 +297,11 @@ class TvPointCloudProperties : TvBaseGeometryProperties
 
     private void ShowVertexNormals_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvPointCloudData cloud = GeomId.openAsPointCloud();
-        _vecArr = new OdTvVectorArray();
+        _vecArr = new OdGeVector3dVector();
         _intArr = new OdInt32Array();
-        _bufVecArr = new OdTvVectorArray();
+        _bufVecArr = new OdGeVector3dVector();
         cloud.getPointNormalsViaRange(0, cloud.getPointsCount(), _vecArr);
         if (_vecArr.Count == 0)
         {
@@ -316,13 +316,13 @@ class TvPointCloudProperties : TvBaseGeometryProperties
             _intArr.Clear();
             _bufVecArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.Normals;
 
-        currentPanel = new StretchingTreeView()
+        _currentPanel = new StretchingTreeView()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
@@ -332,7 +332,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         };
         _isScrollableControl = true;
         LoadVertexNormals();
-        if (CreateDialog("Vertices normals", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Vertices normals", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             cloud.setPointNormalsViaList(_intArr, _bufVecArr);
             Update();
@@ -341,7 +341,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         _intArr.Clear();
         _bufVecArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadVertexNormals()
@@ -351,7 +351,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
             if (_countOfLoadedObjects >= _vecArr.Count)
                 return;
 
-            StretchingTreeViewItem itm = AddTreeItem("Vertex_" + _countOfLoadedObjects, (StretchingTreeView)currentPanel);
+            StretchingTreeViewItem itm = AddTreeItem("Vertex_" + _countOfLoadedObjects, (StretchingTreeView)_currentPanel);
             itm.Tag = _countOfLoadedObjects;
             itm.Items.Add(null);
             itm.Expanded += VertexNormal_Expanded;
@@ -383,7 +383,7 @@ class TvPointCloudProperties : TvBaseGeometryProperties
         CoordinateType type = (CoordinateType)tb.Tag;
         if (!_intArr.Contains(ind))
         {
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
             _intArr.Add(ind);
             _bufVecArr.Add(SetVectorCoordByType(_vecArr[ind], type, tb.Text));
         }

@@ -83,7 +83,7 @@ public class Profiler : IDisposable
 
     #region IDisposable Support
 
-    private bool disposedValue = false; // To detect redundant calls
+    private bool _disposedValue = false; // To detect redundant calls
 
     /// <summary>
     /// 
@@ -91,14 +91,14 @@ public class Profiler : IDisposable
     /// <param name="disposing"></param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposedValue)
+        if (!_disposedValue)
         {
             if (disposing)
             {
                 ElapsedWriteLine();
             }
 
-            disposedValue = true;
+            _disposedValue = true;
         }
     }
 

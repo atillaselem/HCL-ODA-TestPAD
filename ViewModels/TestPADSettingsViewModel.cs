@@ -1,18 +1,17 @@
-﻿using System;
+using System;
 using HCL_ODA_TestPAD.Mvvm;
-using HCL_ODA_TestPAD.Services;
 using HCL_ODA_TestPAD.Settings;
 using Prism.Events;
 
 namespace HCL_ODA_TestPAD.ViewModels
 {
-    public class TestPADSettingsViewModel : BindableBase
+    public class TestPadSettingsViewModel : BindableBase
     {
-        public TestPADSettings TestPadSettings { get; set; }
+        public TestPadSettings TestPadSettings { get; set; }
         private readonly IServiceFactory _serviceFactory;
         private AppSettings _appSettings;
         public Func<IEventAggregator> EventFactory { get; private set; }
-        public TestPADSettingsViewModel(IServiceFactory serviceFactory)
+        public TestPadSettingsViewModel(IServiceFactory serviceFactory)
         {
             _serviceFactory = serviceFactory;
             EventFactory = () => _serviceFactory.EventSrv;

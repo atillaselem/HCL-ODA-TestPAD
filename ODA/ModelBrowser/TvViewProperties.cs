@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -39,7 +39,7 @@ public class TvViewProperties : BasePaletteProperties
     {
         _viewId = viewId;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         int curRow = 0;
         OdTvGsView view = viewId.openObject();
@@ -95,7 +95,7 @@ public class TvViewProperties : BasePaletteProperties
         AddLabelAndTextBox("Owner(view object):", view.getViewportObjectOwner().isNull() ? "" : view.getViewportObjectOwner().openObject().getName()
             , MainGrid, new[] { curRow, 0, curRow, 1 }, true);
         models.Items.Add(modelsGrid);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Pos_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -103,16 +103,16 @@ public class TvViewProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         if (view != null)
         {
             view.setView(SetPointCoordByType(view.position(), (CoordinateType)tb.Tag, tb.Text), view.target(),
                 view.upVector(), view.fieldWidth(), view.fieldHeight(),
-                view.isPerspective() ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+                view.isPerspective() ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Target_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -120,16 +120,16 @@ public class TvViewProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         if (view != null)
         {
             view.setView(view.position(), SetPointCoordByType(view.target(), (CoordinateType)tb.Tag, tb.Text),
                 view.upVector(), view.fieldWidth(), view.fieldHeight(),
-                view.isPerspective() ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+                view.isPerspective() ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void UpVect_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -137,12 +137,12 @@ public class TvViewProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         view.setView(view.position(), view.target(), SetVectorCoordByType(view.upVector(), (CoordinateType)tb.Tag, tb.Text), view.fieldWidth(), view.fieldHeight(),
-            view.isPerspective() ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+            view.isPerspective() ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void FieldWidth_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -150,12 +150,12 @@ public class TvViewProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         view.setView(view.position(), view.target(), view.upVector(), Convert.ToDouble(tb.Text), view.fieldHeight(),
-            view.isPerspective() ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+            view.isPerspective() ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void FieldHeight_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -163,12 +163,12 @@ public class TvViewProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         view.setView(view.position(), view.target(), view.upVector(), view.fieldWidth(), Convert.ToDouble(tb.Text),
-            view.isPerspective() ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+            view.isPerspective() ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Mode_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -176,10 +176,10 @@ public class TvViewProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        _viewId.openObject(OpenMode.kForWrite).setMode((OdTvGsView.RenderMode)cb.SelectedIndex);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        _viewId.openObject(OdTv_OpenMode.kForWrite).setMode((OdTvGsView_RenderMode)cb.SelectedIndex);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void IsPerspective_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -187,12 +187,12 @@ public class TvViewProperties : BasePaletteProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         view.setView(view.position(), view.target(), view.upVector(), view.fieldWidth(), view.fieldHeight(),
-            cb.IsChecked == true ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+            cb.IsChecked == true ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LensLen_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -200,10 +200,10 @@ public class TvViewProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        _viewId.openObject(OpenMode.kForWrite).setLensLength(Convert.ToDouble(tb.Text));
+        MemoryTransaction mtr = _mm.StartTransaction();
+        _viewId.openObject(OdTv_OpenMode.kForWrite).setLensLength(Convert.ToDouble(tb.Text));
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void EnableDefLight_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -211,10 +211,10 @@ public class TvViewProperties : BasePaletteProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        _viewId.openObject(OpenMode.kForWrite).enableDefaultLighting(cb.IsChecked == true, _viewId.openObject().defaultLightingType());
+        MemoryTransaction mtr = _mm.StartTransaction();
+        _viewId.openObject(OdTv_OpenMode.kForWrite).enableDefaultLighting(cb.IsChecked == true, _viewId.openObject().defaultLightingType());
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void DefLightType_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -222,10 +222,10 @@ public class TvViewProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        _viewId.openObject(OpenMode.kForWrite).enableDefaultLighting(_viewId.openObject().defaultLightingEnabled(), (OdTvGsView.DefaultLightingType)cb.SelectedIndex + 1);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        _viewId.openObject(OdTv_OpenMode.kForWrite).enableDefaultLighting(_viewId.openObject().defaultLightingEnabled(), (OdTvGsView_DefaultLightingType)cb.SelectedIndex + 1);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LineweightMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -233,10 +233,10 @@ public class TvViewProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        _viewId.openObject(OpenMode.kForWrite).setLineWeightMode((OdTvGsView.LineWeightMode)cb.SelectedIndex);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        _viewId.openObject(OdTv_OpenMode.kForWrite).setLineWeightMode((OdTvGsView_LineWeightMode)cb.SelectedIndex);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LineweightScale_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -244,10 +244,10 @@ public class TvViewProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        _viewId.openObject(OpenMode.kForWrite).setLineWeightScale(Convert.ToDouble(tb.Text));
+        MemoryTransaction mtr = _mm.StartTransaction();
+        _viewId.openObject(OdTv_OpenMode.kForWrite).setLineWeightScale(Convert.ToDouble(tb.Text));
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void ViewportSize_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -255,22 +255,22 @@ public class TvViewProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null || MainWindow.IsClosing)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         double val = Convert.ToDouble(tb.Text.Replace(".", ","));
-        OdTvGsView view = _viewId.openObject(OpenMode.kForWrite);
+        OdTvGsView view = _viewId.openObject(OdTv_OpenMode.kForWrite);
         DcSizeType type = (DcSizeType)tb.Tag;
         if (val < 1)
         {
             OdGePoint2d ll = new OdGePoint2d();
             OdGePoint2d ur = new OdGePoint2d();
             view.getViewport(ll, ur);
-            if (type == DcSizeType.xMin)
+            if (type == DcSizeType.XMin)
                 ll.x = val;
-            else if (type == DcSizeType.xMax)
+            else if (type == DcSizeType.XMax)
                 ur.x = val;
-            else if (type == DcSizeType.yMin)
+            else if (type == DcSizeType.YMin)
                 ll.y = val;
-            else if (type == DcSizeType.yMax)
+            else if (type == DcSizeType.YMax)
                 ur.y = val;
             view.setViewport(ll, ur);
         }
@@ -278,17 +278,17 @@ public class TvViewProperties : BasePaletteProperties
         {
             OdTvDCRect rect = new OdTvDCRect();
             view.getViewport(rect);
-            if (type == DcSizeType.xMin)
+            if (type == DcSizeType.XMin)
                 rect.xmin = (int)val;
-            else if (type == DcSizeType.xMax)
+            else if (type == DcSizeType.XMax)
                 rect.xmax = (int)val;
-            else if (type == DcSizeType.yMin)
+            else if (type == DcSizeType.YMin)
                 rect.ymin = (int)val;
-            else if (type == DcSizeType.yMax)
+            else if (type == DcSizeType.YMax)
                 rect.ymax = (int)val;
             view.setViewport(rect);
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

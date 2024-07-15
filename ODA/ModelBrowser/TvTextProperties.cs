@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -72,7 +72,7 @@ class TvTextProperties : TvBaseGeometryProperties
     public TvTextProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvTextData txt = GeomId.openAsText();
         int row = 0;
         TextBox text = AddSimpleText("Text:", txt.getString(), MainGrid, new[] { row, 0, row++, 1 });
@@ -131,7 +131,7 @@ class TvTextProperties : TvBaseGeometryProperties
 
         StretchingTreeViewItem common = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(common);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         RenderArea = renderArea;
     }
 
@@ -140,28 +140,28 @@ class TvTextProperties : TvBaseGeometryProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvTextData txt = GeomId.openAsText();
         switch ((ComboboxType)cb.Tag)
         {
             case ComboboxType.Alignment:
-                txt.setAlignmentMode((OdTvTextStyle.AlignmentType)cb.SelectedIndex);
+                txt.setAlignmentMode((OdTvTextStyle_AlignmentType)cb.SelectedIndex);
                 break;
             case ComboboxType.Underlined:
-                txt.setUnderlined((OdTvTextData.StrokeState)cb.SelectedIndex);
+                txt.setUnderlined((OdTvTextData_StrokeState)cb.SelectedIndex);
                 break;
             case ComboboxType.Overlined:
-                txt.setOverlined((OdTvTextData.StrokeState)cb.SelectedIndex);
+                txt.setOverlined((OdTvTextData_StrokeState)cb.SelectedIndex);
                 break;
             case ComboboxType.Striked:
-                txt.setStriked((OdTvTextData.StrokeState)cb.SelectedIndex);
+                txt.setStriked((OdTvTextData_StrokeState)cb.SelectedIndex);
                 break;
             case ComboboxType.TextStyle:
                 txt.setTextStyle(GetTextStyleDef(cb.SelectedItem.ToString()));
                 break;
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void NonRot_Click(object sender, RoutedEventArgs e)
@@ -169,10 +169,10 @@ class TvTextProperties : TvBaseGeometryProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         GeomId.openAsText().setNonRotatable(cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Point_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -180,7 +180,7 @@ class TvTextProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvTextData txt = GeomId.openAsText();
         NodeData data = (NodeData)tb.Tag;
         switch (data.Type)
@@ -208,7 +208,7 @@ class TvTextProperties : TvBaseGeometryProperties
                 }
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void TextBox_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -216,7 +216,7 @@ class TvTextProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvTextData txt = GeomId.openAsText();
         switch ((TextType)tb.Tag)
         {
@@ -238,7 +238,7 @@ class TvTextProperties : TvBaseGeometryProperties
                 break;
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private TextBox AddSimpleText(string label, string text, Grid grid, int[] arr)

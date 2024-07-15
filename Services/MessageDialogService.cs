@@ -8,7 +8,7 @@ public class MessageDialogService : IMessageDialogService
     public async Task<MessageDialogResult> ShowOkCancelDialogAsync(string text, string title)
     {
         var result = MessageBox.Show(text, title, MessageBoxButton.OKCancel);
-        return await Task.Run(() => result == MessageBoxResult.OK ? MessageDialogResult.OK : MessageDialogResult.Cancel);
+        return await Task.Run(() => result == MessageBoxResult.OK ? MessageDialogResult.Ok : MessageDialogResult.Cancel);
     }
 
     public Task ShowInfoDialogAsync(string text, string title)

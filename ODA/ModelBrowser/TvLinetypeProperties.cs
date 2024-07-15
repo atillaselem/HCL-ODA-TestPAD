@@ -23,8 +23,8 @@
 using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -42,7 +42,7 @@ class TvLinetypeProperties : BasePaletteProperties
         : base(devId, renderArea)
     {
         _ltId = ltId;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvLinetype lt = _ltId.openObject();
         int row = 0;
         AddLabelAndTextBox("Name:", lt.getName(), MainGrid, new[] { row, 0, row++, 1 }, true);
@@ -54,7 +54,7 @@ class TvLinetypeProperties : BasePaletteProperties
         lt.getElements(elArr);
         for (int i = 0; i < elArr.Count; i++)
             FillLinetypeElements(elArr[i], elements, i);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void ScaledToFit_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -62,15 +62,15 @@ class TvLinetypeProperties : BasePaletteProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        _ltId.openObject(OpenMode.kForWrite).setScaledToFit(cb.IsChecked == true);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        _ltId.openObject(OdTv_OpenMode.kForWrite).setScaledToFit(cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void FillLinetypeElements(OdTvLinetypeElementPtr ltEl, StretchingTreeViewItem parent, int ind)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         StretchingTreeViewItem itm = AddTreeItem("Element_" + ind, MainGrid, null, parent);
         if (ltEl.getAsDash() != null)
         {
@@ -144,7 +144,7 @@ class TvLinetypeProperties : BasePaletteProperties
         else
             AddLabelAndTextBox("Type:", "Undefined", itm, true);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Text_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -153,8 +153,8 @@ class TvLinetypeProperties : BasePaletteProperties
         if (tb == null)
             return;
         tb.Text = tb.Text.Replace(".", ",");
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLinetype lt = _ltId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLinetype lt = _ltId.openObject(OdTv_OpenMode.kForWrite);
         OdTvLinetypeElementArray arr = new OdTvLinetypeElementArray();
         lt.getElements(arr);
         OdTvLinetypeElementPtr ltEl = arr[(int)tb.Tag];
@@ -162,7 +162,7 @@ class TvLinetypeProperties : BasePaletteProperties
             ltEl.getAsText().setText(tb.Text);
         lt.setElements(arr);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void UpRight_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -170,8 +170,8 @@ class TvLinetypeProperties : BasePaletteProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLinetype lt = _ltId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLinetype lt = _ltId.openObject(OdTv_OpenMode.kForWrite);
         OdTvLinetypeElementArray arr = new OdTvLinetypeElementArray();
         lt.getElements(arr);
         OdTvLinetypeElementPtr ltEl = arr[(int)cb.Tag];
@@ -181,7 +181,7 @@ class TvLinetypeProperties : BasePaletteProperties
             ltEl.getAsText().setUpright(cb.IsChecked == true);
         lt.setElements(arr);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Usc_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -189,8 +189,8 @@ class TvLinetypeProperties : BasePaletteProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLinetype lt = _ltId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLinetype lt = _ltId.openObject(OdTv_OpenMode.kForWrite);
         OdTvLinetypeElementArray arr = new OdTvLinetypeElementArray();
         lt.getElements(arr);
         OdTvLinetypeElementPtr ltEl = arr[(int)cb.Tag];
@@ -200,7 +200,7 @@ class TvLinetypeProperties : BasePaletteProperties
             ltEl.getAsText().setUcsOriented(cb.IsChecked == true);
         lt.setElements(arr);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void TxtStyle_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -208,8 +208,8 @@ class TvLinetypeProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLinetype lt = _ltId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLinetype lt = _ltId.openObject(OdTv_OpenMode.kForWrite);
         OdTvLinetypeElementArray arr = new OdTvLinetypeElementArray();
         lt.getElements(arr);
         OdTvLinetypeElementPtr ltEl = arr[(int)cb.Tag];
@@ -235,7 +235,7 @@ class TvLinetypeProperties : BasePaletteProperties
             ltEl.getAsText().setStyle(newTxtStyle);
         lt.setElements(arr);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Offset_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -245,8 +245,8 @@ class TvLinetypeProperties : BasePaletteProperties
             return;
         tb.Text = tb.Text.Replace(".", ",");
         CoordData data = (CoordData)tb.Tag;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLinetype lt = _ltId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLinetype lt = _ltId.openObject(OdTv_OpenMode.kForWrite);
         OdTvLinetypeElementArray arr = new OdTvLinetypeElementArray();
         lt.getElements(arr);
         OdTvLinetypeElementPtr ltEl = arr[data.Ind];
@@ -263,7 +263,7 @@ class TvLinetypeProperties : BasePaletteProperties
 
         lt.setElements(arr);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Size_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -272,8 +272,8 @@ class TvLinetypeProperties : BasePaletteProperties
         if (tb == null)
             return;
         tb.Text = tb.Text.Replace(".", ",");
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLinetype lt = _ltId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLinetype lt = _ltId.openObject(OdTv_OpenMode.kForWrite);
         OdTvLinetypeElementArray arr = new OdTvLinetypeElementArray();
         lt.getElements(arr);
         OdTvLinetypeElementPtr ltEl = arr[(int)tb.Tag];
@@ -287,6 +287,6 @@ class TvLinetypeProperties : BasePaletteProperties
             ltEl.getAsText().setSize(double.Parse(tb.Text));
         lt.setElements(arr);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

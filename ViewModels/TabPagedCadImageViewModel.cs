@@ -1,10 +1,8 @@
-﻿using Autofac.Features.Indexed;
+using Autofac.Features.Indexed;
 using HCL_ODA_TestPAD.Mvvm;
 using HCL_ODA_TestPAD.Mvvm.Events;
-using HCL_ODA_TestPAD.Services;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels.Base;
-using Prism.Events;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -47,11 +45,11 @@ namespace HCL_ODA_TestPAD.ViewModels
             {
                 case OdaEventType.Panning : SelectedCadImageTabViewModel.CurrentTabViewModel.OnPanClicked(); break;
                 case OdaEventType.Orbitting: SelectedCadImageTabViewModel.CurrentTabViewModel.OnOrbitClicked(); break;
-                case OdaEventType.SetZoom: SelectedCadImageTabViewModel.CurrentTabViewModel.OnZoomClicked(odaMenuCommandArg.eZoomType); break;
-                case OdaEventType.Set3DView: SelectedCadImageTabViewModel.CurrentTabViewModel.OnSet3DViewClicked(odaMenuCommandArg.e3DViewType); break;
-                case OdaEventType.SetRender: SelectedCadImageTabViewModel.CurrentTabViewModel.OnRenderModeClicked(odaMenuCommandArg.eRenderModeType); break;
-                case OdaEventType.SetProjection: SelectedCadImageTabViewModel.CurrentTabViewModel.OnSetProjectionClicked(odaMenuCommandArg.eProjectionType); break;
-                case OdaEventType.SetRegen: SelectedCadImageTabViewModel.CurrentTabViewModel.OnRegenModeClicked(odaMenuCommandArg.eRegenModeType); break;
+                case OdaEventType.SetZoom: SelectedCadImageTabViewModel.CurrentTabViewModel.OnZoomClicked(odaMenuCommandArg.EZoomType); break;
+                case OdaEventType.Set3DView: SelectedCadImageTabViewModel.CurrentTabViewModel.OnSet3DViewClicked(odaMenuCommandArg.E3DViewType); break;
+                case OdaEventType.SetRender: SelectedCadImageTabViewModel.CurrentTabViewModel.OnRenderModeClicked(odaMenuCommandArg.ERenderModeType); break;
+                case OdaEventType.SetProjection: SelectedCadImageTabViewModel.CurrentTabViewModel.OnSetProjectionClicked(odaMenuCommandArg.EProjectionType); break;
+                case OdaEventType.SetRegen: SelectedCadImageTabViewModel.CurrentTabViewModel.OnRegenModeClicked(odaMenuCommandArg.ERegenModeType); break;
                 case OdaEventType.RegenView: SelectedCadImageTabViewModel.CurrentTabViewModel.OnRegenViewClicked(); break;
             };
         }

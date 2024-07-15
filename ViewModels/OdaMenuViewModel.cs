@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Controls.Primitives;
@@ -11,9 +11,9 @@ using HCL_ODA_TestPAD.Splash;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using HCL_ODA_TestPAD.Views;
 using Microsoft.Win32;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 using Prism.Commands;
-using Prism.Events;
-using Teigha.Visualize;
 
 namespace HCL_ODA_TestPAD.ViewModels
 {
@@ -367,7 +367,7 @@ namespace HCL_ODA_TestPAD.ViewModels
             //ResetMenuFlags();
             if (_serviceFactory.AppSettings.ShowAboutAnimation)
             {
-                var aboutDlg = new AboutTestPAD();
+                var aboutDlg = new AboutTestPad();
                 aboutDlg.Show();
             }
         }
@@ -381,15 +381,15 @@ namespace HCL_ODA_TestPAD.ViewModels
             {
                 case "Zoom In":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-                    .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.SetZoom, eZoomType = ZoomType.ZoomIn });
+                    .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.SetZoom, EZoomType = ZoomType.ZoomIn });
                     break;
                 case "Zoom Out":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-                    .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.SetZoom, eZoomType = ZoomType.ZoomOut });
+                    .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.SetZoom, EZoomType = ZoomType.ZoomOut });
                     break;
                 case "Zoom Extents":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-                    .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.SetZoom, eZoomType = ZoomType.ZoomExtents });
+                    .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.SetZoom, EZoomType = ZoomType.ZoomExtents });
                     break;
             }
         }
@@ -404,43 +404,43 @@ namespace HCL_ODA_TestPAD.ViewModels
             {
                 case "Top":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kTop });
+            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, E3DViewType = OdTvExtendedView_e3DViewType.kTop });
                     break;
                 case "Bottom":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kBottom });
+            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, E3DViewType = OdTvExtendedView_e3DViewType.kBottom });
                     break;
                 case "Left":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kLeft });
+            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, E3DViewType = OdTvExtendedView_e3DViewType.kLeft });
                     break;
                 case "Right":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kRight });
+            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, E3DViewType = OdTvExtendedView_e3DViewType.kRight });
                     break;
                 case "Front":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kFront });
+            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, E3DViewType = OdTvExtendedView_e3DViewType.kFront });
                     break;
                 case "Back":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kBack });
+            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, E3DViewType = OdTvExtendedView_e3DViewType.kBack });
                     break;
                 case "SW Isometric":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kSW });
+            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, E3DViewType = OdTvExtendedView_e3DViewType.kSW });
                     break;
                 case "SE Isometric":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kSE });
+            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, E3DViewType = OdTvExtendedView_e3DViewType.kSE });
                     break;
                 case "NE Isometric":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kNE });
+            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, E3DViewType = OdTvExtendedView_e3DViewType.kNE });
                     break;
                 case "NW Isometric":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
-            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, e3DViewType = OdTvExtendedView.e3DViewType.kNW });
+            .Publish(new OdaMenuCommandClickEventArg() { OdaEventType = OdaEventType.Set3DView, E3DViewType = OdTvExtendedView_e3DViewType.kNW });
                     break;
             }
         }
@@ -455,7 +455,7 @@ namespace HCL_ODA_TestPAD.ViewModels
                 case "Isometric":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
-                    { OdaEventType = OdaEventType.SetProjection, eProjectionType = OdTvGsView.Projection.kParallel });
+                    { OdaEventType = OdaEventType.SetProjection, EProjectionType = OdTvGsView_Projection.kParallel });
                     ButtonFactory[ButtonName.IsometricBtn]().IsChecked = true;
                     ButtonFactory[ButtonName.PerspectiveBtn]().IsChecked = false;
                     break;
@@ -464,7 +464,7 @@ namespace HCL_ODA_TestPAD.ViewModels
                     ButtonFactory[ButtonName.IsometricBtn]().IsChecked = false;
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
-                    { OdaEventType = OdaEventType.SetProjection, eProjectionType = OdTvGsView.Projection.kPerspective });
+                    { OdaEventType = OdaEventType.SetProjection, EProjectionType = OdTvGsView_Projection.kPerspective });
                     break;
             }
         }
@@ -481,31 +481,31 @@ namespace HCL_ODA_TestPAD.ViewModels
                     ButtonFactory[ButtonName.Wireframe2DBtn]().IsChecked = true;
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
-                    { OdaEventType = OdaEventType.SetRender, eRenderModeType = OdTvGsView.RenderMode.k2DOptimized });
+                    { OdaEventType = OdaEventType.SetRender, ERenderModeType = OdTvGsView_RenderMode.k2DOptimized });
                     break;
                 case "3D Wireframe":
                     ButtonFactory[ButtonName.Wireframe3DBtn]().IsChecked = true;
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
-                    { OdaEventType = OdaEventType.SetRender, eRenderModeType = OdTvGsView.RenderMode.kWireframe });
+                    { OdaEventType = OdaEventType.SetRender, ERenderModeType = OdTvGsView_RenderMode.kWireframe });
                     break;
                 case "HiddenLine":
                     ButtonFactory[ButtonName.HiddenLineBtn]().IsChecked = true;
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
-                    { OdaEventType = OdaEventType.SetRender, eRenderModeType = OdTvGsView.RenderMode.kHiddenLine });
+                    { OdaEventType = OdaEventType.SetRender, ERenderModeType = OdTvGsView_RenderMode.kHiddenLine });
                     break;
                 case "Shaded":
                     ButtonFactory[ButtonName.ShadedBtn]().IsChecked = true;
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
-                    { OdaEventType = OdaEventType.SetRender, eRenderModeType = OdTvGsView.RenderMode.kFlatShaded });
+                    { OdaEventType = OdaEventType.SetRender, ERenderModeType = OdTvGsView_RenderMode.kFlatShaded });
                     break;
                 case "Shaded with edges":
                     ButtonFactory[ButtonName.ShadedWithEdgesBtn]().IsChecked = true;
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
-                    { OdaEventType = OdaEventType.SetRender, eRenderModeType = OdTvGsView.RenderMode.kFlatShadedWithWireframe });
+                    { OdaEventType = OdaEventType.SetRender, ERenderModeType = OdTvGsView_RenderMode.kFlatShadedWithWireframe });
                     break;
             }
         }
@@ -530,12 +530,12 @@ namespace HCL_ODA_TestPAD.ViewModels
                 case "RegenAll":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
-                    { OdaEventType = OdaEventType.SetRegen, eRegenModeType = OdTvGsDevice.RegenMode.kRegenAll });
+                    { OdaEventType = OdaEventType.SetRegen, ERegenModeType = OdTvGsDevice_RegenMode.kRegenAll });
                     break;
                 case "RegenVisible":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()
                     .Publish(new OdaMenuCommandClickEventArg()
-                    { OdaEventType = OdaEventType.SetRegen, eRegenModeType = OdTvGsDevice.RegenMode.kRegenVisible });
+                    { OdaEventType = OdaEventType.SetRegen, ERegenModeType = OdTvGsDevice_RegenMode.kRegenVisible });
                     break;
                 case "RegenView":
                     _serviceFactory.EventSrv.GetEvent<OdaMenuCommandClickEvent>()

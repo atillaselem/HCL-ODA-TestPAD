@@ -24,8 +24,8 @@
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Globalization;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -53,7 +53,7 @@ class TvSphereProperties : TvBaseGeometryProperties
     public TvSphereProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvSphereData sphere = GeomId.openAsSphere();
         int row = 0;
         TextBox[] center = AddPoint3D("Center", sphere.getCenter(), MainGrid, new[] { row, 0, row++, 1 });
@@ -84,7 +84,7 @@ class TvSphereProperties : TvBaseGeometryProperties
 
         StretchingTreeViewItem cmn = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(cmn);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
     }
 
@@ -93,14 +93,14 @@ class TvSphereProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvSphereData sphere = GeomId.openAsSphere();
         if (!sphere.getRadius().Equals(double.Parse(tb.Text)))
         {
             sphere.setRadius(double.Parse(tb.Text));
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Point_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -108,7 +108,7 @@ class TvSphereProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvSphereData sphere = GeomId.openAsSphere();
         NodeData data = (NodeData)tb.Tag;
 
@@ -140,6 +140,6 @@ class TvSphereProperties : TvBaseGeometryProperties
         }
 
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

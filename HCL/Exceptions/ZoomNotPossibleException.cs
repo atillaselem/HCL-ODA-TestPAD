@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HCL_ODA_TestPAD.HCL.Exceptions
 {
@@ -29,6 +25,7 @@ namespace HCL_ODA_TestPAD.HCL.Exceptions
         {
         }
 
+        [Obsolete("Obsolete")]
         protected ZoomNotPossibleException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(
             serializationInfo, streamingContext)
         {

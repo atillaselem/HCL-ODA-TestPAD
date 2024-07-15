@@ -26,8 +26,8 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
 using ComboBox = System.Windows.Controls.ComboBox;
@@ -60,8 +60,8 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private TypeOfPropety _type;
     private int CountOfLoadedObjects = 200;
-    private bool isChanged = false;
-    private UIElement currentPanel;
+    private bool _isChanged = false;
+    private UIElement _currentPanel;
     private int _countOfLoadedObjects = 0;
 
     // need for elements wothout child
@@ -69,9 +69,9 @@ class TvShellProperties : TvBaseGeometryProperties
     private int _scrollHeight = 0;
 
     // temp arrays
-    private OdTvPointArray _pointArr;
-    private OdTvVectorArray _vectorArr;
-    private OdTvVectorArray _bufVectorArr;
+    private OdGePoint3dVector _pointArr;
+    private OdGeVector3dVector _vectorArr;
+    private OdGeVector3dVector _bufVectorArr;
     private OdInt32Array _intArr;
     private OdTvColorDefArray _colorDefArr;
     private OdTvColorDefArray _bufColorDefArray;
@@ -95,7 +95,7 @@ class TvShellProperties : TvBaseGeometryProperties
     public TvShellProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
       : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         int row = 0;
         AddLabelAndTextBox("Number of edges:", shell.getEdgesCount().ToString(), MainGrid, new[] { row, 0, row++, 1 }, true);
@@ -115,7 +115,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _layerDefArr = new OdTvLayerDefArray();
         _ltDefArr = new OdTvLinetypeDefArray();
         _visDefArr = new OdTvVisibilityDefArray();
-        _vectorArr = new OdTvVectorArray();
+        _vectorArr = new OdGeVector3dVector();
         _mapDefArr = new OdTvMapperDefArray();
         _matDefArr = new OdTvMaterialDefArray();
         _transpDefArr = new OdTvTransparencyDefArray();
@@ -183,7 +183,7 @@ class TvShellProperties : TvBaseGeometryProperties
         StretchingTreeViewItem common = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(common);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void VOrient_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -191,10 +191,10 @@ class TvShellProperties : TvBaseGeometryProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        GeomId.openAsShell().setVertexOrientation((OrientationType)cb.SelectedIndex);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        GeomId.openAsShell().setVertexOrientation((OdTv_OrientationType)cb.SelectedIndex);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void BackFaceCul_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -202,10 +202,10 @@ class TvShellProperties : TvBaseGeometryProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        GeomId.openAsShell().setBackFaceCulling((OdTvShellData.FaceCulling)cb.SelectedIndex);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        GeomId.openAsShell().setBackFaceCulling((OdTvShellData_FaceCulling)cb.SelectedIndex);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void DisableLighting_Click(object sender, RoutedEventArgs e)
@@ -213,10 +213,10 @@ class TvShellProperties : TvBaseGeometryProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         GeomId.openAsShell().setDisableLighting(cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     protected override void ScrollDialog_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -287,23 +287,23 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowVertices_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         OdInt32Array faces = new OdInt32Array();
-        _pointArr = new OdTvPointArray();
+        _pointArr = new OdGePoint3dVector();
         shell.getParam(_pointArr, faces);
 
         if (!CheckCountOfObject(_pointArr.Count))
         {
             _pointArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.Vertices;
 
-        currentPanel = new StretchingTreeView()
+        _currentPanel = new StretchingTreeView()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
@@ -313,14 +313,14 @@ class TvShellProperties : TvBaseGeometryProperties
         };
         _isScrollableControl = true;
         LoadPoints();
-        if (CreateDialog("Shell vertices", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell vertices", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setParam(_pointArr, faces);
             Update();
         }
         _pointArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadPoints()
@@ -329,7 +329,7 @@ class TvShellProperties : TvBaseGeometryProperties
             return;
         for (int i = 0; i < CountOfLoadedObjects; i++, _countOfLoadedObjects++)
         {
-            StretchingTreeViewItem itm = AddTreeItem("Point_" + _countOfLoadedObjects, (StretchingTreeView)currentPanel);
+            StretchingTreeViewItem itm = AddTreeItem("Point_" + _countOfLoadedObjects, (StretchingTreeView)_currentPanel);
             itm.Tag = _countOfLoadedObjects;
             itm.Items.Add(null);
             itm.Expanded += Vertex_Expanded;
@@ -363,7 +363,7 @@ class TvShellProperties : TvBaseGeometryProperties
         if (newPt != _pointArr[ind])
         {
             _pointArr[ind] = newPt;
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
     }
 
@@ -373,9 +373,9 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowFaces_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
-        OdTvPointArray points = new OdTvPointArray();
+        OdGePoint3dVector points = new OdGePoint3dVector();
         _intArr = new OdInt32Array();
         shell.getParam(points, _intArr);
 
@@ -383,25 +383,25 @@ class TvShellProperties : TvBaseGeometryProperties
         {
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.Faces;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _scrollHeight = 26;
         _isScrollableControl = false;
         LoadFaces();
 
-        if (CreateDialog("Shell faces", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell faces", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setParam(points, _intArr);
             Update();
         }
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadFaces()
@@ -411,7 +411,7 @@ class TvShellProperties : TvBaseGeometryProperties
             if (_countOfLoadedObjects >= _intArr.Count)
                 return;
 
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(_scrollHeight) });
             TextBox txtBox = AddLabelAndTextBox("Face_" + _countOfLoadedObjects, _intArr[_countOfLoadedObjects].ToString(),
                 grid, new[] { _countOfLoadedObjects, 0, _countOfLoadedObjects, 1 });
@@ -430,7 +430,7 @@ class TvShellProperties : TvBaseGeometryProperties
         if (_intArr[ind] != int.Parse(tb.Text))
         {
             _intArr[ind] = int.Parse(tb.Text);
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
     }
     #endregion
@@ -439,7 +439,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowEdgesColors_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         _intArr = new OdInt32Array();
         _colorDefArr = new OdTvColorDefArray();
@@ -456,18 +456,18 @@ class TvShellProperties : TvBaseGeometryProperties
             _bufColorDefArray.Clear();
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.EdgeColors;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _scrollHeight = 26;
         _isScrollableControl = false;
         LoadEdgesColors();
 
-        if (CreateDialog("Shell edges colors", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell edges colors", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setEdgeColorsViaList(_intArr, _bufColorDefArray);
             Update();
@@ -476,7 +476,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _bufColorDefArray.Clear();
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadEdgesColors()
@@ -486,7 +486,7 @@ class TvShellProperties : TvBaseGeometryProperties
             if (_countOfLoadedObjects >= _colorDefArr.Count)
                 return;
 
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(_scrollHeight) });
 
             Colorpicker eColor = AddColorDef("Edge_" + _countOfLoadedObjects, _colorDefArr[_countOfLoadedObjects],
@@ -510,7 +510,7 @@ class TvShellProperties : TvBaseGeometryProperties
             }
             else
                 _bufColorDefArray[_intArr.IndexOf(ind)] = newColor;
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
     }
 
@@ -520,7 +520,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowEdgesLayers_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         _intArr = new OdInt32Array();
         _layerDefArr = new OdTvLayerDefArray();
@@ -539,18 +539,18 @@ class TvShellProperties : TvBaseGeometryProperties
             _bufLayerDefArr.Clear();
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.EdgeLayers;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _scrollHeight = 26;
         _isScrollableControl = false;
         LoadEdgesLayers();
 
-        if (CreateDialog("Shell edge layers", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell edge layers", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setEdgeLayersViaList(_intArr, _bufLayerDefArr);
             Update();
@@ -559,7 +559,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _bufLayerDefArr.Clear();
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadEdgesLayers()
@@ -568,7 +568,7 @@ class TvShellProperties : TvBaseGeometryProperties
         {
             if (_countOfLoadedObjects >= _layerDefArr.Count)
                 return;
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(_scrollHeight) });
             ComboBox eLayer = AddLayerDef("Edge_" + _countOfLoadedObjects, _layerDefArr[_countOfLoadedObjects],
                 grid, new[] { _countOfLoadedObjects, 0, _countOfLoadedObjects, 1 });
@@ -584,7 +584,7 @@ class TvShellProperties : TvBaseGeometryProperties
         int ind = (int)cb.Tag;
         if (!_intArr.Contains(ind))
         {
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
             _intArr.Add(ind);
             _bufLayerDefArr.Add(GetLayerDef(cb.SelectedItem.ToString()));
         }
@@ -598,7 +598,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowEdgesLinetypes_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         _intArr = new OdInt32Array();
         _ltDefArr = new OdTvLinetypeDefArray();
@@ -617,18 +617,18 @@ class TvShellProperties : TvBaseGeometryProperties
             _bufLtDefArr.Clear();
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.EdgeLinetypes;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _scrollHeight = 26;
         _isScrollableControl = false;
         LoadEdgesLinetypes();
 
-        if (CreateDialog("Shell edge linetypes", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell edge linetypes", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setEdgeLinetypesViaList(_intArr, _bufLtDefArr);
             Update();
@@ -637,7 +637,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _bufLtDefArr.Clear();
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadEdgesLinetypes()
@@ -646,7 +646,7 @@ class TvShellProperties : TvBaseGeometryProperties
         {
             if (_countOfLoadedObjects >= _ltDefArr.Count)
                 return;
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(_scrollHeight) });
             ComboBox eLt = AddLinetypeDef("Edge_" + _countOfLoadedObjects, _ltDefArr[_countOfLoadedObjects],
                 grid, new[] { _countOfLoadedObjects, 0, _countOfLoadedObjects, 1 });
@@ -662,7 +662,7 @@ class TvShellProperties : TvBaseGeometryProperties
         int ind = (int)cb.Tag;
         if (!_intArr.Contains(ind))
         {
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
             _intArr.Add(ind);
             _bufLtDefArr.Add(GetLinetypeDef(cb.SelectedItem.ToString()));
         }
@@ -676,7 +676,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowEdgesVisibility_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         _intArr = new OdInt32Array();
         _visDefArr = new OdTvVisibilityDefArray();
@@ -695,18 +695,18 @@ class TvShellProperties : TvBaseGeometryProperties
             _bufVisDefArr.Clear();
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.EdgleVisibilities;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _scrollHeight = 26;
         _isScrollableControl = false;
         LoadEdgesVisibilities();
 
-        if (CreateDialog("Shell edge visibilities", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell edge visibilities", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setEdgeVisibilitiesViaList(_intArr, _bufVisDefArr);
             Update();
@@ -715,7 +715,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _bufVisDefArr.Clear();
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadEdgesVisibilities()
@@ -724,7 +724,7 @@ class TvShellProperties : TvBaseGeometryProperties
         {
             if (_countOfLoadedObjects >= _visDefArr.Count)
                 return;
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(_scrollHeight) });
             CheckBox eVis = AddVisibilityDef("Edge_" + _countOfLoadedObjects, _visDefArr[_countOfLoadedObjects],
                 grid, new[] { _countOfLoadedObjects, 0, _countOfLoadedObjects, 1 });
@@ -742,7 +742,7 @@ class TvShellProperties : TvBaseGeometryProperties
         {
             _intArr.Add(ind);
             _bufVisDefArr.Add(new OdTvVisibilityDef(cb.IsChecked == true));
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
         else
             _bufVisDefArr[_intArr.IndexOf(ind)] = new OdTvVisibilityDef(cb.IsChecked == true);
@@ -754,7 +754,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowFacesColors_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         _intArr = new OdInt32Array();
         _colorDefArr = new OdTvColorDefArray();
@@ -769,18 +769,18 @@ class TvShellProperties : TvBaseGeometryProperties
             _bufColorDefArray.Clear();
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.FaceColors;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _scrollHeight = 26;
         _isScrollableControl = false;
         LoadFacesColors();
 
-        if (CreateDialog("Shell faces colors", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell faces colors", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setFaceColorsViaList(_intArr, _bufColorDefArray);
             Update();
@@ -789,7 +789,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _bufColorDefArray.Clear();
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadFacesColors()
@@ -799,7 +799,7 @@ class TvShellProperties : TvBaseGeometryProperties
             if (_countOfLoadedObjects >= _colorDefArr.Count)
                 return;
 
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(_scrollHeight) });
 
             Colorpicker fColor = AddColorDef("Face_" + _countOfLoadedObjects, _colorDefArr[_countOfLoadedObjects],
@@ -823,7 +823,7 @@ class TvShellProperties : TvBaseGeometryProperties
             }
             else
                 _bufColorDefArray[_intArr.IndexOf(ind)] = newColor;
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
     }
 
@@ -833,7 +833,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowFacesLayers_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         _intArr = new OdInt32Array();
         _layerDefArr = new OdTvLayerDefArray();
@@ -852,18 +852,18 @@ class TvShellProperties : TvBaseGeometryProperties
             _bufLayerDefArr.Clear();
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.FaceLayers;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _scrollHeight = 26;
         _isScrollableControl = false;
         LoadFacesLayers();
 
-        if (CreateDialog("Shell face layers", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell face layers", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setFaceLayersViaList(_intArr, _bufLayerDefArr);
             Update();
@@ -872,7 +872,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _bufLayerDefArr.Clear();
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadFacesLayers()
@@ -881,7 +881,7 @@ class TvShellProperties : TvBaseGeometryProperties
         {
             if (_countOfLoadedObjects >= _layerDefArr.Count)
                 return;
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(_scrollHeight) });
             ComboBox fLayer = AddLayerDef("Face_" + _countOfLoadedObjects, _layerDefArr[_countOfLoadedObjects],
                 grid, new[] { _countOfLoadedObjects, 0, _countOfLoadedObjects, 1 });
@@ -897,7 +897,7 @@ class TvShellProperties : TvBaseGeometryProperties
         int ind = (int)cb.Tag;
         if (!_intArr.Contains(ind))
         {
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
             _intArr.Add(ind);
             _bufLayerDefArr.Add(GetLayerDef(cb.SelectedItem.ToString()));
         }
@@ -911,11 +911,11 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowFaceNormals_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
-        _vectorArr = new OdTvVectorArray();
+        _vectorArr = new OdGeVector3dVector();
         _intArr = new OdInt32Array();
-        _bufVectorArr = new OdTvVectorArray();
+        _bufVectorArr = new OdGeVector3dVector();
         shell.getFaceNormalsViaRange(0, (int)shell.getFacesCount(), _vectorArr);
         if (_vectorArr.Count == 0)
         {
@@ -930,13 +930,13 @@ class TvShellProperties : TvBaseGeometryProperties
             _intArr.Clear();
             _bufVectorArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.FaceNormals;
 
-        currentPanel = new StretchingTreeView()
+        _currentPanel = new StretchingTreeView()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
@@ -946,7 +946,7 @@ class TvShellProperties : TvBaseGeometryProperties
         };
         _isScrollableControl = true;
         LoadFaceNormals();
-        if (CreateDialog("Shell face normals", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell face normals", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setFaceNormalsViaList(_intArr, _bufVectorArr);
             Update();
@@ -955,7 +955,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _intArr.Clear();
         _bufVectorArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadFaceNormals()
@@ -964,7 +964,7 @@ class TvShellProperties : TvBaseGeometryProperties
             return;
         for (int i = 0; i < CountOfLoadedObjects; i++, _countOfLoadedObjects++)
         {
-            StretchingTreeViewItem itm = AddTreeItem("Face_" + _countOfLoadedObjects, (StretchingTreeView)currentPanel);
+            StretchingTreeViewItem itm = AddTreeItem("Face_" + _countOfLoadedObjects, (StretchingTreeView)_currentPanel);
             itm.Tag = _countOfLoadedObjects;
             itm.Items.Add(null);
             itm.Expanded += FaceNormal_Expanded;
@@ -996,7 +996,7 @@ class TvShellProperties : TvBaseGeometryProperties
         CoordinateType type = (CoordinateType)tb.Tag;
         if (!_intArr.Contains(ind))
         {
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
             _intArr.Add(ind);
             _bufVectorArr.Add(SetVectorCoordByType(_vectorArr[ind], type, tb.Text));
         }
@@ -1010,7 +1010,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowFaceMappers_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         _mapDefArr = new OdTvMapperDefArray();
         _intArr = new OdInt32Array();
@@ -1029,13 +1029,13 @@ class TvShellProperties : TvBaseGeometryProperties
             _intArr.Clear();
             _bufMapDefArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.FaceMappers;
 
-        currentPanel = new StretchingTreeView()
+        _currentPanel = new StretchingTreeView()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
@@ -1045,7 +1045,7 @@ class TvShellProperties : TvBaseGeometryProperties
         };
         _isScrollableControl = true;
         LoadFaceMappers();
-        if (CreateDialog("Shell face mappers", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell face mappers", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setFaceMappersViaList(_intArr, _bufMapDefArr);
             Update();
@@ -1054,7 +1054,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _intArr.Clear();
         _bufMapDefArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadFaceMappers()
@@ -1063,8 +1063,8 @@ class TvShellProperties : TvBaseGeometryProperties
             return;
         for (int i = 0; i < CountOfLoadedObjects; i++, _countOfLoadedObjects++)
         {
-            StretchingTreeViewItem itm = AddTreeItem("Face_" + _countOfLoadedObjects, (StretchingTreeView)currentPanel);
-            if (_mapDefArr[_countOfLoadedObjects].getType() == OdTvMapperDef.MapperType.kDefault)
+            StretchingTreeViewItem itm = AddTreeItem("Face_" + _countOfLoadedObjects, (StretchingTreeView)_currentPanel);
+            if (_mapDefArr[_countOfLoadedObjects].getType() == OdTvMapperDef_MapperType.kDefault)
                 itm.Foreground = new SolidColorBrush(Colors.Gray);
             itm.Tag = _countOfLoadedObjects;
             itm.Items.Add(null);
@@ -1084,7 +1084,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void AddMapper(OdTvMapperDef mapper, StretchingTreeViewItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         List<string> autoTrList = new List<string>() { "None", "Object", "Model" };
         ComboBox autoTr = AddLabelAndComboBox("Auto transform:", autoTrList, mapper.autoTransform().ToString().Remove(0, 1), parent);
         autoTr.Tag = mapper;
@@ -1094,7 +1094,7 @@ class TvShellProperties : TvBaseGeometryProperties
         proj.Tag = mapper;
         proj.SelectionChanged += Proj_SelectionChanged;
         List<TextBox> matrix = AddMatrix("Transform", mapper.transform(), parent);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Proj_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1105,10 +1105,10 @@ class TvShellProperties : TvBaseGeometryProperties
         OdTvMapperDef map = (OdTvMapperDef)cb.Tag;
         Grid grid = (Grid)cb.Parent;
         int ind = (int)((StretchingTreeViewItem)grid.Parent).Tag;
-        map.setProjection((OdTvMapperDef.Projection)cb.SelectedIndex);
+        map.setProjection((OdTvMapperDef_Projection)cb.SelectedIndex);
         if (!_intArr.Contains(ind))
         {
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
             _intArr.Add(ind);
             _bufMapDefArr.Add(map);
         }
@@ -1123,10 +1123,10 @@ class TvShellProperties : TvBaseGeometryProperties
         Grid grid = (Grid)cb.Parent;
         int ind = (int)((StretchingTreeViewItem)grid.Parent).Tag;
         int newInd = cb.SelectedIndex == 0 ? 1 : cb.SelectedIndex == 1 ? 2 : 4;
-        map.setAutoTransform((OdTvMapperDef.AutoTransform)newInd);
+        map.setAutoTransform((OdTvMapperDef_AutoTransform)newInd);
         if (!_intArr.Contains(ind))
         {
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
             _intArr.Add(ind);
             _bufMapDefArr.Add(map);
         }
@@ -1138,7 +1138,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowFacesMaterials_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         _intArr = new OdInt32Array();
         _matDefArr = new OdTvMaterialDefArray();
@@ -1157,18 +1157,18 @@ class TvShellProperties : TvBaseGeometryProperties
             _bufMatDefArr.Clear();
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.FaceMaterials;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _scrollHeight = 26;
         _isScrollableControl = false;
         LoadFacesMaterials();
 
-        if (CreateDialog("Shell face matrials", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell face matrials", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setFaceMaterialsViaList(_intArr, _bufMatDefArr);
             Update();
@@ -1177,7 +1177,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _bufMatDefArr.Clear();
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadFacesMaterials()
@@ -1186,7 +1186,7 @@ class TvShellProperties : TvBaseGeometryProperties
         {
             if (_countOfLoadedObjects >= _matDefArr.Count)
                 return;
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(_scrollHeight) });
             ComboBox fMat = AddMatrialDef("Face_" + _countOfLoadedObjects, _matDefArr[_countOfLoadedObjects],
                 grid, new[] { _countOfLoadedObjects, 0, _countOfLoadedObjects, 1 });
@@ -1202,7 +1202,7 @@ class TvShellProperties : TvBaseGeometryProperties
         int ind = (int)cb.Tag;
         if (!_intArr.Contains(ind))
         {
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
             _intArr.Add(ind);
             _bufMatDefArr.Add(GetMaterialDef(cb.SelectedItem.ToString()));
         }
@@ -1216,7 +1216,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowFaceTransparencies_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         _intArr = new OdInt32Array();
         _transpDefArr = new OdTvTransparencyDefArray();
@@ -1235,18 +1235,18 @@ class TvShellProperties : TvBaseGeometryProperties
             _transpDefArr.Clear();
             _bufTranspDefArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.FaceTranparencies;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _scrollHeight = 26;
         _isScrollableControl = false;
         LoadFaceTransparencies();
 
-        if (CreateDialog("Shell face transparencies", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell face transparencies", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setFaceTransparencyViaList(_intArr, _bufTranspDefArr);
             Update();
@@ -1255,7 +1255,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _transpDefArr.Clear();
         _bufTranspDefArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadFaceTransparencies()
@@ -1265,7 +1265,7 @@ class TvShellProperties : TvBaseGeometryProperties
             if (_countOfLoadedObjects >= _transpDefArr.Count)
                 return;
 
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(_scrollHeight) });
             TextBox txtBox = AddTransparencyDef("Face_" + _countOfLoadedObjects, _transpDefArr[_countOfLoadedObjects],
                 grid, new[] { _countOfLoadedObjects, 0, _countOfLoadedObjects, 1 });
@@ -1285,7 +1285,7 @@ class TvShellProperties : TvBaseGeometryProperties
         {
             _intArr.Add(ind);
             _bufTranspDefArr.Add(new OdTvTransparencyDef(double.Parse(tb.Text)));
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
         else
             _bufTranspDefArr[_intArr.IndexOf(ind)] = new OdTvTransparencyDef(double.Parse(tb.Text));
@@ -1297,7 +1297,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowFacesVisibility_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         _intArr = new OdInt32Array();
         _visDefArr = new OdTvVisibilityDefArray();
@@ -1316,18 +1316,18 @@ class TvShellProperties : TvBaseGeometryProperties
             _bufVisDefArr.Clear();
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.FaceVisibilities;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _scrollHeight = 26;
         _isScrollableControl = false;
         LoadFacesVisibilities();
 
-        if (CreateDialog("Shell face visibilities", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell face visibilities", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setFaceVisibilitiesViaList(_intArr, _bufVisDefArr);
             Update();
@@ -1336,7 +1336,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _bufVisDefArr.Clear();
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadFacesVisibilities()
@@ -1345,7 +1345,7 @@ class TvShellProperties : TvBaseGeometryProperties
         {
             if (_countOfLoadedObjects >= _visDefArr.Count)
                 return;
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(_scrollHeight) });
             CheckBox fVis = AddVisibilityDef("Face_" + _countOfLoadedObjects, _visDefArr[_countOfLoadedObjects],
                 grid, new[] { _countOfLoadedObjects, 0, _countOfLoadedObjects, 1 });
@@ -1363,7 +1363,7 @@ class TvShellProperties : TvBaseGeometryProperties
         {
             _intArr.Add(ind);
             _bufVisDefArr.Add(new OdTvVisibilityDef(cb.IsChecked == true));
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
         else
             _bufVisDefArr[_intArr.IndexOf(ind)] = new OdTvVisibilityDef(cb.IsChecked == true);
@@ -1375,7 +1375,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowMapperCoord_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         _point2dArr = new OdTvPoint2dArray();
         _bufPoint2dArr = new OdTvPoint2dArray();
@@ -1394,13 +1394,13 @@ class TvShellProperties : TvBaseGeometryProperties
             _point2dArr.Clear();
             _bufPoint2dArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.MapperCoordinates;
 
-        currentPanel = new StretchingTreeView()
+        _currentPanel = new StretchingTreeView()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
@@ -1410,7 +1410,7 @@ class TvShellProperties : TvBaseGeometryProperties
         };
         _isScrollableControl = true;
         LoadMapperCoords();
-        if (CreateDialog("Shell mapper coordinates", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell mapper coordinates", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setVertexMappingCoordsViaList(_intArr, _bufPoint2dArr);
             Update();
@@ -1419,7 +1419,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _point2dArr.Clear();
         _bufPoint2dArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadMapperCoords()
@@ -1429,7 +1429,7 @@ class TvShellProperties : TvBaseGeometryProperties
             if (_countOfLoadedObjects >= _point2dArr.Count)
                 return;
 
-            StretchingTreeViewItem itm = AddTreeItem("Point_" + _countOfLoadedObjects, (StretchingTreeView)currentPanel);
+            StretchingTreeViewItem itm = AddTreeItem("Point_" + _countOfLoadedObjects, (StretchingTreeView)_currentPanel);
             itm.Tag = _countOfLoadedObjects;
             itm.Items.Add(null);
             itm.Expanded += MapperCoord_Expanded;
@@ -1463,7 +1463,7 @@ class TvShellProperties : TvBaseGeometryProperties
         {
             _intArr.Add(ind);
             _bufPoint2dArr.Add(SetPointCoordByType(_point2dArr[ind], type, tb.Text));
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
         else
             _bufPoint2dArr[_intArr.IndexOf(ind)] = SetPointCoordByType(_bufPoint2dArr[_intArr.IndexOf(ind)], type, tb.Text);
@@ -1477,7 +1477,7 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowVerticesColors_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
         _intArr = new OdInt32Array();
         _rgbDefArr = new OdTvRGBColorDefArray();
@@ -1492,18 +1492,18 @@ class TvShellProperties : TvBaseGeometryProperties
             _bufRgbArr.Clear();
             _intArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.VerticesColors;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _scrollHeight = 26;
         _isScrollableControl = false;
         LoadVerticesColors();
 
-        if (CreateDialog("Shell vertices colors", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell vertices colors", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setVertexColorsViaList(_intArr, _bufRgbArr);
             Update();
@@ -1512,7 +1512,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _bufRgbArr.Clear();
         _intArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadVerticesColors()
@@ -1522,7 +1522,7 @@ class TvShellProperties : TvBaseGeometryProperties
             if (_countOfLoadedObjects >= _rgbDefArr.Count)
                 return;
 
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(_scrollHeight) });
             OdTvRGBColorDef old = _rgbDefArr[_countOfLoadedObjects];
             byte r, g, b;
@@ -1545,7 +1545,7 @@ class TvShellProperties : TvBaseGeometryProperties
         {
             _intArr.Add(ind);
             _bufRgbArr.Add(new OdTvRGBColorDef(r, g, b));
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
         else
             _bufRgbArr[_intArr.IndexOf(ind)] = new OdTvRGBColorDef(r, g, b);
@@ -1557,11 +1557,11 @@ class TvShellProperties : TvBaseGeometryProperties
 
     private void ShowVertexNormals_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvShellData shell = GeomId.openAsShell();
-        _vectorArr = new OdTvVectorArray();
+        _vectorArr = new OdGeVector3dVector();
         _intArr = new OdInt32Array();
-        _bufVectorArr = new OdTvVectorArray();
+        _bufVectorArr = new OdGeVector3dVector();
         shell.getVertexNormalsViaRange(0, (int)shell.getVerticesCount(), _vectorArr);
         if (_vectorArr.Count == 0)
         {
@@ -1576,13 +1576,13 @@ class TvShellProperties : TvBaseGeometryProperties
             _intArr.Clear();
             _bufVectorArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.VerticesNormals;
 
-        currentPanel = new StretchingTreeView()
+        _currentPanel = new StretchingTreeView()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
@@ -1592,7 +1592,7 @@ class TvShellProperties : TvBaseGeometryProperties
         };
         _isScrollableControl = true;
         LoadVertexNormals();
-        if (CreateDialog("Shell Vertex normals", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Shell Vertex normals", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             shell.setVertexNormalsViaList(_intArr, _bufVectorArr);
             Update();
@@ -1601,7 +1601,7 @@ class TvShellProperties : TvBaseGeometryProperties
         _intArr.Clear();
         _bufVectorArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadVertexNormals()
@@ -1610,7 +1610,7 @@ class TvShellProperties : TvBaseGeometryProperties
             return;
         for (int i = 0; i < CountOfLoadedObjects; i++, _countOfLoadedObjects++)
         {
-            StretchingTreeViewItem itm = AddTreeItem("Vertex_" + _countOfLoadedObjects, (StretchingTreeView)currentPanel);
+            StretchingTreeViewItem itm = AddTreeItem("Vertex_" + _countOfLoadedObjects, (StretchingTreeView)_currentPanel);
             itm.Tag = _countOfLoadedObjects;
             itm.Items.Add(null);
             itm.Expanded += VertexNormal_Expanded;
@@ -1642,7 +1642,7 @@ class TvShellProperties : TvBaseGeometryProperties
         CoordinateType type = (CoordinateType)tb.Tag;
         if (!_intArr.Contains(ind))
         {
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
             _intArr.Add(ind);
             _bufVectorArr.Add(SetVectorCoordByType(_vectorArr[ind], type, tb.Text));
         }

@@ -4,7 +4,7 @@ namespace HCL_ODA_TestPAD.Services;
 
 public enum MessageDialogResult
 {
-    OK,
+    Ok,
     Cancel
 }
 

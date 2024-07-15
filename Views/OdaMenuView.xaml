@@ -223,9 +223,24 @@
                     FontSize="19"
                     Foreground="#C6C9E0" />
             </Button>
+
             <Button
                 Grid.Row="0"
                 Grid.Column="6"
+                Background="Transparent"
+                BorderThickness="0"
+                Command="{Binding HclMenuCommand}"
+                Style="{StaticResource SimpleButtonStyle}">
+                <Label
+                    Content="HCL"
+                    FontFamily="Open Sans"
+                    FontSize="19"
+                    Foreground="#C6C9E0" />
+            </Button>
+
+            <Button
+                Grid.Row="0"
+                Grid.Column="7"
                 Background="Transparent"
                 BorderThickness="0"
                 Command="{Binding HelpMenuCommand}"
@@ -239,7 +254,7 @@
             </Button>
             <Button
                 Grid.Row="0"
-                Grid.Column="7"
+                Grid.Column="8"
                 Background="Transparent"
                 BorderThickness="0"
                 Command="{Binding DrawingMenuCommand}"
@@ -254,7 +269,7 @@
 
             <Button
                 Grid.Row="0"
-                Grid.Column="8"
+                Grid.Column="9"
                 Background="Transparent"
                 BorderThickness="0"
                 Command="{Binding MarkupMenuCommand}"
@@ -269,7 +284,7 @@
 
             <Button
                 Grid.Row="0"
-                Grid.Column="9"
+                Grid.Column="10"
                 Background="Transparent"
                 BorderThickness="0"
                 Command="{Binding SectioningMenuCommand}"
@@ -284,7 +299,7 @@
 
             <Button
                 Grid.Row="0"
-                Grid.Column="10"
+                Grid.Column="11"
                 Background="Transparent"
                 BorderThickness="0"
                 Command="{Binding PanelsMenuCommand}"
@@ -588,6 +603,32 @@
                 Style="{StaticResource ButtonStyle}"
                 ToolTip="RegenView">
                 <Image Source="{StaticResource RegenViewImg}" Style="{StaticResource ImageStyle}" />
+            </Button>
+
+        </StackPanel>
+
+        <!--  HCL button panel  -->
+        <StackPanel
+            x:Name="HCLPanel"
+            Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="5"
+            Style="{StaticResource MenuStackPanelStyle}">
+
+            <Button
+                Command="{Binding HclCommand}"
+                CommandParameter="PLTStation"
+                Style="{StaticResource ButtonStyle}"
+                ToolTip="PLT Station">
+                <Image Source="{StaticResource StationImg}" Style="{StaticResource HclImageStyle}" />
+            </Button>
+
+            <Button
+                Command="{Binding HclCommand}"
+                CommandParameter="Prism"
+                Style="{StaticResource ButtonStyle}"
+                ToolTip="Prism">
+                <Image Source="{StaticResource PrismImg}" Style="{StaticResource HclImageStyle}" />
             </Button>
 
         </StackPanel>

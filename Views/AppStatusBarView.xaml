@@ -68,6 +68,9 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Label
                 HorizontalAlignment="Left"
@@ -92,6 +95,27 @@
                     </LinearGradientBrush>
                 </ProgressBar.Background>
             </ProgressBar>
+            <Label
+                Grid.Column="2"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Left"
+                Content="{Binding Path=ScreenCoordinates}"
+                FontWeight="Bold" />
+            <Label
+                Grid.Column="3"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Center"
+                Content="{Binding Path=CadCoordinates}"
+                FontWeight="Bold" />
+            <Label
+                Grid.Column="4"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Right"
+                Content="{Binding Path=ScaleFactor}"
+                FontWeight="Bold" />
         </Grid>
     </StatusBar>
 

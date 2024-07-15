@@ -22,8 +22,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -51,7 +51,7 @@ class TvEllipticArcProperties : TvBaseGeometryProperties
     public TvEllipticArcProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvEllipticArcData arc = GeomId.openAsEllipticArc();
         int row = 0;
         TextBox[] center = AddPoint3D("Center", arc.getCenter(), MainGrid, new[] { row, 0, row++, 1 });
@@ -88,7 +88,7 @@ class TvEllipticArcProperties : TvBaseGeometryProperties
 
         StretchingTreeViewItem cmn = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(cmn);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
     }
 
@@ -97,14 +97,14 @@ class TvEllipticArcProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvEllipticArcData arc = GeomId.openAsEllipticArc();
         if (!arc.getEnd().Equals(double.Parse(tb.Text)))
         {
             arc.setEnd(double.Parse(tb.Text));
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Start_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -112,14 +112,14 @@ class TvEllipticArcProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvEllipticArcData arc = GeomId.openAsEllipticArc();
         if (!arc.getStart().Equals(double.Parse(tb.Text)))
         {
             arc.setStart(double.Parse(tb.Text));
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Thickness_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -127,14 +127,14 @@ class TvEllipticArcProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvEllipticArcData arc = GeomId.openAsEllipticArc();
         if (!arc.getThickness().Equals(double.Parse(tb.Text)))
         {
             arc.setThickness(double.Parse(tb.Text));
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Filled_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -142,10 +142,10 @@ class TvEllipticArcProperties : TvBaseGeometryProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         GeomId.openAsEllipticArc().setFilled(cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Point_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -153,7 +153,7 @@ class TvEllipticArcProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvEllipticArcData arc = GeomId.openAsEllipticArc();
         NodeData data = (NodeData)tb.Tag;
 
@@ -177,6 +177,6 @@ class TvEllipticArcProperties : TvBaseGeometryProperties
         }
 
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

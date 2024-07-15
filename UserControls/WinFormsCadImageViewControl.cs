@@ -1,4 +1,4 @@
-﻿using HCL_ODA_TestPAD.Dialogs;
+using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.HCL;
 using HCL_ODA_TestPAD.HCL.CadUnits;
 using HCL_ODA_TestPAD.ODA.Draggers;
@@ -7,11 +7,9 @@ using HCL_ODA_TestPAD.ODA.Draggers.Markups;
 using HCL_ODA_TestPAD.ODA.Draggers.Navigation;
 using HCL_ODA_TestPAD.ODA.ModelBrowser;
 using HCL_ODA_TestPAD.ODA.WCS;
-using HCL_ODA_TestPAD.Services;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels;
 using HCL_ODA_TestPAD.ViewModels.Base;
-using Prism.Events;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,18 +17,18 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
-using static Teigha.Visualize.OdTvPdfExportParams;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 
 namespace HCL_ODA_TestPAD.UserControls
 {
-    public partial class WinFormsCadImageViewControl : UserControl, IOdaSectioning, IOpenGLES2Control
+    public partial class WinFormsCadImageViewControl : UserControl, IOdaSectioning, IOpenGles2Control
     {
         private readonly IServiceFactory _serviceFactory;
         public WinFormsCadImageViewControl Adapter => this;
         #region App Specific Variables
-        public MainWindowViewModel VM { get; set; }
+        public MainWindowViewModel Vm { get; set; }
         public string FilePath { get; private set; }
         //public double Width { get; set; }
         //public double Height { get; set; }
@@ -48,7 +46,7 @@ namespace HCL_ODA_TestPAD.UserControls
         #endregion
 
         #region ODA Visualize Variables
-        private readonly MemoryManager MM = MemoryManager.GetMemoryManager();
+        private readonly MemoryManager _mm = MemoryManager.GetMemoryManager();
 
         // Visualize database
         private OdTvDatabaseId _dbId = null;
@@ -76,9 +74,9 @@ namespace HCL_ODA_TestPAD.UserControls
         public OdTvModelId CuttingPlaneModelId { get { return _cuttingPlanesModelId; } }
         private OdTvGsViewId _cuttingPlanesViewId = null;
         public OdTvGsViewId CuttingPlanesViewId { get { return _cuttingPlanesViewId; } }
-        private int CuttingPlaneNum = 0;
+        private int _cuttingPlaneNum = 0;
         public OdTvSectioningOptions SectioningOptions { get; set; }
-        public static int OD_TV_CUTTING_PLANE_MAX_NUM = 5;
+        public static int _odTvCuttingPlaneMaxNum = 5;
 
         public static OdTvRegAppId AppTvId { get; set; }
         private Dictionary<ulong, OdTvExtendedView> _extendedViewDict = new Dictionary<ulong, OdTvExtendedView>();
@@ -89,7 +87,7 @@ namespace HCL_ODA_TestPAD.UserControls
         public List<TvTreeItem> SelectedNodes = new List<TvTreeItem>();
 
         public OdTvSelectionSet SelectionSet = null;
-        public TvWpfViewWCS WCS { get; set; }
+        public TvWpfViewWcs Wcs { get; set; }
         public TvDatabaseInfo DatabaseInfo { get; set; }
         // flag for shift button pressed
         bool _isShiftPressed = false;
@@ -119,8 +117,8 @@ namespace HCL_ODA_TestPAD.UserControls
             this.MouseUp += MouseUpEvent;
             this.MouseMove += MouseMoveEvent;
             this.KeyPress += TextInputEvent;
-            VM = vm;
-            Size = new Size((int)VM.AppMainWindow.Width, (int)VM.AppMainWindow.Height);
+            Vm = vm;
+            Size = new Size((int)Vm.AppMainWindow.Width, (int)Vm.AppMainWindow.Height);
             SectioningOptions = new ODA.Draggers.OdTvSectioningOptions();
 
             var cadGenerator = new CadRegenerator(serviceFactory);
@@ -135,7 +133,7 @@ namespace HCL_ODA_TestPAD.UserControls
 
         public void ClearDevices()
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
             foreach (var extView in _extendedViewDict)
             {
@@ -145,9 +143,9 @@ namespace HCL_ODA_TestPAD.UserControls
             _extendedViewDict.Clear();
 
             if (_dbId != null && !_dbId.isNull() && _dbId.isValid())
-                _dbId.openObject(OpenMode.kForWrite).clearDevices();
+                _dbId.openObject(OdTv_OpenMode.kForWrite).clearDevices();
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         #region Paint and initialization
@@ -156,7 +154,7 @@ namespace HCL_ODA_TestPAD.UserControls
         {
             if (!this.Disposing && _tvDeviceId != null && !_tvDeviceId.isNull())
             {
-                MemoryTransaction mtr = MM.StartTransaction();
+                MemoryTransaction mtr = _mm.StartTransaction();
 
                 OdTvGsDevice pDevice = _tvDeviceId.openObject();
                 pDevice.TryAutoRegeneration(_cadRegenFactory).update();
@@ -169,7 +167,7 @@ namespace HCL_ODA_TestPAD.UserControls
                         _dragger.NotifyAboutViewChange(DraggerViewChangeType.ViewChangeFull);
                 }
 
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
             }
         }
 
@@ -177,14 +175,14 @@ namespace HCL_ODA_TestPAD.UserControls
         {
             if (_tvDeviceId != null && !this.Disposing)
             {
-                MemoryTransaction mtr = MM.StartTransaction();
-                OdTvGsDevice dev = _tvDeviceId.openObject(OpenMode.kForWrite);
+                MemoryTransaction mtr = _mm.StartTransaction();
+                OdTvGsDevice dev = _tvDeviceId.openObject(OdTv_OpenMode.kForWrite);
                 if (this.Width > 0 && this.Height > 0)
                 {
                     dev.onSize(new OdTvDCRect(0, Width, Height, 0));
                     dev.TryAutoRegeneration(_cadRegenFactory).update();
                 }
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
             }
         }
 
@@ -194,12 +192,12 @@ namespace HCL_ODA_TestPAD.UserControls
         {
             if (_dbId == null || _tvDeviceId == null)
                 return;
-            MemoryTransaction mtr = MM.StartTransaction();
-            OdTvDatabase pDb = _dbId.openObject(OpenMode.kForWrite);
-            _tvDraggersModelId = pDb.createModel("Draggers", OdTvModel.Type.kDirect, false);
+            MemoryTransaction mtr = _mm.StartTransaction();
+            OdTvDatabase pDb = _dbId.openObject(OdTv_OpenMode.kForWrite);
+            _tvDraggersModelId = pDb.createModel("Draggers", OdTvModel_Type.kDirect, false);
             OdTvSelectDragger selectDragger = new OdTvSelectDragger(this, _tvActiveModelId, _tvDeviceId, _tvDraggersModelId);
             _dragger = selectDragger;
-            DraggerResult res = _dragger.Start(null, TvActiveViewport, Cursor, WCS);
+            DraggerResult res = _dragger.Start(null, TvActiveViewport, Cursor, Wcs);
             ActionAfterDragger(res);
             bool exist;
             AppTvId = _dbId.openObject().registerAppName("WPF Visualize Viewer", out exist);
@@ -212,20 +210,20 @@ namespace HCL_ODA_TestPAD.UserControls
                 _tvMarkupModelId = null;
 
             // cutting planes
-            _cuttingPlanesModelId = pDb.createModel("$ODA_TVVIEWER_SECTIONING_MODEL_" + CuttingPlaneNum, OdTvModel.Type.kMain, false);
-            _cuttingPlanesViewId = TvGsDeviceId.openObject(OpenMode.kForWrite).createView("$ODA_TVVIEWER_SECTIONING_VIEW_" + CuttingPlaneNum++);
-            OdTvGsView pVsectioningView = _cuttingPlanesViewId.openObject(OpenMode.kForWrite);
+            _cuttingPlanesModelId = pDb.createModel("$ODA_TVVIEWER_SECTIONING_MODEL_" + _cuttingPlaneNum, OdTvModel_Type.kMain, false);
+            _cuttingPlanesViewId = TvGsDeviceId.openObject(OdTv_OpenMode.kForWrite).createView("$ODA_TVVIEWER_SECTIONING_VIEW_" + _cuttingPlaneNum++);
+            OdTvGsView pVsectioningView = _cuttingPlanesViewId.openObject(OdTv_OpenMode.kForWrite);
             pVsectioningView.addModel(_cuttingPlanesModelId);
-            pVsectioningView.setMode(OdTvGsView.RenderMode.kGouraudShaded);
+            pVsectioningView.setMode(OdTvGsView_RenderMode.kGouraudShaded);
 
             // set projection button
             OdTvGsView view = _tvDeviceId.openObject().viewAt(TvActiveViewport).openObject();
             if (view.isPerspective())
-                VM.AppMainWindow.PerspectiveBtn.IsChecked = true;
+                Vm.AppMainWindow.PerspectiveBtn.IsChecked = true;
             else
-                VM.AppMainWindow.IsometricBtn.IsChecked = true;
+                Vm.AppMainWindow.IsometricBtn.IsChecked = true;
             // set render mode
-            VM.SetRenderModeButton(view.mode());
+            Vm.SetRenderModeButton(view.mode());
 
             //VM.AppMainWindow.PropertiesPalette.InitializePalette(_tvDevice, this);
 
@@ -240,13 +238,13 @@ namespace HCL_ODA_TestPAD.UserControls
 
             //VM.TvObjectExplorer.ResetEvent += VM.TvPropertiesPalette.FillObjectParameters;
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         public OdTvExtendedView GetActiveTvExtendedView()
         {
             OdTvExtendedView exView = null;
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             OdTvGsViewId viewId = _tvDeviceId.openObject().viewAt(TvActiveViewport);
             if (viewId.isNull())
                 return null;
@@ -260,7 +258,7 @@ namespace HCL_ODA_TestPAD.UserControls
             {
                 exView = new OdTvExtendedView(viewId);
                 //exView.setAnimationEnabled((VM.AppearanceOpt & OdTvWpfMainWindowModel.AppearanceOptions.UseAnimation) == OdTvWpfMainWindowModel.AppearanceOptions.UseAnimation);
-                exView.setZoomScale(VM.ZoomStep);
+                exView.setZoomScale(Vm.ZoomStep);
                 exView.setAnimationDuration(0.9);
 
                 if (view != null)
@@ -273,7 +271,7 @@ namespace HCL_ODA_TestPAD.UserControls
                 _extendedViewDict.Add(handle, exView);
             }
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
 
             return exView;
         }
@@ -291,13 +289,13 @@ namespace HCL_ODA_TestPAD.UserControls
 
         #region View settings methods
 
-        public void SetRenderMode(OdTvGsView.RenderMode renderMode)
+        public void SetRenderMode(OdTvGsView_RenderMode renderMode)
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             if (_tvDeviceId != null && !_tvDeviceId.isNull())
             {
-                OdTvGsView view = _tvDeviceId.openObject().viewAt(TvActiveViewport).openObject(OpenMode.kForWrite);
-                OdTvGsView.RenderMode oldMode = view.mode();
+                OdTvGsView view = _tvDeviceId.openObject().viewAt(TvActiveViewport).openObject(OdTv_OpenMode.kForWrite);
+                OdTvGsView_RenderMode oldMode = view.mode();
                 if (oldMode != renderMode)
                 {
                     view.setMode(renderMode);
@@ -308,65 +306,65 @@ namespace HCL_ODA_TestPAD.UserControls
                     //    WCS.UpdateWCS();
 
                     _tvDeviceId.openObject().update();
-                    VM.SetRenderModeButton(renderMode);
+                    Vm.SetRenderModeButton(renderMode);
                 }
             }
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
-        public void SetProjectionType(OdTvGsView.Projection projection)
+        public void SetProjectionType(OdTvGsView_Projection projection)
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             if (_tvDeviceId != null && !_tvDeviceId.isNull())
             {
-                OdTvGsView view = _tvDeviceId.openObject().viewAt(TvActiveViewport).openObject(OpenMode.kForWrite);
+                OdTvGsView view = _tvDeviceId.openObject().viewAt(TvActiveViewport).openObject(OdTv_OpenMode.kForWrite);
                 view.setView(view.position(), view.target(), view.upVector(), view.fieldWidth(), view.fieldHeight(), projection);
                 _tvDeviceId.openObject().update();
             }
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         public void SetBackgroundColor(Color color)
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             uint iColor = ((uint)(color.R | color.G << 8 | ((color.B) << 16)));
             if (_tvDeviceId != null && !_tvDeviceId.isNull())
             {
-                OdTvGsDevice dev = _tvDeviceId.openObject(OpenMode.kForWrite);
+                OdTvGsDevice dev = _tvDeviceId.openObject(OdTv_OpenMode.kForWrite);
                 dev.setBackgroundColor(iColor);
                 dev.TryAutoRegeneration(_cadRegenFactory).update();
             }
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
-        public void Regen(OdTvGsDevice.RegenMode rm)
+        public void Regen(OdTvGsDevice_RegenMode rm)
         {
             if (_tvDeviceId == null)
                 return;
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             OdTvGsDevice dev = _tvDeviceId.openObject();
             dev.regen(rm);
             dev.invalidate();
             dev.TryAutoRegeneration(_cadRegenFactory).update();
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         public void Regen()
         {
             if (_tvDeviceId == null)
                 return;
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             OdTvGsDevice dev = _tvDeviceId.openObject();
             if (TvActiveViewport > 0)
                 dev.viewAt(TvActiveViewport).openObject().regen();
             dev.invalidate();
             dev.TryAutoRegeneration(_cadRegenFactory).update();
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
-        public void Set3DView(OdTvExtendedView.e3DViewType type)
+        public void Set3DView(OdTvExtendedView_e3DViewType type)
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
             OdTvExtendedView exView = GetActiveTvExtendedView();
             if (exView == null)
@@ -391,7 +389,7 @@ namespace HCL_ODA_TestPAD.UserControls
 
             Invalidate();
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             if (_serviceFactory.AppSettings.ShowCube)
             {
                 OnOffViewCube(true);
@@ -401,13 +399,13 @@ namespace HCL_ODA_TestPAD.UserControls
         public OdGeVector3d GetEyeDirection()
         {
             OdGeVector3d eyeDir = new OdGeVector3d(OdGeVector3d.kIdentity);
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
             OdTvGsView pView = GetActiveTvExtendedView().getViewId().openObject();
             if (pView != null)
                 eyeDir = pView.position() - pView.target();
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return eyeDir;
         }
 
@@ -422,10 +420,10 @@ namespace HCL_ODA_TestPAD.UserControls
 
             if ((res & DraggerResult.NeedUpdateView) != 0)
             {
-                MemoryTransaction mtr = MM.StartTransaction();
+                MemoryTransaction mtr = _mm.StartTransaction();
                 OdTvGsDevice pDevice = _tvDeviceId.openObject();
                 pDevice.TryAutoRegeneration(_cadRegenFactory).update();
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
             }
 
             if ((res & DraggerResult.NeedUFinishDragger) != 0)
@@ -437,20 +435,20 @@ namespace HCL_ODA_TestPAD.UserControls
             DraggerResult res = DraggerResult.NothingToDo;
 
             if (_dragger == null)
-                res = dragger.Start(null, TvActiveViewport, Cursor, WCS);
+                res = dragger.Start(null, TvActiveViewport, Cursor, Wcs);
             else
             {
                 ODA.Draggers.OdTvDragger pPrevDragger = _dragger;
                 if (_dragger.HasPrevious())
                 {
-                    DraggerResult res_prev;
+                    DraggerResult resPrev;
                     if (useCurrentAsPrevious)
-                        _dragger.Finish(out res_prev);
+                        _dragger.Finish(out resPrev);
                     else
-                        pPrevDragger = _dragger.Finish(out res_prev);
-                    ActionAfterDragger(res_prev);
+                        pPrevDragger = _dragger.Finish(out resPrev);
+                    ActionAfterDragger(resPrev);
                 }
-                res = dragger.Start(pPrevDragger, TvActiveViewport, Cursor, WCS);
+                res = dragger.Start(pPrevDragger, TvActiveViewport, Cursor, Wcs);
             }
             // need update active dragger before calling action
             _dragger = dragger;
@@ -470,7 +468,7 @@ namespace HCL_ODA_TestPAD.UserControls
 
                     // activate previous dragger
                     _dragger = prevDragger;
-                    res = _dragger.Start(null, TvActiveViewport, Cursor, WCS);
+                    res = _dragger.Start(null, TvActiveViewport, Cursor, Wcs);
                     ActionAfterDragger(res);
                 }
             }
@@ -480,12 +478,12 @@ namespace HCL_ODA_TestPAD.UserControls
         {
             if (_tvMarkupModelId != null && _dbId != null)
             {
-                MemoryTransaction mtr = MM.StartTransaction();
+                MemoryTransaction mtr = _mm.StartTransaction();
 
-                OdTvModel pMarkupModel = _tvMarkupModelId.openObject(OpenMode.kForWrite);
+                OdTvModel pMarkupModel = _tvMarkupModelId.openObject(OdTv_OpenMode.kForWrite);
                 if (pMarkupModel == null)
                 {
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     return;
                 }
                 OdTvEntitiesIterator pIt = pMarkupModel.getEntitiesIterator();
@@ -493,28 +491,28 @@ namespace HCL_ODA_TestPAD.UserControls
                 {
                     while (!pIt.done())
                     {
-                        MemoryTransaction mtr2 = MM.StartTransaction();
+                        MemoryTransaction mtr2 = _mm.StartTransaction();
 
                         OdTvEntityId entityId = pIt.getEntity();
-                        OdTvEntity pEn = entityId.openObject(OpenMode.kForWrite);
+                        OdTvEntity pEn = entityId.openObject(OdTv_OpenMode.kForWrite);
                         if (pEn.getName() == OdTvMarkupDragger.NameOfMarkupTempEntity) // if temp entity
                         {
                             pMarkupModel.removeEntity(entityId);
                         }
-                        else if (pEn.getVisibility().getType() != OdTvVisibilityDef.VisibilityType.kInvisible)
+                        else if (pEn.getVisibility().getType() != OdTvVisibilityDef_VisibilityType.kInvisible)
                         {
                             OdTvGeometryDataIterator pItF = pEn.getGeometryDataIterator();
                             // folds
                             while (!pItF.done())
                             {
                                 // objects
-                                OdTvEntity pFold = pItF.getGeometryData().openAsSubEntity(OpenMode.kForWrite);
+                                OdTvEntity pFold = pItF.getGeometryData().openAsSubEntity(OdTv_OpenMode.kForWrite);
                                 OdTvGeometryDataIterator pItO = pFold.getGeometryDataIterator();
 
                                 while (!pItO.done())
                                 {
                                     OdTvGeometryDataId geomId = pItO.getGeometryData();
-                                    OdTvUserData usrData = geomId.openAsSubEntity(OpenMode.kForWrite).getUserData(AppTvId);
+                                    OdTvUserData usrData = geomId.openAsSubEntity(OdTv_OpenMode.kForWrite).getUserData(AppTvId);
                                     if (usrData == null)
                                         pFold.removeGeometryData(geomId);
 
@@ -526,12 +524,12 @@ namespace HCL_ODA_TestPAD.UserControls
                             pEn.setVisibility(new OdTvVisibilityDef(false));
                         }
 
-                        MM.StopTransaction(mtr2);
+                        _mm.StopTransaction(mtr2);
                         pIt.step();
                     }
                 }
 
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
             }
         }
 
@@ -556,15 +554,15 @@ namespace HCL_ODA_TestPAD.UserControls
             if (_dbId == null || _tvDeviceId == null)
                 return;
 
-            VM.UncheckDraggersBtns();
+            Vm.UncheckDraggersBtns();
 
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
             FinishDragger();
 
-            using var dev = _tvDeviceId.openObject(OpenMode.kForWrite);
+            using var dev = _tvDeviceId.openObject(OdTv_OpenMode.kForWrite);
             OdTvGsViewId viewId = dev.viewAt(TvActiveViewport);
-            OdTvGsView pView = viewId.openObject(OpenMode.kForWrite);
+            OdTvGsView pView = viewId.openObject(OdTv_OpenMode.kForWrite);
             if (pView == null)
                 return;
 
@@ -593,9 +591,9 @@ namespace HCL_ODA_TestPAD.UserControls
             if (_dragger != null)
                 _dragger.NotifyAboutViewChange(DraggerViewChangeType.ViewChangeZoom);
 
-            GetActiveTvExtendedView().setViewType(OdTvExtendedView.e3DViewType.kCustom);
+            GetActiveTvExtendedView().setViewType(OdTvExtendedView_e3DViewType.kCustom);
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         private void MouseDownEvent(object sender, MouseEventArgs e)
@@ -626,7 +624,7 @@ namespace HCL_ODA_TestPAD.UserControls
 
             if (_mouseDown == MouseDownState.MiddleMouseBtn)
             {
-                VM.UncheckDraggersBtns();
+                Vm.UncheckDraggersBtns();
                 if (!_isShiftPressed)
                     Pan();
                 else
@@ -710,9 +708,9 @@ namespace HCL_ODA_TestPAD.UserControls
             if (_dbId == null || _tvDeviceId == null)
                 return;
 
-            VM.UncheckDraggersBtns();
+            Vm.UncheckDraggersBtns();
 
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
             OdTvExtendedView exView = GetActiveTvExtendedView();
             if (exView == null)
@@ -743,19 +741,24 @@ namespace HCL_ODA_TestPAD.UserControls
             }
 
             SetAnimation(exView.getAnimation());
-            exView.setViewType(OdTvExtendedView.e3DViewType.kCustom);
+            exView.setViewType(OdTvExtendedView_e3DViewType.kCustom);
 
             if (_dragger != null)
                 _dragger.NotifyAboutViewChange(DraggerViewChangeType.ViewChangeZoom);
 
             Invalidate();
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
+        }
+
+        public void ShowTool(HclToolType type)
+        {
+            throw new NotImplementedException("HCL Tools are not implemented for GPU Device.");
         }
 
         private void ScreenDolly(int x, int y)
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             OdTvGsViewId viewId = _tvDeviceId.openObject().viewAt(TvActiveViewport);
             OdTvGsView pView = viewId.openObject();
             if (pView == null)
@@ -764,7 +767,7 @@ namespace HCL_ODA_TestPAD.UserControls
             OdGeVector3d vec = new OdGeVector3d(x, y, 0);
             vec.transformBy((pView.screenMatrix() * pView.projectionMatrix()).inverse());
             pView.dolly(vec);
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         #endregion
@@ -773,9 +776,9 @@ namespace HCL_ODA_TestPAD.UserControls
 
         public void LoadFile(string filepath)
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             this.Cursor = Cursors.WaitCursor;
-            OdTvFactoryId factId = TV_Globals.odTvGetFactory();
+            OdTvFactoryId factId = TV_Visualize_Globals.odTvGetFactory();
             factId.clearDatabases();
 
             bool isIfc = false;
@@ -798,16 +801,16 @@ namespace HCL_ODA_TestPAD.UserControls
 
             if (_dbId != null)
             {
-                OdTvDatabase odTvDatabase = _dbId.openObject(OpenMode.kForWrite);
+                OdTvDatabase odTvDatabase = _dbId.openObject(OdTv_OpenMode.kForWrite);
                 _tvActiveModelId = odTvDatabase == null ? null : odTvDatabase.getModelsIterator().getModel();
                 if (_tvActiveModelId == null)
                 {
                     MessageBox.Show("Import failed!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Cursor = Cursors.Default;
-                    MM.StopTransaction(mtr);
-                    if (VM.FileIsExist)
+                    _mm.StopTransaction(mtr);
+                    if (Vm.FileIsExist)
                     {
-                        VM.ClearRenderArea();
+                        Vm.ClearRenderArea();
                     }
 
                     return;
@@ -826,34 +829,34 @@ namespace HCL_ODA_TestPAD.UserControls
                 if (devIt != null && !devIt.done())
                 {
                     _tvDeviceId = devIt.getDevice();
-                    OdTvGsDevice odTvGsDevice = _tvDeviceId.openObject(OpenMode.kForWrite);
+                    OdTvGsDevice odTvGsDevice = _tvDeviceId.openObject(OdTv_OpenMode.kForWrite);
                     IntPtr wndHndl = new IntPtr(this.Handle.ToInt32());
                     OdTvDCRect rect = new OdTvDCRect(0, Width, Height, 0);
-                    odTvGsDevice.setupGs(wndHndl, rect, OdTvGsDevice.Name.kOpenGLES2);
+                    odTvGsDevice.setupGs(wndHndl, rect, OdTvGsDevice_Name.kOpenGLES2);
                     odTvGsDevice.setForbidImageHighlight(_serviceFactory.AppSettings.SetForbidImageHighlight);
-                    odTvGsDevice.setOption(OdTvGsDevice.Options.kForcePartialUpdate, _serviceFactory.AppSettings.UseForcePartialUpdate);
-                    odTvGsDevice.setOption(OdTvGsDevice.Options.kBlocksCache, _serviceFactory.AppSettings.UseBlocksCache);
+                    odTvGsDevice.setOption(OdTvGsDevice_Options.kForcePartialUpdate, _serviceFactory.AppSettings.UseForcePartialUpdate);
+                    odTvGsDevice.setOption(OdTvGsDevice_Options.kBlocksCache, _serviceFactory.AppSettings.UseBlocksCache);
 
                     if (!isIfc)
                     {
-                        odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _serviceFactory.AppSettings.UseSceneGraph);
+                        odTvGsDevice.setOption(OdTvGsDevice_Options.kUseSceneGraph, _serviceFactory.AppSettings.UseSceneGraph);
                     }
                     else
                     {
-                        odTvGsDevice.setOption(OdTvGsDevice.Options.kUseSceneGraph, _serviceFactory.AppSettings.IfcUseSceneGraph);
+                        odTvGsDevice.setOption(OdTvGsDevice_Options.kUseSceneGraph, _serviceFactory.AppSettings.IfcUseSceneGraph);
                     }
 
                     for (int i = 0; i < odTvGsDevice.numViews(); i++)
                     {
-                        MemoryTransaction viewTr = MM.StartTransaction();
+                        MemoryTransaction viewTr = _mm.StartTransaction();
                         if (odTvGsDevice.viewAt(i).openObject().getActive())
                             TvActiveViewport = i;
-                        MM.StopTransaction(viewTr);
+                        _mm.StopTransaction(viewTr);
                     }
                     if (TvActiveViewport < 0)
                     {
                         TvActiveViewport = 0;
-                        odTvGsDevice.viewAt(0).openObject(OpenMode.kForWrite).setActive(true);
+                        odTvGsDevice.viewAt(0).openObject(OdTv_OpenMode.kForWrite).setActive(true);
                     }
 
                     odTvGsDevice.onSize(rect);
@@ -874,14 +877,14 @@ namespace HCL_ODA_TestPAD.UserControls
                 }
 
                 FilePath = filepath;
-                VM.FileIsExist = true;
+                Vm.FileIsExist = true;
                 //Init();
                 //VM.AppMainWindow.ModelBrowser.Initialize(_dbId, this);
             }
 
             OnOffFPS(true);
             this.Cursor = Cursors.Default;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
         public uint GetCadDbUnitAsCadFileUnit(OdTvDatabase odTvDatabase)
         {
@@ -890,12 +893,12 @@ namespace HCL_ODA_TestPAD.UserControls
             for (; !modelsIterator.done(); modelsIterator.step())
             {
                 using var odTvModelId = modelsIterator.getModel();
-                using var odTvModel = odTvModelId.openObject(OpenMode.kForRead);
+                using var odTvModel = odTvModelId.openObject(OdTv_OpenMode.kForRead);
                 if (!odTvModelId.isNull())
                 {
                     var modelUnits = odTvModel.getUnits();
                     double userDefCoef = 0;
-                    if (modelUnits == Units.kUserDefined)
+                    if (modelUnits == OdTv_Units.kUserDefined)
                     {
                         modelUnits = odTvModel.getUnits(out userDefCoef);
                     }
@@ -917,7 +920,7 @@ namespace HCL_ODA_TestPAD.UserControls
             for (; !modelsIterator.done(); modelsIterator.step())
             {
                 using var odTvModelId = modelsIterator.getModel();
-                using var odTvModel = odTvModelId.openObject(OpenMode.kForWrite);
+                using var odTvModel = odTvModelId.openObject(OdTv_OpenMode.kForWrite);
                 if (!odTvModelId.isNull())
                 {
                     var tvUnits = UnitsValueConverter.MapHiltiUnitsToOda(CadUnits);
@@ -929,7 +932,7 @@ namespace HCL_ODA_TestPAD.UserControls
                     {
                         // As US_Feet and other un available units in Units enum are treated as userdefined in visualize
                         // have to set related coef value along with units, as of now HCL is supporting US_Feet so setting US_Feet coef value
-                        odTvModel.setUnits(tvUnits, CADModelConstants.UsFeetCoefValue);
+                        odTvModel.setUnits(tvUnits, CadModelConstants.UsFeetCoefValue);
                     }
                 }
 
@@ -947,7 +950,7 @@ namespace HCL_ODA_TestPAD.UserControls
             using var layersIt = odTvDatabase.getLayersIterator();
             for (; !layersIt.done(); layersIt.step())
             {
-                using var layer = layersIt.getLayer().openObject(OpenMode.kForWrite);
+                using var layer = layersIt.getLayer().openObject(OdTv_OpenMode.kForWrite);
                 if (layer.getTotallyInvisible())
                 {
                     layer.setTotallyInvisible(false);
@@ -957,22 +960,22 @@ namespace HCL_ODA_TestPAD.UserControls
 
         public void ConfigureViewSettings(OdTvGsViewId bitmapDeviceViewId)
         {
-            using var viewOpen = bitmapDeviceViewId.openObject(OpenMode.kForWrite);
+            using var viewOpen = bitmapDeviceViewId.openObject(OdTv_OpenMode.kForWrite);
             viewOpen.setDefaultLightingIntensity(1.25);
 
-            using var color = new OdTvColorDef(CADModelConstants.LightColor.R, CADModelConstants.LightColor.G,
-                                         CADModelConstants.LightColor.B);
+            using var color = new OdTvColorDef(CadModelConstants.LightColor.R, CadModelConstants.LightColor.G,
+                                         CadModelConstants.LightColor.B);
             viewOpen.setDefaultLightingColor(color);
-            viewOpen.enableDefaultLighting(true, OdTvGsView.DefaultLightingType.kTwoLights);
-            using var db = viewOpen.getDatabase().openObject(OpenMode.kForWrite);
-            using var background = db.createBackground("Gradient", OdTvGsViewBackgroundId.BackgroundTypes.kGradient);
+            viewOpen.enableDefaultLighting(true, OdTvGsView_DefaultLightingType.kTwoLights);
+            using var db = viewOpen.getDatabase().openObject(OdTv_OpenMode.kForWrite);
+            using var background = db.createBackground("Gradient", OdTvGsViewBackgroundId_BackgroundTypes.kGradient);
 
-            using var bg = background.openAsGradientBackground(OpenMode.kForWrite);
+            using var bg = background.openAsGradientBackground(OdTv_OpenMode.kForWrite);
             if (bg != null)
             {
-                bg.setColorTop(new OdTvColorDef(CADModelConstants.GradientColorTop.R, CADModelConstants.GradientColorTop.G, CADModelConstants.GradientColorTop.B));
-                bg.setColorMiddle(new OdTvColorDef(CADModelConstants.GradientColorMiddle.R, CADModelConstants.GradientColorMiddle.G, CADModelConstants.GradientColorMiddle.B));
-                bg.setColorBottom(new OdTvColorDef(CADModelConstants.GradientColorBottom.R, CADModelConstants.GradientColorBottom.G, CADModelConstants.GradientColorBottom.B));
+                bg.setColorTop(new OdTvColorDef(CadModelConstants.GradientColorTop.R, CadModelConstants.GradientColorTop.G, CadModelConstants.GradientColorTop.B));
+                bg.setColorMiddle(new OdTvColorDef(CadModelConstants.GradientColorMiddle.R, CadModelConstants.GradientColorMiddle.G, CadModelConstants.GradientColorMiddle.B));
+                bg.setColorBottom(new OdTvColorDef(CadModelConstants.GradientColorBottom.R, CadModelConstants.GradientColorBottom.G, CadModelConstants.GradientColorBottom.B));
                 viewOpen.setBackground(background);
             }
         }
@@ -993,14 +996,14 @@ namespace HCL_ODA_TestPAD.UserControls
                     dwgPmtrs.setFeedbackForChooseCallback(null);
                     dwgPmtrs.setImportFrozenLayers(_serviceFactory.AppSettings.DwgSetImportFrozenLayers);
                     dwgPmtrs.setClearEmptyObjects(_serviceFactory.AppSettings.DwgSetClearEmptyObjects);
-                    dwgPmtrs.setNeedCDATree(_serviceFactory.AppSettings.DwgSetNeedCDATree);
-                    dwgPmtrs.setNeedCollectPropertiesInCDA(_serviceFactory.AppSettings.DwgSetNeedCollectPropertiesInCDA);
+                    dwgPmtrs.setNeedCDATree(_serviceFactory.AppSettings.DwgSetNeedCdaTree);
+                    dwgPmtrs.setNeedCollectPropertiesInCDA(_serviceFactory.AppSettings.DwgSetNeedCollectPropertiesInCda);
                 }
                 else if (ext == ".ifc")
                 {
                     var tvIfcImportParams = new OdTvIfcImportParams();
-                    tvIfcImportParams.setNeedCDATree(_serviceFactory.AppSettings.IfcSetNeedCDATree);
-                    tvIfcImportParams.setNeedCollectPropertiesInCDA(_serviceFactory.AppSettings.IfcSetNeedCollectPropertiesInCDA);
+                    tvIfcImportParams.setNeedCDATree(_serviceFactory.AppSettings.IfcSetNeedCdaTree);
+                    tvIfcImportParams.setNeedCollectPropertiesInCDA(_serviceFactory.AppSettings.IfcSetNeedCollectPropertiesInCda);
                     tvIfcImportParams.setFeedbackForChooseCallback(PCallback);
                     isIfc = true;
                     importParams = tvIfcImportParams;
@@ -1049,10 +1052,10 @@ namespace HCL_ODA_TestPAD.UserControls
 
             try
             {
-                MemoryTransaction mtr = MM.StartTransaction();
-                OdTvDatabase db = _dbId.openObject(OpenMode.kForWrite);
+                MemoryTransaction mtr = _mm.StartTransaction();
+                OdTvDatabase db = _dbId.openObject(OdTv_OpenMode.kForWrite);
                 OdTvResult rc = db.writeFile(filePath);
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
             }
             catch
             {
@@ -1065,9 +1068,9 @@ namespace HCL_ODA_TestPAD.UserControls
 
         public void CreateNewFile()
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             this.Cursor = Cursors.WaitCursor;
-            OdTvFactoryId factId = TV_Globals.odTvGetFactory();
+            OdTvFactoryId factId = TV_Visualize_Globals.odTvGetFactory();
             factId.clearDatabases();
             DatabaseInfo = new TvDatabaseInfo();
             Stopwatch timer = Stopwatch.StartNew();
@@ -1076,9 +1079,9 @@ namespace HCL_ODA_TestPAD.UserControls
             try
             {
                 OdTvResult rc = OdTvResult.tvCannotOpenFile;
-                OdTvDatabase pDatabase = _dbId.openObject(OpenMode.kForWrite, ref rc);
+                OdTvDatabase pDatabase = _dbId.openObject(OdTv_OpenMode.kForWrite, ref rc);
                 // Create model
-                _tvActiveModelId = pDatabase.createModel("Tv_Model", OdTvModel.Type.kMain);
+                _tvActiveModelId = pDatabase.createModel("Tv_Model", OdTvModel_Type.kMain);
             }
             catch
             {
@@ -1095,25 +1098,25 @@ namespace HCL_ODA_TestPAD.UserControls
             timer.Stop();
             DatabaseInfo.FirstUpdateTime = timer.ElapsedMilliseconds;
 
-            VM.FileIsExist = true;
+            Vm.FileIsExist = true;
             FilePath = "";
             this.Cursor = Cursors.Default;
             //VM.MainWindow.ModelBrowser.Initialize(_dbId, this);
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         private OdTvGsDeviceId CreateNewDevice()
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             OdTvGsDeviceId newDevId = null;
 
             try
             {
                 IntPtr wndHndl = new IntPtr(Handle.ToInt32());
                 OdTvDCRect rect = new OdTvDCRect(0, Size.Width, Size.Height, 0);
-                newDevId = _dbId.openObject().createDevice("TV_Device", wndHndl, rect, OdTvGsDevice.Name.kOpenGLES2);
+                newDevId = _dbId.openObject().createDevice("TV_Device", wndHndl, rect, OdTvGsDevice_Name.kOpenGLES2);
                 // Open device
-                OdTvGsDevice pDevice = newDevId.openObject(OpenMode.kForWrite);
+                OdTvGsDevice pDevice = newDevId.openObject(OdTv_OpenMode.kForWrite);
                 if (pDevice == null)
                     return null;
 
@@ -1128,7 +1131,7 @@ namespace HCL_ODA_TestPAD.UserControls
                 pDevice.addView(newViewId);
 
                 // Add current model to the view
-                OdTvGsView viewPtr = newViewId.openObject(OpenMode.kForWrite);
+                OdTvGsView viewPtr = newViewId.openObject(OdTv_OpenMode.kForWrite);
 
                 // Setup view to make it contr directional with the WCS normal
                 viewPtr.setView(new OdGePoint3d(0, 0, 1), new OdGePoint3d(0, 0, 0), new OdGeVector3d(0, 1, 0), 1, 1);
@@ -1140,7 +1143,7 @@ namespace HCL_ODA_TestPAD.UserControls
                 viewPtr.setActive(true);
 
                 // Set the render mode
-                viewPtr.setMode(OdTvGsView.RenderMode.k2DOptimized);
+                viewPtr.setMode(OdTvGsView_RenderMode.k2DOptimized);
 
                 newDevId.openObject().onSize(rect);
             }
@@ -1150,18 +1153,18 @@ namespace HCL_ODA_TestPAD.UserControls
                 throw;
             }
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return newDevId;
         }
         public void ExportToPdf(string fileName, bool is2D = true)
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
-            OdTvDatabase db = _dbId.openObject(OpenMode.kForWrite);
+            OdTvDatabase db = _dbId.openObject(OdTv_OpenMode.kForWrite);
             if (db == null)
             {
                 MessageBox.Show("There is no database for the save!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return;
             }
             this.Cursor = Cursors.WaitCursor;
@@ -1175,7 +1178,7 @@ namespace HCL_ODA_TestPAD.UserControls
                 if (rc != OdTvResult.tvOk)
                 {
                     MessageBox.Show("Export of file " + fileName + " was failed!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     this.Cursor = Cursors.Default;
                     return;
                 }
@@ -1183,13 +1186,13 @@ namespace HCL_ODA_TestPAD.UserControls
             catch
             {
                 MessageBox.Show("Export of file " + fileName + " was failed!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 this.Cursor = Cursors.Default;
                 return;
             }
 
             this.Cursor = Cursors.Default;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         #endregion
@@ -1228,9 +1231,9 @@ namespace HCL_ODA_TestPAD.UserControls
         {
             if (_tvMarkupModelId == null)
             {
-                MemoryTransaction mtr = MM.StartTransaction();
-                _tvMarkupModelId = _dbId.openObject(OpenMode.kForWrite).createModel(OdTvMarkupDragger.NameOfMarkupModel, OdTvModel.Type.kDirect, true);
-                MM.StopTransaction(mtr);
+                MemoryTransaction mtr = _mm.StartTransaction();
+                _tvMarkupModelId = _dbId.openObject(OdTv_OpenMode.kForWrite).createModel(OdTvMarkupDragger.NameOfMarkupModel, OdTvModel_Type.kDirect, true);
+                _mm.StopTransaction(mtr);
             }
         }
 
@@ -1271,7 +1274,7 @@ namespace HCL_ODA_TestPAD.UserControls
 
         public void SaveMarkup()
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
             if (_tvMarkupModelId == null || _tvMarkupModelId.openObject().getEntitiesIterator().done())
             {
@@ -1293,7 +1296,7 @@ namespace HCL_ODA_TestPAD.UserControls
                 OdTvEntityId curEnId = it.getEntity();
                 OdTvEntity curEn = curEnId.openObject();
                 if (curEn.getName() == OdTvMarkupDragger.NameOfMarkupTempEntity || curEn.getVisibility().getType() !=
-                    OdTvVisibilityDef.VisibilityType.kInvisible)
+                    OdTvVisibilityDef_VisibilityType.kInvisible)
                 {
                     activeEntityId = curEnId;
                     break;
@@ -1312,12 +1315,12 @@ namespace HCL_ODA_TestPAD.UserControls
             SaveMarkupDialog dlg = new SaveMarkupDialog(_tvMarkupModelId, activeEntityId, _tvDeviceId.openObject().viewAt(TvActiveViewport));
             dlg.ShowDialog();
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         public void LoadMarkup()
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
             if (_tvMarkupModelId == null || _tvMarkupModelId.openObject().getEntitiesIterator().done())
             {
@@ -1331,7 +1334,7 @@ namespace HCL_ODA_TestPAD.UserControls
             if (dlg.ShowDialog() == true)
                 Invalidate();
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         #endregion
@@ -1345,30 +1348,30 @@ namespace HCL_ODA_TestPAD.UserControls
 
             if (bEnable)
             {
-                if (WCS == null)
-                    CreateWCS();
+                if (Wcs == null)
+                    CreateWcs();
                 else
-                    WCS.UpdateWCS();
+                    Wcs.UpdateWcs();
             }
-            else if (!bEnable && WCS != null)
+            else if (!bEnable && Wcs != null)
             {
-                WCS.removeWCS();
+                Wcs.RemoveWcs();
             }
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             _tvDeviceId.openObject().update();
             Invalidate();
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
-        private void CreateWCS()
+        private void CreateWcs()
         {
-            if (WCS != null)
-                WCS.removeWCS();
+            if (Wcs != null)
+                Wcs.RemoveWcs();
 
-            MemoryTransaction mtr = MM.StartTransaction();
-            WCS = new TvWpfViewWCS(TvDatabaseId, TvGsDeviceId.openObject().viewAt(TvActiveViewport));
-            OdTvGsView pWcsView = WCS.GetWcsViewId().openObject(OpenMode.kForWrite);
-            OdTvGsView activeView = WCS.GetParentViewId().openObject();
+            MemoryTransaction mtr = _mm.StartTransaction();
+            Wcs = new TvWpfViewWcs(TvDatabaseId, TvGsDeviceId.openObject().viewAt(TvActiveViewport));
+            OdTvGsView pWcsView = Wcs.GetWcsViewId().openObject(OdTv_OpenMode.kForWrite);
+            OdTvGsView activeView = Wcs.GetParentViewId().openObject();
             OdGePoint3d activeViewPos = activeView.position();
             //Identity Matrix
             OdGeMatrix3d wcsMatrix = new OdGeMatrix3d();
@@ -1377,7 +1380,7 @@ namespace HCL_ODA_TestPAD.UserControls
             //Create a camera view for WCS
             pWcsView.setView(activeViewPos.transformBy(wcsMatrix), OdGePoint3d.kOrigin, activeView.upVector(), 1, 1);
             //pWcsView.setMode(activeView.mode());
-            pWcsView.setMode(OdTvGsView.RenderMode.kGouraudShaded);
+            pWcsView.setMode(OdTvGsView_RenderMode.kGouraudShaded);
             pWcsView.zoom(3.2);
             OdGePoint2d lowerLeft = new OdGePoint2d();
             OdGePoint2d upperRight = new OdGePoint2d();
@@ -1385,49 +1388,49 @@ namespace HCL_ODA_TestPAD.UserControls
             upperRight.x = lowerLeft.x + 1.87;
             upperRight.y = lowerLeft.y + 0.3;
             pWcsView.setViewport(lowerLeft, upperRight);
-            WCS.UpdateWCS();
+            Wcs.UpdateWcs();
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         public void OnOffViewCube(bool bEnable)
         {
             if (_tvDeviceId == null)
                 return;
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             OdTvExtendedView extView = GetActiveTvExtendedView();
             if (extView != null && extView.getEnabledViewCube() != bEnable)
             {
                 extView.setEnabledViewCube(bEnable);
                 Invalidate();
             }
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         public void OnOffFPS(bool bEnable)
         {
             if (_tvDeviceId == null)
                 return;
-            MemoryTransaction mtr = MM.StartTransaction();
-            OdTvGsDevice dev = _tvDeviceId.openObject(OpenMode.kForWrite);
+            MemoryTransaction mtr = _mm.StartTransaction();
+            OdTvGsDevice dev = _tvDeviceId.openObject(OdTv_OpenMode.kForWrite);
             if (dev.getShowFPS() != bEnable)
             {
                 dev.setShowFPS(bEnable);
                 dev.TryAutoRegeneration(_cadRegenFactory).update();
                 Invalidate();
             }
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         public void OnOffAnimation(bool bEnable)
         {
             if (_tvDeviceId == null)
                 return;
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             OdTvExtendedView exView = GetActiveTvExtendedView();
             if (exView != null)
                 exView.setAnimationEnabled(bEnable);
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         public void SetZoomStep(double dValue)
@@ -1468,7 +1471,7 @@ namespace HCL_ODA_TestPAD.UserControls
             if (exView == null)
                 return;
 
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
             OdTvGsView view = exView.getViewId().openObject();
             if (view == null)
@@ -1491,7 +1494,7 @@ namespace HCL_ODA_TestPAD.UserControls
 
             Invalidate();
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         public void AddEntityToSet(OdTvEntityId enId)
@@ -1505,12 +1508,12 @@ namespace HCL_ODA_TestPAD.UserControls
             ClearSelectionSet();
 
             OdTvSelectionOptions opt = new OdTvSelectionOptions();
-            opt.setLevel(OdTvSelectionOptions.Level.kEntity);
-            opt.setMode(OdTvSelectionOptions.Mode.kPoint);
+            opt.setLevel(OdTvSelectionOptions_Level.kEntity);
+            opt.setMode(OdTvSelectionOptions_Mode.kPoint);
             SelectionSet = OdTvSelectionSet.createObject(opt);
             SelectionSet.appendEntity(enId);
 
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             OdTvGsView view = exView.getViewId().openObject();
             if (view == null)
                 return;
@@ -1527,7 +1530,7 @@ namespace HCL_ODA_TestPAD.UserControls
                 view.highlight(id, path, true);
             }
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
 
             Invalidate();
         }
@@ -1546,12 +1549,12 @@ namespace HCL_ODA_TestPAD.UserControls
         {
             if (_tvDeviceId == null || _tvDeviceId.isNull())
                 return;
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
-            OdTvGsView pView = GetActiveTvExtendedView().getViewId().openObject(OpenMode.kForWrite);
+            OdTvGsView pView = GetActiveTvExtendedView().getViewId().openObject(OdTv_OpenMode.kForWrite);
             if (pView == null)
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return;
             }
 
@@ -1565,11 +1568,11 @@ namespace HCL_ODA_TestPAD.UserControls
                 pView.setEnableCuttingPlaneFill(bNewFillingEnabled, iNewColor);
 
             uint iOldPatternColor = 0;
-            OdTvGsView.CuttingPlaneFillStyle oldFillingPatternStyle = OdTvGsView.CuttingPlaneFillStyle.kCheckerboard;
-            bool bOldFillingPatternEnabled = pView.getCuttingPlaneFillPatternEnabled(ref oldFillingPatternStyle, out iOldPatternColor);
+            OdTvGsView_CuttingPlaneFillStyle oldFillingPatternStyle = OdTvGsView_CuttingPlaneFillStyle.kCheckerboard;
+            bool bOldFillingPatternEnabled = pView.getCuttingPlaneFillPatternEnabled(out oldFillingPatternStyle, out iOldPatternColor);
 
             bool bNewFillingPatternEnabled = SectioningOptions.FillingPatternEnabled;
-            OdTvGsView.CuttingPlaneFillStyle newFillingPatternStyle = SectioningOptions.FillingPaternStyle;
+            OdTvGsView_CuttingPlaneFillStyle newFillingPatternStyle = SectioningOptions.FillingPaternStyle;
             uint iNewFillingPatternColor = SectioningOptions.FillingPatternColor;
 
             if (bNewFillingPatternEnabled != bOldFillingPatternEnabled
@@ -1584,7 +1587,7 @@ namespace HCL_ODA_TestPAD.UserControls
                 pDevice.TryAutoRegeneration(_cadRegenFactory).update();
             }
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         public void OnAppearSectioningPanel(bool bAppear)
@@ -1619,16 +1622,16 @@ namespace HCL_ODA_TestPAD.UserControls
 
         public bool ShowCuttingPlanes()
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             SectioningOptions.IsShown = !SectioningOptions.IsShown;
 
             bool bRet = false;
 
-            OdTvGsView pActiveView = GetActiveTvExtendedView().getViewId().openObject(OpenMode.kForWrite);
-            OdTvGsDevice pDevice = _tvDeviceId.openObject(OpenMode.kForWrite);
+            OdTvGsView pActiveView = GetActiveTvExtendedView().getViewId().openObject(OdTv_OpenMode.kForWrite);
+            OdTvGsDevice pDevice = _tvDeviceId.openObject(OdTv_OpenMode.kForWrite);
             if (pActiveView == null || pDevice == null)
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return bRet;
             }
 
@@ -1665,7 +1668,7 @@ namespace HCL_ODA_TestPAD.UserControls
                 // remove geometry for the sectioning planes
                 if (!_cuttingPlanesModelId.isNull())
                 {
-                    OdTvModel pMoveModel = _cuttingPlanesModelId.openObject(OpenMode.kForWrite);
+                    OdTvModel pMoveModel = _cuttingPlanesModelId.openObject(OdTv_OpenMode.kForWrite);
                     if (pMoveModel != null)
                         pMoveModel.clearEntities();
                 }
@@ -1678,7 +1681,7 @@ namespace HCL_ODA_TestPAD.UserControls
             }
 
             Invalidate();
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return bRet;
         }
 
@@ -1686,29 +1689,29 @@ namespace HCL_ODA_TestPAD.UserControls
         {
             if (pView == null)
                 return;
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
             OdGePlane cuttingPlane = new OdGePlane();
             OdTvResult rc = pView.getCuttingPlane((uint)index, cuttingPlane);
             if (rc != OdTvResult.tvOk)
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return;
             }
 
-            OdTvModel pCuttingPlaneModel = _cuttingPlanesModelId.openObject(OpenMode.kForWrite);
+            OdTvModel pCuttingPlaneModel = _cuttingPlanesModelId.openObject(OdTv_OpenMode.kForWrite);
             // create cutting plane entity
             OdTvEntityId cuttingPlanesEntityId = pCuttingPlaneModel.appendEntity("$_CUTTINGPLANE_ENTITY" + index);
             //set a few parameters to the cutting plane
-            OdTvEntity pCuttingPlanesEntity = cuttingPlanesEntityId.openObject(OpenMode.kForWrite);
+            OdTvEntity pCuttingPlanesEntity = cuttingPlanesEntityId.openObject(OdTv_OpenMode.kForWrite);
             pCuttingPlanesEntity.setColor(new OdTvColorDef(175, 175, 175));
-            pCuttingPlanesEntity.setLineWeight(new OdTvLineWeightDef(ODA.Draggers.OdTvCuttingPlaneDragger.OD_TV_CUTTINGPLANE_EDGE_DEFAULT_LINEWEIGHT));
+            pCuttingPlanesEntity.setLineWeight(new OdTvLineWeightDef(ODA.Draggers.OdTvCuttingPlaneDragger.OdTvCuttingplaneEdgeDefaultLineweight));
             pCuttingPlanesEntity.setTransparency(new OdTvTransparencyDef(0.8));
             pCuttingPlanesEntity.addViewDependency(_cuttingPlanesViewId);
 
             IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(index));
             Marshal.WriteInt32(ptr, 0, index);
-            OdTvByteUserData data = new OdTvByteUserData(ptr, sizeof(int), OdTvByteUserData.Ownership.kCopyOwn, false);
+            OdTvByteUserData data = new OdTvByteUserData(ptr, sizeof(int), OdTvByteUserData_Ownership.kCopyOwn, false);
 
             pCuttingPlanesEntity.appendUserData(data, AppTvId);
 
@@ -1719,14 +1722,14 @@ namespace HCL_ODA_TestPAD.UserControls
             cuttingPlane.get(origin, uAxis, vAxis);
 
             // Get max distance between extents
-            double cuttingPlaneSize = getMainModelExtentsDistance() / 2d;
+            double cuttingPlaneSize = GetMainModelExtentsDistance() / 2d;
 
-            OdTvPointArray points = new OdTvPointArray();
+            OdGePoint3dVector points = new OdGePoint3dVector();
 
             OdGeMatrix3d transformMatrix = new OdGeMatrix3d();
             // 0
             OdGeVector3d moveVector0 = -vAxis - uAxis;
-            moveVector0 = moveVector0 * cuttingPlaneSize * ODA.Draggers.OdTvCuttingPlaneDragger.OD_TV_CUTTINGPLANE_SIZE_COEFF;
+            moveVector0 = moveVector0 * cuttingPlaneSize * ODA.Draggers.OdTvCuttingPlaneDragger.OdTvCuttingplaneSizeCoeff;
             transformMatrix.setToIdentity();
             transformMatrix.setToTranslation(moveVector0);
             OdGePoint3d point0 = new OdGePoint3d(origin);
@@ -1735,7 +1738,7 @@ namespace HCL_ODA_TestPAD.UserControls
 
             // 1
             OdGeVector3d moveVector1 = vAxis - uAxis;
-            moveVector1 = moveVector1 * cuttingPlaneSize * ODA.Draggers.OdTvCuttingPlaneDragger.OD_TV_CUTTINGPLANE_SIZE_COEFF;
+            moveVector1 = moveVector1 * cuttingPlaneSize * ODA.Draggers.OdTvCuttingPlaneDragger.OdTvCuttingplaneSizeCoeff;
             transformMatrix.setToIdentity();
             transformMatrix.setToTranslation(moveVector1);
             OdGePoint3d point1 = new OdGePoint3d(origin);
@@ -1744,7 +1747,7 @@ namespace HCL_ODA_TestPAD.UserControls
 
             // 2
             OdGeVector3d moveVector2 = vAxis + uAxis;
-            moveVector2 = moveVector2 * cuttingPlaneSize * ODA.Draggers.OdTvCuttingPlaneDragger.OD_TV_CUTTINGPLANE_SIZE_COEFF;
+            moveVector2 = moveVector2 * cuttingPlaneSize * ODA.Draggers.OdTvCuttingPlaneDragger.OdTvCuttingplaneSizeCoeff;
             transformMatrix.setToIdentity();
             transformMatrix.setToTranslation(moveVector2);
             OdGePoint3d point2 = new OdGePoint3d(origin);
@@ -1753,7 +1756,7 @@ namespace HCL_ODA_TestPAD.UserControls
 
             // 3
             OdGeVector3d moveVector3 = uAxis - vAxis;
-            moveVector3 = moveVector3 * cuttingPlaneSize * ODA.Draggers.OdTvCuttingPlaneDragger.OD_TV_CUTTINGPLANE_SIZE_COEFF;
+            moveVector3 = moveVector3 * cuttingPlaneSize * ODA.Draggers.OdTvCuttingPlaneDragger.OdTvCuttingplaneSizeCoeff;
             transformMatrix.setToIdentity();
             transformMatrix.setToTranslation(moveVector3);
             OdGePoint3d point3 = new OdGePoint3d(origin);
@@ -1783,13 +1786,13 @@ namespace HCL_ODA_TestPAD.UserControls
                     cuttingPlaneDragger.OnCuttingPlaneAdded(cuttingPlanesEntityId);
             }
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
-        private double getMainModelExtentsDistance()
+        private double GetMainModelExtentsDistance()
         {
             double maxDistance = 0d;
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
             OdTvModel pModel = _tvActiveModelId.openObject();
 
@@ -1812,33 +1815,33 @@ namespace HCL_ODA_TestPAD.UserControls
             else
                 maxDistance = maxPoint.x - minPoint.x;
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return maxDistance;
         }
 
         public bool AddCuttingPlane(OdGeVector3d axis, OdTvResult rc)
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
-            OdTvGsView pActiveView = GetActiveTvExtendedView().getViewId().openObject(OpenMode.kForWrite);
+            OdTvGsView pActiveView = GetActiveTvExtendedView().getViewId().openObject(OdTv_OpenMode.kForWrite);
             if (pActiveView == null)
             {
                 rc = OdTvResult.tvThereIsNoActiveView;
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return false;
             }
 
             uint nPlanes = pActiveView.numCuttingPlanes();
-            if (nPlanes >= OD_TV_CUTTING_PLANE_MAX_NUM)
+            if (nPlanes >= _odTvCuttingPlaneMaxNum)
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return false;
             }
 
             if (axis.isZeroLength())
             {
                 rc = OdTvResult.tvCuttingPlaneZeroNormal;
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return false;
             }
 
@@ -1872,8 +1875,8 @@ namespace HCL_ODA_TestPAD.UserControls
 
             try
             {
-                MemoryTransaction mtrDev = MM.StartTransaction();
-                OdTvGsDevice pDevice = _tvDeviceId.openObject(OpenMode.kForWrite);
+                MemoryTransaction mtrDev = _mm.StartTransaction();
+                OdTvGsDevice pDevice = _tvDeviceId.openObject(OdTv_OpenMode.kForWrite);
                 if (SectioningOptions.IsShown)
                 {
                     // if it is the first added object
@@ -1890,30 +1893,30 @@ namespace HCL_ODA_TestPAD.UserControls
 
                 pDevice.invalidate();
                 Invalidate();
-                MM.StopTransaction(mtrDev);
+                _mm.StopTransaction(mtrDev);
             }
             catch (System.Exception)
             {
 
             }
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return true;
         }
 
         public void RemoveCuttingPlanes()
         {
-            MemoryTransaction mtr = MM.StartTransaction();
-            OdTvGsView pActiveView = GetActiveTvExtendedView().getViewId().openObject(OpenMode.kForWrite);
+            MemoryTransaction mtr = _mm.StartTransaction();
+            OdTvGsView pActiveView = GetActiveTvExtendedView().getViewId().openObject(OdTv_OpenMode.kForWrite);
             if (pActiveView == null)
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return;
             }
 
             try
             {
-                OdTvGsDevice pDevice = _tvDeviceId.openObject(OpenMode.kForWrite);
+                OdTvGsDevice pDevice = _tvDeviceId.openObject(OdTv_OpenMode.kForWrite);
                 if (SectioningOptions.IsShown)
                 {
                     //notify dragger
@@ -1927,7 +1930,7 @@ namespace HCL_ODA_TestPAD.UserControls
                     // remove geometry for the sectioning planes
                     if (!_cuttingPlanesModelId.isNull())
                     {
-                        OdTvModel pMoveModel = _cuttingPlanesModelId.openObject(OpenMode.kForWrite);
+                        OdTvModel pMoveModel = _cuttingPlanesModelId.openObject(OdTv_OpenMode.kForWrite);
                         if (pMoveModel != null)
                             pMoveModel.clearEntities();
                     }
@@ -1948,20 +1951,20 @@ namespace HCL_ODA_TestPAD.UserControls
             {
             }
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         public void UpdateCadView(bool invalidate = false)
         {
             throw new NotImplementedException();
         }
-        public void ShowFPS()
+        public void ShowFps()
         {
-            OnOffFPS(_serviceFactory.AppSettings.ShowFPS);
+            OnOffFPS(_serviceFactory.AppSettings.ShowFps);
         }
-        public void ShowWCS()
+        public void ShowWcs()
         {
-            OnOffWCS(_serviceFactory.AppSettings.ShowWCS);
+            OnOffWCS(_serviceFactory.AppSettings.ShowWcs);
         }
         public void ShowCube()
         {
@@ -1970,8 +1973,13 @@ namespace HCL_ODA_TestPAD.UserControls
 
         public void ShowCustomModels()
         {
-            ShowFPS();
-            ShowWCS();
+            ShowFps();
+            ShowWcs();
+        }
+
+        public void SaveAsVsfx(string fileName)
+        {
+            throw new NotImplementedException();
         }
         #endregion
     }

@@ -29,7 +29,7 @@ public class Bootstrapper
         builder.RegisterType<AppAvalonDockViewModel>().AsSelf();
         builder.RegisterType<AppStatusBarViewModel>().AsSelf();
         builder.RegisterType<OdaDatabaseExplorerViewModel>().AsSelf();
-        builder.RegisterType<TestPADSettingsViewModel>().AsSelf();
+        builder.RegisterType<TestPadSettingsViewModel>().AsSelf();
         builder.RegisterType<TabPagedCadImageViewModel>().AsSelf();
         builder.RegisterType<AppMonitorViewModel>().AsSelf();
         builder.RegisterType<OverlayViewModel>().AsSelf();
@@ -41,7 +41,7 @@ public class Bootstrapper
         builder.RegisterType<MainWindowViewModel>().AsSelf();
         builder.RegisterType<MainWindow>().AsSelf();
         builder.RegisterType<ServiceFactory>().As<IServiceFactory>().SingleInstance();
-        builder.RegisterType<TestPADSettings>().AsSelf();
+        builder.RegisterType<TestPadSettings>().AsSelf();
 
         var container = builder.Build();
         return new AutofacServiceProvider(container);

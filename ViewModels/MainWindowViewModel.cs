@@ -1,10 +1,11 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
+using ODA.Visualize.TV_VisualizeTools;
 using System.IO;
 using HCL_ODA_TestPAD.Mvvm.Commands;
 using HCL_ODA_TestPAD.ODA.ModelBrowser;
@@ -21,11 +22,13 @@ public class MainWindowViewModel : BindableBase
 {
     private readonly IServiceFactory _serviceFactory;
     public AppStatusBarViewModel AppStatusBarViewModel { get; set; }
+    public OverlayViewModel OverlayViewModel { get; }
     public MainWindowViewModel(IServiceFactory serviceFactory,
-        AppStatusBarViewModel appStatusBarViewModel)
+        AppStatusBarViewModel appStatusBarViewModel, OverlayViewModel overlayViewModel)
     {
         _serviceFactory = serviceFactory;
         AppStatusBarViewModel = appStatusBarViewModel;
+        OverlayViewModel = overlayViewModel;
     }
 
     //private MemoryManager MM = MemoryManager.GetMemoryManager();
@@ -128,6 +131,17 @@ public class MainWindowViewModel : BindableBase
         }
     }
 
+    private bool _isHcl;
+    public bool IsHcl
+    {
+        get { return _isHcl; }
+        set
+        {
+            _isHcl = value;
+            AppMainWindow.HCLPanel.Visibility = _isHcl ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
     private bool _isSectioning;
     public bool IsSectioning
     {
@@ -161,8 +175,8 @@ public class MainWindowViewModel : BindableBase
     [Flags]
     public enum AppearanceOptions
     {
-        FPSEnabled = 1,
-        WCSEnabled = 2,
+        FpsEnabled = 1,
+        WcsEnabled = 2,
         UseAnimation = 4,
         ViewCubeEnabled = 8
     }
@@ -175,12 +189,12 @@ public class MainWindowViewModel : BindableBase
         set
         {
             _appearanceOpt = value;
-            if (_hclGLES2_Control != null)
+            if (_hclGles2Control != null)
             {
-                _hclGLES2_Control.OnOffViewCube((_appearanceOpt & AppearanceOptions.ViewCubeEnabled) == AppearanceOptions.ViewCubeEnabled);
-                _hclGLES2_Control.OnOffFPS((_appearanceOpt & AppearanceOptions.FPSEnabled) == AppearanceOptions.FPSEnabled);
-                _hclGLES2_Control.OnOffWCS((_appearanceOpt & AppearanceOptions.WCSEnabled) == AppearanceOptions.WCSEnabled);
-                _hclGLES2_Control.OnOffAnimation((_appearanceOpt & AppearanceOptions.UseAnimation) == AppearanceOptions.UseAnimation);
+                _hclGles2Control.OnOffViewCube((_appearanceOpt & AppearanceOptions.ViewCubeEnabled) == AppearanceOptions.ViewCubeEnabled);
+                _hclGles2Control.OnOffFPS((_appearanceOpt & AppearanceOptions.FpsEnabled) == AppearanceOptions.FpsEnabled);
+                _hclGles2Control.OnOffWCS((_appearanceOpt & AppearanceOptions.WcsEnabled) == AppearanceOptions.WcsEnabled);
+                _hclGles2Control.OnOffAnimation((_appearanceOpt & AppearanceOptions.UseAnimation) == AppearanceOptions.UseAnimation);
             }
         }
     }
@@ -192,33 +206,33 @@ public class MainWindowViewModel : BindableBase
         set
         {
             _zoomStep = value;
-            if (_hclGLES2_Control != null)
-                _hclGLES2_Control.SetZoomStep(_zoomStep);
+            if (_hclGles2Control != null)
+                _hclGles2Control.SetZoomStep(_zoomStep);
         }
     }
 
-    private IOpenGLES2Control _hclGLES2_Control;
-    public IOpenGLES2Control WpfView
+    private IOpenGles2Control _hclGles2Control;
+    public IOpenGles2Control WpfView
     {
-        get { return _hclGLES2_Control; }
+        get { return _hclGles2Control; }
     }
 
     private WindowsFormsHost _winHost = null;
     public void AddView(bool addView = false)
     {
-        if(_serviceFactory.AppSettings.RenderDevice == RenderDevice.OpenGL_Bitmap)
+        if(_serviceFactory.AppSettings.RenderDevice == RenderDevice.OpenGlBitmap)
         {
-            _hclGLES2_Control = new DefaultCadImageViewControl(
-                this, _serviceFactory);
-            _hclGLES2_Control.AddDefaultViewOnLoad = addView;
-            AppMainWindow.RenderArea.Children.Add((DefaultCadImageViewControl)_hclGLES2_Control);
+            _hclGles2Control = new DefaultCadImageViewControl(
+                this, _serviceFactory, OverlayViewModel);
+            _hclGles2Control.AddDefaultViewOnLoad = addView;
+            AppMainWindow.RenderArea.Children.Add((DefaultCadImageViewControl)_hclGles2Control);
         }
         else
         {
-            _hclGLES2_Control = new WinFormsCadImageViewControl(
+            _hclGles2Control = new WinFormsCadImageViewControl(
                 this, _serviceFactory);
             _winHost = new WindowsFormsHost();
-            _winHost.Child = (WinFormsCadImageViewControl)_hclGLES2_Control;
+            _winHost.Child = (WinFormsCadImageViewControl)_hclGles2Control;
             AppMainWindow.RenderArea.Children.Add(_winHost);
         }
 
@@ -226,12 +240,12 @@ public class MainWindowViewModel : BindableBase
 
     internal void ClearRenderArea()
     {
-        if (_hclGLES2_Control == null) return;
+        if (_hclGles2Control == null) return;
         if (AppMainWindow.RenderArea.Children.Count > 0)
         {
             AppMainWindow.RenderArea.Children.RemoveAt(AppMainWindow.RenderArea.Children.Count - 1);
         }
-        _hclGLES2_Control = null;
+        _hclGles2Control = null;
         FileIsExist = false;
     }
 
@@ -253,6 +267,7 @@ public class MainWindowViewModel : BindableBase
         IsProjection = false;
         IsStyle = false;
         IsRegen = false;
+        IsHcl = false;
         IsDrawing = false;
         IsMarkup = false;
         IsSectioning = false;
@@ -371,8 +386,8 @@ public class MainWindowViewModel : BindableBase
         ResetMenuFlags();
         IsSectioning = true;
         PlayNavRectAnimation(-100);
-        if (_hclGLES2_Control != null)
-            _hclGLES2_Control.OnAppearSectioningPanel(true);
+        if (_hclGles2Control != null)
+            _hclGles2Control.OnAppearSectioningPanel(true);
     }
     #endregion
 
@@ -392,15 +407,15 @@ public class MainWindowViewModel : BindableBase
     }
 
     // OnOffTreeBrowserCommand command
-    private RelayCommand _OnOffTreeBrowserCommand;
+    private RelayCommand _onOffTreeBrowserCommand;
     public RelayCommand OnOffTreeBrowserCommand
     {
         get
         {
-            if (_OnOffTreeBrowserCommand != null)
-                return _OnOffTreeBrowserCommand;
+            if (_onOffTreeBrowserCommand != null)
+                return _onOffTreeBrowserCommand;
             else
-                return (_OnOffTreeBrowserCommand = new RelayCommand(param => OnOffModelBrowser(param)));
+                return (_onOffTreeBrowserCommand = new RelayCommand(param => OnOffModelBrowser(param)));
         }
     }
 
@@ -458,7 +473,6 @@ public class MainWindowViewModel : BindableBase
 
     #endregion
 
-
     #region File commands
     // AddView command
     private RelayCommand _addViewCommand;
@@ -476,7 +490,7 @@ public class MainWindowViewModel : BindableBase
     private void AddViewCommand_Clicked()
     {
         ClearRenderArea();
-        if (_hclGLES2_Control == null)
+        if (_hclGles2Control == null)
             AddView(true);
     }
 
@@ -495,7 +509,7 @@ public class MainWindowViewModel : BindableBase
     private void ClearViewCommand_Clicked()
     {
         ClearRenderArea();
-        if (_hclGLES2_Control == null)
+        if (_hclGles2Control == null)
             AddView(false);
     }
     // Open command
@@ -528,9 +542,9 @@ public class MainWindowViewModel : BindableBase
     }
     private void SettingsCommand_Clicked()
     {
-        var settingsView = new TestPADSettingsView();
-        var settingsViewModel = new TestPADSettingsViewModel(_serviceFactory);
-        settingsViewModel.TestPadSettings = new TestPADSettings(_serviceFactory);
+        var settingsView = new TestPadSettingsView();
+        var settingsViewModel = new TestPadSettingsViewModel(_serviceFactory);
+        settingsViewModel.TestPadSettings = new TestPadSettings(_serviceFactory);
         settingsView.DataContext = settingsViewModel;
         Window window = new Window
         {
@@ -569,13 +583,13 @@ public class MainWindowViewModel : BindableBase
         key.Close();
 
         ClearRenderArea();
-        if (_hclGLES2_Control == null)
+        if (_hclGles2Control == null)
             AddView();
         //_hclGLES2_Control?.ClearDevices();
         //if (_hclGLES2_Control == null)
         //AddView(false);
 
-        _hclGLES2_Control.LoadFile(dlg.FileName);
+        _hclGles2Control.LoadFile(dlg.FileName);
         //_hclGLES2_Control.OnOffFPS(true);
         //_hclGLES2_Control.ShowCustomModels();
         //UncheckDraggersBtns();
@@ -596,7 +610,7 @@ public class MainWindowViewModel : BindableBase
 
     private void NewCommand_Clicked()
     {
-        if (_hclGLES2_Control == null)
+        if (_hclGles2Control == null)
             AddView();
         //_hclGLES2_Control.CreateNewFile();
         //_hclGLES2_Control.Focus();
@@ -617,8 +631,8 @@ public class MainWindowViewModel : BindableBase
 
     private void SaveCommand_Clicked()
     {
-        if (_hclGLES2_Control.FilePath.Length > 0 && File.Exists(_hclGLES2_Control.FilePath) && System.IO.Path.GetExtension(WpfView.FilePath) == ".vsf")
-            _hclGLES2_Control.SaveFile(_hclGLES2_Control.FilePath);
+        if (_hclGles2Control.FilePath.Length > 0 && File.Exists(_hclGles2Control.FilePath) && System.IO.Path.GetExtension(WpfView.FilePath) == ".vsf")
+            _hclGles2Control.SaveFile(_hclGles2Control.FilePath);
         else
             SaveAsCommand_Clicked();
     }
@@ -684,7 +698,7 @@ public class MainWindowViewModel : BindableBase
             Filter = "PDF Files(*.pdf)|*.pdf"
         };
 
-        string fileName = Path.GetFileName(_hclGLES2_Control.FilePath);
+        string fileName = Path.GetFileName(_hclGles2Control.FilePath);
         if (fileName != null)
         {
             fileName = fileName.Remove(fileName.Length - Path.GetExtension(fileName).Length);
@@ -697,7 +711,7 @@ public class MainWindowViewModel : BindableBase
             return;
 
         if (dlg.FileName.Length > 0)
-            _hclGLES2_Control.ExportToPdf(dlg.FileName, is2D);
+            _hclGles2Control.ExportToPdf(dlg.FileName, is2D);
 
         //_hclGLES2_Control.Focus();
     }
@@ -724,13 +738,13 @@ public class MainWindowViewModel : BindableBase
         AppMainWindow.OrbitBtn.IsChecked = false;
         AppMainWindow.ZoomToAreaBtn.IsChecked = false;
         AppMainWindow.PanBtn.IsChecked = true;
-        _hclGLES2_Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
+        _hclGles2Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
         //then raise a click evt
         //MainWindow.PanBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         if (AppMainWindow.PanBtn.IsChecked == true)
-            _hclGLES2_Control.Pan();
+            _hclGles2Control.Pan();
         else
-            _hclGLES2_Control.FinishDragger();
+            _hclGles2Control.FinishDragger();
 
 
     }
@@ -746,11 +760,11 @@ public class MainWindowViewModel : BindableBase
     {
         AppMainWindow.PanBtn.IsChecked = false;
         AppMainWindow.ZoomToAreaBtn.IsChecked = false;
-        _hclGLES2_Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
+        _hclGles2Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
         if (AppMainWindow.OrbitBtn.IsChecked == true)
-            _hclGLES2_Control.Orbit();
+            _hclGles2Control.Orbit();
         else
-            _hclGLES2_Control.FinishDragger();
+            _hclGles2Control.FinishDragger();
     }
 
     // zoom in command
@@ -765,13 +779,13 @@ public class MainWindowViewModel : BindableBase
         switch (param.ToString())
         {
             case "Zoom In":
-                _hclGLES2_Control.Zoom(ZoomType.ZoomIn);
+                _hclGles2Control.Zoom(ZoomType.ZoomIn);
                 break;
             case "Zoom Out":
-                _hclGLES2_Control.Zoom(ZoomType.ZoomOut);
+                _hclGles2Control.Zoom(ZoomType.ZoomOut);
                 break;
             case "Zoom Extents":
-                _hclGLES2_Control.Zoom(ZoomType.ZoomExtents);
+                _hclGles2Control.Zoom(ZoomType.ZoomExtents);
                 break;
         }
     }
@@ -787,7 +801,7 @@ public class MainWindowViewModel : BindableBase
     {
         AppMainWindow.PanBtn.IsChecked = false;
         AppMainWindow.OrbitBtn.IsChecked = false;
-        _hclGLES2_Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
+        _hclGles2Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
     }
     #endregion
 
@@ -802,7 +816,7 @@ public class MainWindowViewModel : BindableBase
 
     private void DrawingCommand_Clicked(object param)
     {
-        _hclGLES2_Control.DrawGeometry(param.ToString());
+        _hclGles2Control.DrawGeometry(param.ToString());
     }
 
     #endregion
@@ -818,25 +832,25 @@ public class MainWindowViewModel : BindableBase
         switch (param.ToString())
         {
             case "Rectangle":
-                _hclGLES2_Control.DrawRectMarkup();
+                _hclGles2Control.DrawRectMarkup();
                 break;
             case "Circle":
-                _hclGLES2_Control.DrawCircMarkup();
+                _hclGles2Control.DrawCircMarkup();
                 break;
             case "Handle":
-                _hclGLES2_Control.DrawHandleMarkup();
+                _hclGles2Control.DrawHandleMarkup();
                 break;
             case "Cloud":
-                _hclGLES2_Control.DrawCloudMarkup();
+                _hclGles2Control.DrawCloudMarkup();
                 break;
             case "Text":
-                _hclGLES2_Control.DrawTextMarkup();
+                _hclGles2Control.DrawTextMarkup();
                 break;
             case "Save":
-                _hclGLES2_Control.SaveMarkup();
+                _hclGles2Control.SaveMarkup();
                 break;
             case "Load":
-                _hclGLES2_Control.LoadMarkup();
+                _hclGles2Control.LoadMarkup();
                 break;
         }
     }
@@ -857,31 +871,31 @@ public class MainWindowViewModel : BindableBase
         switch (param.ToString())
         {
             case "2D Wireframe":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.k2DOptimized);
+                _hclGles2Control.SetRenderMode(OdTvGsView_RenderMode.k2DOptimized);
                 break;
             case "3D Wireframe":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.kWireframe);
+                _hclGles2Control.SetRenderMode(OdTvGsView_RenderMode.kWireframe);
                 break;
             case "HiddenLine":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.kHiddenLine);
+                _hclGles2Control.SetRenderMode(OdTvGsView_RenderMode.kHiddenLine);
                 break;
             case "Shaded":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.kFlatShaded);
+                _hclGles2Control.SetRenderMode(OdTvGsView_RenderMode.kFlatShaded);
                 break;
             case "Gouraud shaded":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.kGouraudShaded);
+                _hclGles2Control.SetRenderMode(OdTvGsView_RenderMode.kGouraudShaded);
                 break;
             case "Shaded with edges":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.kFlatShadedWithWireframe);
+                _hclGles2Control.SetRenderMode(OdTvGsView_RenderMode.kFlatShadedWithWireframe);
                 break;
             case "Gouraud shaded with edges":
-                _hclGLES2_Control.SetRenderMode(OdTvGsView.RenderMode.kGouraudShadedWithWireframe);
+                _hclGles2Control.SetRenderMode(OdTvGsView_RenderMode.kGouraudShadedWithWireframe);
                 break;
         }
         //_hclGLES2_Control.Focus();
     }
 
-    public void SetRenderModeButton(OdTvGsView.RenderMode mode)
+    public void SetRenderModeButton(OdTvGsView_RenderMode mode)
     {
         AppMainWindow.Wireframe2DBtn.IsChecked = false;
         AppMainWindow.Wireframe3DBtn.IsChecked = false;
@@ -892,22 +906,22 @@ public class MainWindowViewModel : BindableBase
         //MainWindow.GouraudShadedWithEdgesBtn.IsChecked = false;
         switch (mode)
         {
-            case OdTvGsView.RenderMode.k2DOptimized:
+            case OdTvGsView_RenderMode.k2DOptimized:
                 AppMainWindow.Wireframe2DBtn.IsChecked = true;
                 break;
-            case OdTvGsView.RenderMode.kWireframe:
+            case OdTvGsView_RenderMode.kWireframe:
                 AppMainWindow.Wireframe3DBtn.IsChecked = true;
                 break;
-            case OdTvGsView.RenderMode.kHiddenLine:
+            case OdTvGsView_RenderMode.kHiddenLine:
                 AppMainWindow.HiddenLineBtn.IsChecked = true;
                 break;
-            case OdTvGsView.RenderMode.kFlatShaded:
+            case OdTvGsView_RenderMode.kFlatShaded:
                 AppMainWindow.ShadedBtn.IsChecked = true;
                 break;
             //case OdTvGsView.RenderMode.kGouraudShaded:
             //    MainWindow.GouraudShadedBtn.IsChecked = true;
             //    break;
-            case OdTvGsView.RenderMode.kFlatShadedWithWireframe:
+            case OdTvGsView_RenderMode.kFlatShadedWithWireframe:
                 AppMainWindow.ShadedWithEdgesBtn.IsChecked = true;
                 break;
             //case OdTvGsView.RenderMode.kGouraudShadedWithWireframe:
@@ -944,18 +958,57 @@ public class MainWindowViewModel : BindableBase
         switch (param.ToString())
         {
             case "RegenAll":
-                _hclGLES2_Control.Regen(OdTvGsDevice.RegenMode.kRegenAll);
+                _hclGles2Control.Regen(OdTvGsDevice_RegenMode.kRegenAll);
                 break;
             case "RegenVisible":
-                _hclGLES2_Control.Regen(OdTvGsDevice.RegenMode.kRegenVisible);
+                _hclGles2Control.Regen(OdTvGsDevice_RegenMode.kRegenVisible);
                 break;
             case "RegenView":
-                _hclGLES2_Control.Regen();
+                _hclGles2Control.Regen();
                 break;
         }
         //_hclGLES2_Control.Focus();
     }
 
+#region HCL Commands
+
+    // HCL commands
+    private RelayCommand _hclCommand;
+    public RelayCommand HclCommand
+    {
+        get { return _hclCommand ?? (_hclCommand = new RelayCommand(param => HclCommand_Clicked(param), param => FileIsExist)); }
+    }
+    private void HclCommand_Clicked(object param)
+    {
+        switch (param.ToString())
+        {
+            case "PLTStation":
+                _hclGles2Control.ShowTool(HclToolType.PLTStation);
+                break;
+            case "Prism":
+                _hclGles2Control.ShowTool(HclToolType.Prism);
+                break;
+            case "Points":
+                _hclGles2Control.ShowTool(HclToolType.Points);
+                break;
+        }
+        //_hclGLES2_Control.Focus();
+    }
+
+    // Hcl menu switched command
+    private RelayCommand _hclMenuCommand;
+    public RelayCommand HclMenuCommand
+    {
+        get { return _hclMenuCommand ?? (_hclMenuCommand = new RelayCommand(param => HclMenuCommand_Clicked(), param => FileIsExist)); }
+    }
+
+    private void HclMenuCommand_Clicked()
+    {
+        ResetMenuFlags();
+        IsHcl = true;
+        PlayNavRectAnimation(100);
+    }
+#endregion
     // View commands
     private RelayCommand _viewCommand;
     public RelayCommand ViewCommand
@@ -968,34 +1021,34 @@ public class MainWindowViewModel : BindableBase
         switch (param.ToString())
         {
             case "Top":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kTop);
+                _hclGles2Control.Set3DView(OdTvExtendedView_e3DViewType.kTop);
                 break;
             case "Bottom":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kBottom);
+                _hclGles2Control.Set3DView(OdTvExtendedView_e3DViewType.kBottom);
                 break;
             case "Left":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kLeft);
+                _hclGles2Control.Set3DView(OdTvExtendedView_e3DViewType.kLeft);
                 break;
             case "Right":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kRight);
+                _hclGles2Control.Set3DView(OdTvExtendedView_e3DViewType.kRight);
                 break;
             case "Front":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kFront);
+                _hclGles2Control.Set3DView(OdTvExtendedView_e3DViewType.kFront);
                 break;
             case "Back":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kBack);
+                _hclGles2Control.Set3DView(OdTvExtendedView_e3DViewType.kBack);
                 break;
             case "SW Isometric":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kSW);
+                _hclGles2Control.Set3DView(OdTvExtendedView_e3DViewType.kSW);
                 break;
             case "SE Isometric":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kSE);
+                _hclGles2Control.Set3DView(OdTvExtendedView_e3DViewType.kSE);
                 break;
             case "NE Isometric":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kNE);
+                _hclGles2Control.Set3DView(OdTvExtendedView_e3DViewType.kNE);
                 break;
             case "NW Isometric":
-                _hclGLES2_Control.Set3DView(OdTvExtendedView.e3DViewType.kNW);
+                _hclGles2Control.Set3DView(OdTvExtendedView_e3DViewType.kNW);
                 break;
         }
         //_hclGLES2_Control.Focus();
@@ -1015,12 +1068,12 @@ public class MainWindowViewModel : BindableBase
             case "Isometric":
                 AppMainWindow.PerspectiveBtn.IsChecked = false;
                 AppMainWindow.IsometricBtn.IsChecked = true;
-                _hclGLES2_Control.SetProjectionType(OdTvGsView.Projection.kParallel);
+                _hclGles2Control.SetProjectionType(OdTvGsView_Projection.kParallel);
                 break;
             case "Perspective":
                 AppMainWindow.IsometricBtn.IsChecked = false;
                 AppMainWindow.PerspectiveBtn.IsChecked = true;
-                _hclGLES2_Control.SetProjectionType(OdTvGsView.Projection.kPerspective);
+                _hclGles2Control.SetProjectionType(OdTvGsView_Projection.kPerspective);
                 break;
         }
         //_hclGLES2_Control.Focus();
@@ -1039,7 +1092,7 @@ public class MainWindowViewModel : BindableBase
 
     private void SectioningCommand_Clicked(object param)
     {
-        if (_hclGLES2_Control == null)
+        if (_hclGles2Control == null)
             return;
         switch (param.ToString())
         {
@@ -1138,13 +1191,36 @@ public class MainWindowViewModel : BindableBase
         if (itm.NodeData.Type == TvBrowserItemType.Entity)
         {
             OdTvEntityId enId = itm.NodeData.EntityId;
-            if (WpfView != null && (enId.getType() == OdTvEntityId.EntityTypes.kEntity
-                                    || enId.getType() == OdTvEntityId.EntityTypes.kInsert))
+            if (WpfView != null && (enId.getType() == OdTvEntityId_EntityTypes.kEntity
+                                    || enId.getType() == OdTvEntityId_EntityTypes.kInsert))
             {
                 WpfView.AddEntityToSet(enId);
             }
 
         }
+    }
+
+    internal void SaveFileAsVsfx()
+    {
+        SaveFileDialog dlg = new SaveFileDialog
+        {
+            Filter = "Vsfx File (*.vsfx)|*.vsfx"
+        };
+
+        var fileName = Path.GetFileName(_hclGles2Control.FilePath);
+        if (fileName != null)
+        {
+            dlg.FileName = Path.GetFileNameWithoutExtension(fileName);
+        }
+        else
+            return;
+
+        if (dlg.ShowDialog() != true)
+            return;
+
+        if (dlg.FileName.Length > 0)
+            _hclGles2Control.SaveAsVsfx(dlg.FileName);
+        MessageBox.Show($"File saved successfully.\n{dlg.FileName}", "Save File", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     #endregion

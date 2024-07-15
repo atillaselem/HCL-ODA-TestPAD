@@ -25,8 +25,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 using Brushes = System.Windows.Media.Brushes;
 using ComboBox = System.Windows.Controls.ComboBox;
 using Orientation = System.Windows.Controls.Orientation;
@@ -100,9 +100,9 @@ public partial class Colorpicker : UserControl
         if (itm.ColorName == "")
             SelectedColor = new OdTvColorDef(255, 255, 255);
         else if (itm.ColorName == "ByBlock")
-            SelectedColor = new OdTvColorDef(InheritedAttribute.kByBlock);
+            SelectedColor = new OdTvColorDef(OdTv_InheritedAttribute.kByBlock);
         else if (itm.ColorName == "ByLayer")
-            SelectedColor = new OdTvColorDef(InheritedAttribute.kByLayer);
+            SelectedColor = new OdTvColorDef(OdTv_InheritedAttribute.kByLayer);
         else if (itm.ColorName == "Choose color...")
         {
             //ColorDialog dlg = new ColorDialog();
@@ -130,10 +130,10 @@ public partial class Colorpicker : UserControl
     {
         switch (startColor.getType())
         {
-            case OdTvColorDef.ColorType.kDefault:
+            case OdTvColorDef_ColorType.kDefault:
                 ComboBox.SelectedItem = FindItemByName("");
                 break;
-            case OdTvColorDef.ColorType.kColor:
+            case OdTvColorDef_ColorType.kColor:
             {
                 byte r, g, b;
                     startColor.getColor(out r, out g, out b);
@@ -164,10 +164,10 @@ public partial class Colorpicker : UserControl
                     ComboBox.SelectedIndex = 0;
                     break;
                 }
-            case OdTvColorDef.ColorType.kInherited:
-                ComboBox.SelectedItem = FindItemByName(startColor.getInheritedColor() == InheritedAttribute.kByBlock ? "ByBlock" : "ByLayer");
+            case OdTvColorDef_ColorType.kInherited:
+                ComboBox.SelectedItem = FindItemByName(startColor.getInheritedColor() == OdTv_InheritedAttribute.kByBlock ? "ByBlock" : "ByLayer");
                 break;
-            case OdTvColorDef.ColorType.kIndexed:
+            case OdTvColorDef_ColorType.kIndexed:
                 {
                     string indColorName = startColor.getIndexedColor().ToString();
                     TvComboboxItem itm = FindItemByName(indColorName);

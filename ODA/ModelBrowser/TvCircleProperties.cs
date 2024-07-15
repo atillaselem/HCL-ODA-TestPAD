@@ -22,8 +22,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -32,7 +32,7 @@ class TvCircleProperties : TvBaseGeometryProperties
     public TvCircleProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvCircleData circ = GeomId.openAsCircle();
         int row = 0;
         TextBox[] center = AddPoint3D("Center", circ.getCenter(), MainGrid, new[] { row, 0, row++, 1 });
@@ -50,7 +50,7 @@ class TvCircleProperties : TvBaseGeometryProperties
 
         StretchingTreeViewItem cmn = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(cmn);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Filled_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -58,10 +58,10 @@ class TvCircleProperties : TvBaseGeometryProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         GeomId.openAsCircle().setFilled(cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Normal_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -69,7 +69,7 @@ class TvCircleProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvCircleData circ = GeomId.openAsCircle();
         OdGeVector3d newVec = SetVectorCoordByType(circ.getNormal(), (CoordinateType)tb.Tag, tb.Text);
         if (circ.getNormal() != newVec)
@@ -77,7 +77,7 @@ class TvCircleProperties : TvBaseGeometryProperties
             circ.setNormal(newVec);
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Radius_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -85,14 +85,14 @@ class TvCircleProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvCircleData circ = GeomId.openAsCircle();
         if (!circ.getRadius().Equals(double.Parse(tb.Text)))
         {
             circ.setRadius(double.Parse(tb.Text));
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Center_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -100,7 +100,7 @@ class TvCircleProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvCircleData circ = GeomId.openAsCircle();
         OdGePoint3d newPt = SetPointCoordByType(circ.getCenter(), (CoordinateType)tb.Tag, tb.Text);
         if (circ.getCenter() != newPt)
@@ -108,6 +108,6 @@ class TvCircleProperties : TvBaseGeometryProperties
             circ.setCenter(newPt);
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

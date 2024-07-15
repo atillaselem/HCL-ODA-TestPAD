@@ -1,21 +1,21 @@
-﻿using System;
-using Teigha.Core;
-using Teigha.Visualize;
+using System;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.HCL.CadUnits
 {
     public enum SurveyUnits
     {
-        meters,
-        centimeters,
-        millimeters,
-        inches,
-        inches_1_16,
-        usfeet,
-        feet,
-        feet_inch_1_8,
-        feet_inch_1_16,
-        max_units
+        Meters,
+        Centimeters,
+        Millimeters,
+        Inches,
+        Inches116,
+        Usfeet,
+        Feet,
+        FeetInch18,
+        FeetInch116,
+        MaxUnits
     }
     internal static class UnitsValueConverter
     {
@@ -32,37 +32,37 @@ namespace HCL_ODA_TestPAD.HCL.CadUnits
 
             switch (surveyUnit)
             {
-                case SurveyUnits.inches:
+                case SurveyUnits.Inches:
                     {
                         isMetric = false;
                         units = UnitsValue.kUnitsInches;
                         break;
                     }
-                case SurveyUnits.feet:
-                case SurveyUnits.feet_inch_1_8:
-                case SurveyUnits.feet_inch_1_16:
+                case SurveyUnits.Feet:
+                case SurveyUnits.FeetInch18:
+                case SurveyUnits.FeetInch116:
                     {
                         isMetric = false;
                         units = UnitsValue.kUnitsFeet;
                         break;
                     }
-                case SurveyUnits.usfeet:
+                case SurveyUnits.Usfeet:
                     {
                         isMetric = false;
                         units = UnitsValue.kUnitsUSSurveyFeet;
                         break;
                     }
-                case SurveyUnits.meters:
+                case SurveyUnits.Meters:
                     {
                         units = UnitsValue.kUnitsMeters;
                         break;
                     }
-                case SurveyUnits.millimeters:
+                case SurveyUnits.Millimeters:
                     {
                         units = UnitsValue.kUnitsMillimeters;
                         break;
                     }
-                case SurveyUnits.centimeters:
+                case SurveyUnits.Centimeters:
                     {
                         units = UnitsValue.kUnitsCentimeters;
                         break;
@@ -81,22 +81,22 @@ namespace HCL_ODA_TestPAD.HCL.CadUnits
             switch (eUnits)
             {
                 case UnitsValue.kUnitsInches:
-                    return CADModelConstants.Inches2Meters;
+                    return CadModelConstants.Inches2Meters;
 
                 case UnitsValue.kUnitsFeet:
-                    return CADModelConstants.Feet2Meters;
+                    return CadModelConstants.Feet2Meters;
 
                 case UnitsValue.kUnitsUSSurveyFeet:
-                    return CADModelConstants.UsFeet2Meter;
+                    return CadModelConstants.UsFeet2Meter;
 
                 case UnitsValue.kUnitsMillimeters:
-                    return CADModelConstants.Millimeters2Meters;
+                    return CadModelConstants.Millimeters2Meters;
 
                 case UnitsValue.kUnitsCentimeters:
-                    return CADModelConstants.Centimeters2Meters;
+                    return CadModelConstants.Centimeters2Meters;
 
                 case UnitsValue.kUnitsMeters:
-                    return CADModelConstants.DefaultMeters;
+                    return CadModelConstants.DefaultMeters;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(eUnits), "Units not supported");
@@ -113,22 +113,22 @@ namespace HCL_ODA_TestPAD.HCL.CadUnits
             switch (eUnits)
             {
                 case UnitsValue.kUnitsInches:
-                    return CADModelConstants.Meters2Inches;
+                    return CadModelConstants.Meters2Inches;
 
                 case UnitsValue.kUnitsFeet:
-                    return CADModelConstants.Meters2Feet;
+                    return CadModelConstants.Meters2Feet;
 
                 case UnitsValue.kUnitsUSSurveyFeet:
-                    return CADModelConstants.Meter2UsFeet;
+                    return CadModelConstants.Meter2UsFeet;
 
                 case UnitsValue.kUnitsMillimeters:
-                    return CADModelConstants.Meters2Millimeters;
+                    return CadModelConstants.Meters2Millimeters;
 
                 case UnitsValue.kUnitsCentimeters:
-                    return CADModelConstants.Meters2Centimeters;
+                    return CadModelConstants.Meters2Centimeters;
 
                 case UnitsValue.kUnitsMeters:
-                    return CADModelConstants.DefaultMeters;
+                    return CadModelConstants.DefaultMeters;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(eUnits), "Units not supported");
@@ -158,7 +158,7 @@ namespace HCL_ODA_TestPAD.HCL.CadUnits
         public static double GetPointSize(UnitsValue toUnits)
         {
             //Convert from meters to user selected units
-            return ConvertMeterstoSelectedUnits(toUnits, CADModelConstants.PointSizeDwgExportMeter);
+            return ConvertMeterstoSelectedUnits(toUnits, CadModelConstants.PointSizeDwgExportMeter);
         }
 
         /// <summary>
@@ -172,19 +172,19 @@ namespace HCL_ODA_TestPAD.HCL.CadUnits
             switch (toUnits)
             {
                 case UnitsValue.kUnitsInches:
-                    return meterValue * CADModelConstants.Meters2Inches;
+                    return meterValue * CadModelConstants.Meters2Inches;
 
                 case UnitsValue.kUnitsUSSurveyFeet:
-                    return meterValue * CADModelConstants.Meter2UsFeet;
+                    return meterValue * CadModelConstants.Meter2UsFeet;
 
                 case UnitsValue.kUnitsFeet:
-                    return meterValue * CADModelConstants.Meters2Feet;
+                    return meterValue * CadModelConstants.Meters2Feet;
 
                 case UnitsValue.kUnitsMillimeters:
-                    return meterValue * CADModelConstants.Meters2Millimeters;
+                    return meterValue * CadModelConstants.Meters2Millimeters;
 
                 case UnitsValue.kUnitsCentimeters:
-                    return meterValue * CADModelConstants.Meters2Centimeters;
+                    return meterValue * CadModelConstants.Meters2Centimeters;
 
                 case UnitsValue.kUnitsMeters:
                     return meterValue;
@@ -194,48 +194,48 @@ namespace HCL_ODA_TestPAD.HCL.CadUnits
             }
         }
 
-        public static UnitsValue MapOdaUnitsToHilti(Units modelUnits, double userDefCoef)
+        public static UnitsValue MapOdaUnitsToHilti(OdTv_Units modelUnits, double userDefCoef)
         {
             //Mapping Visulize Units to Drawings UnitsValue
             return modelUnits switch
             {
-                Units.kUserDefined => userDefCoef == CADModelConstants.UsFeetCoefValue ? UnitsValue.kUnitsUSSurveyFeet : UnitsValue.kUnitsUndefined,
-                Units.kMeters => UnitsValue.kUnitsMeters,
-                Units.kCentimeters => UnitsValue.kUnitsCentimeters,
-                Units.kMillimeters => UnitsValue.kUnitsMillimeters,
-                Units.kFeet => UnitsValue.kUnitsFeet,
-                Units.kInches => UnitsValue.kUnitsInches,
+                OdTv_Units.kUserDefined => userDefCoef == CadModelConstants.UsFeetCoefValue ? UnitsValue.kUnitsUSSurveyFeet : UnitsValue.kUnitsUndefined,
+                OdTv_Units.kMeters => UnitsValue.kUnitsMeters,
+                OdTv_Units.kCentimeters => UnitsValue.kUnitsCentimeters,
+                OdTv_Units.kMillimeters => UnitsValue.kUnitsMillimeters,
+                OdTv_Units.kFeet => UnitsValue.kUnitsFeet,
+                OdTv_Units.kInches => UnitsValue.kUnitsInches,
                 _ => UnitsValue.kUnitsUndefined,
             };
         }
 
-        public static Units MapHiltiUnitsToOda(UnitsValue unitsValue)
+        public static OdTv_Units MapHiltiUnitsToOda(UnitsValue unitsValue)
         {
             //Mapping Drawings UnitsValue to Visulize Units
             return unitsValue switch
             {
-                UnitsValue.kUnitsMeters => Units.kMeters,
-                UnitsValue.kUnitsCentimeters => Units.kCentimeters,
-                UnitsValue.kUnitsMillimeters => Units.kMillimeters,
-                UnitsValue.kUnitsFeet => Units.kFeet,
-                UnitsValue.kUnitsInches => Units.kInches,
-                UnitsValue.kUnitsUSSurveyFeet => Units.kUserDefined,
-                _ => Units.kMeters,
+                UnitsValue.kUnitsMeters => OdTv_Units.kMeters,
+                UnitsValue.kUnitsCentimeters => OdTv_Units.kCentimeters,
+                UnitsValue.kUnitsMillimeters => OdTv_Units.kMillimeters,
+                UnitsValue.kUnitsFeet => OdTv_Units.kFeet,
+                UnitsValue.kUnitsInches => OdTv_Units.kInches,
+                UnitsValue.kUnitsUSSurveyFeet => OdTv_Units.kUserDefined,
+                _ => OdTv_Units.kMeters,
             };
         }
 
-        public static SurveyUnits MapOdaUnitsToSurveyUnits(Units units, double userDefCoef)
+        public static SurveyUnits MapOdaUnitsToSurveyUnits(OdTv_Units units, double userDefCoef)
         {
             //Mapping Cad File Unit read from file to Survey Units shown in Settings Combobox
             return units switch
             {
-                Units.kMeters => SurveyUnits.meters,
-                Units.kCentimeters => SurveyUnits.centimeters,
-                Units.kMillimeters => SurveyUnits.millimeters,
-                Units.kFeet => SurveyUnits.feet,
-                Units.kInches => SurveyUnits.inches,
-                Units.kUserDefined => userDefCoef == CADModelConstants.UsFeetCoefValue ? SurveyUnits.usfeet : SurveyUnits.meters,
-                _ => SurveyUnits.meters,
+                OdTv_Units.kMeters => SurveyUnits.Meters,
+                OdTv_Units.kCentimeters => SurveyUnits.Centimeters,
+                OdTv_Units.kMillimeters => SurveyUnits.Millimeters,
+                OdTv_Units.kFeet => SurveyUnits.Feet,
+                OdTv_Units.kInches => SurveyUnits.Inches,
+                OdTv_Units.kUserDefined => userDefCoef == CadModelConstants.UsFeetCoefValue ? SurveyUnits.Usfeet : SurveyUnits.Meters,
+                _ => SurveyUnits.Meters,
             };
         }
     }

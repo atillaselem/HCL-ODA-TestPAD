@@ -26,8 +26,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers;
 
@@ -84,9 +84,9 @@ public abstract class OdTvDragger
     public Cursor CurrentCursor { get; set; }
     public Cursor LasAppActiveCursor { get; set; }
 
-    protected MemoryManager MM = MemoryManager.GetMemoryManager();
+    protected MemoryManager _mm = MemoryManager.GetMemoryManager();
 
-    public TvWpfViewWCS WCS { get; set; }
+    public TvWpfViewWcs Wcs { get; set; }
 
     public IOdaSectioning _wpfView = null;
 
@@ -109,20 +109,20 @@ public abstract class OdTvDragger
     /// </summary>
     public void UpdateBaseColor()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         uint bgColor = TvDeviceId.openObject().getBackgroundColor();
         byte[] bytes = new[] { byte.MaxValue, (byte)(bgColor >> 16), (byte)(bgColor >> 8), (byte)(bgColor >> 0) };
         int newColor = BitConverter.ToInt32(bytes, 0);
         Color col = Color.FromArgb(newColor);
         col = col.GetHue() < 128 ? Color.Black : Color.White;
         TvDraggerColor = new OdTvColorDef(col.R, col.G, col.B);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     /// <summary>
     /// Should be called to prepare dragger for the work
     /// </summary>
-    public virtual DraggerResult Start(OdTvDragger prevDragger, int activeView, Cursor cursor, TvWpfViewWCS wcs)
+    public virtual DraggerResult Start(OdTvDragger prevDragger, int activeView, Cursor cursor, TvWpfViewWcs wcs)
     {
         if (prevDragger != null)
             PrevDragger = prevDragger;
@@ -132,11 +132,11 @@ public abstract class OdTvDragger
         CurrentCursor = cursor;
         LasAppActiveCursor = cursor;
 
-        WCS = wcs;
+        Wcs = wcs;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         TvView = TvDeviceId.openObject().getActiveView();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         State = DraggerState.Waiting;
 
@@ -199,11 +199,11 @@ public abstract class OdTvDragger
             RemoveDraggersModelFromView();
 
             //remove entities from the model
-            MemoryTransaction mtr = MM.StartTransaction();
-            OdTvModel model = TvDraggerModelId.openObject(OpenMode.kForWrite);
+            MemoryTransaction mtr = _mm.StartTransaction();
+            OdTvModel model = TvDraggerModelId.openObject(OdTv_OpenMode.kForWrite);
             if (model != null)
                 model.clearEntities();
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
 
             // need redraw after
             rc = DraggerResult.NeedUpdateView;
@@ -289,20 +289,20 @@ public abstract class OdTvDragger
     /// </summary>
     protected void AddDraggersModelToView()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         if (TvView != null)
-            TvView.openObject(OpenMode.kForWrite).addModel(TvDraggerModelId);
-        MM.StopTransaction(mtr);
+            TvView.openObject(OdTv_OpenMode.kForWrite).addModel(TvDraggerModelId);
+        _mm.StopTransaction(mtr);
     }
     /// <summary>
     /// Remove the draggers model from active view
     /// </summary>
     protected void RemoveDraggersModelFromView()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         if (TvView != null)
-            TvView.openObject(OpenMode.kForWrite).eraseModel(TvDraggerModelId);
-        MM.StopTransaction(mtr);
+            TvView.openObject(OdTv_OpenMode.kForWrite).eraseModel(TvDraggerModelId);
+        _mm.StopTransaction(mtr);
     }
     /// <summary>
     /// Reset the dragger state
@@ -327,7 +327,7 @@ public abstract class OdTvDragger
         if (TvView == null)
             return wcsPt;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGsView view = TvView.openObject();
 
         if (view.isPerspective())
@@ -339,7 +339,7 @@ public abstract class OdTvDragger
         // transform to WCS
         wcsPt.transformBy(view.eyeToWorldMatrix());
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return wcsPt;
     }

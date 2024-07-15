@@ -22,8 +22,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -51,7 +51,7 @@ class TvCircArcProperties : TvBaseGeometryProperties
     public TvCircArcProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvCircleArcData arc = GeomId.openAsCircleArc();
         int row = 0;
         TextBox[] start = AddPoint3D("Start", arc.getStart(), MainGrid, new[] { row, 0, row++, 1 });
@@ -83,7 +83,7 @@ class TvCircArcProperties : TvBaseGeometryProperties
 
         StretchingTreeViewItem cmn = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(cmn);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
     }
 
@@ -92,14 +92,14 @@ class TvCircArcProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvCircleArcData arc = GeomId.openAsCircleArc();
         if (!arc.getThickness().Equals(double.Parse(tb.Text)))
         {
             arc.setThickness(double.Parse(tb.Text));
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Filled_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -107,10 +107,10 @@ class TvCircArcProperties : TvBaseGeometryProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         GeomId.openAsCircleArc().setFilled(cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Point_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -118,7 +118,7 @@ class TvCircArcProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvCircleArcData arc = GeomId.openAsCircleArc();
         NodeData data = (NodeData)tb.Tag;
 
@@ -142,6 +142,6 @@ class TvCircArcProperties : TvBaseGeometryProperties
         }
 
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

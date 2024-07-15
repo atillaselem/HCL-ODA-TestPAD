@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Teigha.Core;
-using Teigha.Visualize;
+using System;
+using HCL_ODA_TestPAD.HCL.CAD.Math.API;
+using ODA.Kernel.TD_RootIntegrated;
 
 namespace HCL_ODA_TestPAD.HCL.CadUnits
 {
     public static class UnitConverter
     {
-        public static double MISSING_VALUE { get; } = -9.99E+27;
+        public static double MissingValue { get; } = -9.99E+27;
         public static double MapUnitsToMetersConversionFactor { get; set; } = 1.0;
 
         public static double MetersToMapUnitsConversionFactor { get; set; } = 1.0;
 
         public static double MapUnitsToMeters(double len)
         {
-            double dConvFactor = MapUnitsToMetersConversionFactor;
+            var dConvFactor = MapUnitsToMetersConversionFactor;
             return len * dConvFactor;
         }
 
@@ -32,7 +28,7 @@ namespace HCL_ODA_TestPAD.HCL.CadUnits
 
             OdGePoint3d newLoc = new(loc.x * dConvFactor, loc.y * dConvFactor, loc.z * dConvFactor);
 
-            if (loc.z == MISSING_VALUE)
+            if (loc.z == MissingValue)
             {
                 newLoc.z = 0.0;
             }
@@ -46,5 +42,15 @@ namespace HCL_ODA_TestPAD.HCL.CadUnits
             return len * dConvFactor;
         }
 
+        public static HcLocation MapUnitsToMeters(HcLocation loc)
+        {
+            ArgumentNullException.ThrowIfNull(loc);
+
+            double dConvFactor = MapUnitsToMetersConversionFactor;
+
+            HcLocation newLoc = new(loc.Easting * dConvFactor, loc.Northing * dConvFactor, loc.Elevation * dConvFactor);
+
+            return newLoc;
+        }
     }
 }

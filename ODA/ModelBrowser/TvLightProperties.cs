@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -64,7 +64,7 @@ class TvLightProperties : BasePaletteProperties
         if (lightId == null || lightId.isNull())
             return;
         _lightId = lightId;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvLight light = _lightId.openObjectAsLight();
         int row = 0;
         Colorpicker color = AddColorDef("Color:", light.getLightColor(), new[] { row, 0, row++, 1 }, MainGrid);
@@ -114,7 +114,7 @@ class TvLightProperties : BasePaletteProperties
             pt.Tag = new ControlData(TextType.Direction, (CoordinateType)pt.Tag);
             pt.LostKeyboardFocus += TextProperty_LostKeyboardFocus;
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void UseLimits_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -122,13 +122,13 @@ class TvLightProperties : BasePaletteProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLight light = _lightId.openObjectAsLight(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLight light = _lightId.openObjectAsLight(OdTv_OpenMode.kForWrite);
         OdTvLightAttenuation la = light.getLightAttenuation();
         la.setUseLimits(cb.IsChecked == true);
         light.setLightAttenuation(la);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void AttenType_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -136,25 +136,25 @@ class TvLightProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLight light = _lightId.openObjectAsLight(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLight light = _lightId.openObjectAsLight(OdTv_OpenMode.kForWrite);
         OdTvLightAttenuation atten = light.getLightAttenuation();
-        atten.setAttenuationType((OdTvLightAttenuation.AttenuationType)cb.SelectedIndex);
+        atten.setAttenuationType((OdTvLightAttenuation_AttenuationType)cb.SelectedIndex);
         light.setLightAttenuation(atten);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Color_ColorChanged(object sender, OdTvColorDef newColor)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLight light = _lightId.openObjectAsLight(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLight light = _lightId.openObjectAsLight(OdTv_OpenMode.kForWrite);
         if (light.getLightColor() != newColor)
         {
             light.setLightColor(newColor);
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Type_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -162,10 +162,10 @@ class TvLightProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        _lightId.openObjectAsLight(OpenMode.kForWrite).setLightType((OdTvLight.LightType)cb.SelectedIndex + 1);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        _lightId.openObjectAsLight(OdTv_OpenMode.kForWrite).setLightType((OdTvLight_LightType)cb.SelectedIndex + 1);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void TextProperty_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -173,8 +173,8 @@ class TvLightProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvLight light = _lightId.openObjectAsLight(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvLight light = _lightId.openObjectAsLight(OdTv_OpenMode.kForWrite);
         ControlData data = (ControlData)tb.Tag;
         switch (data.ProperyType)
         {
@@ -245,6 +245,6 @@ class TvLightProperties : BasePaletteProperties
         }
 
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

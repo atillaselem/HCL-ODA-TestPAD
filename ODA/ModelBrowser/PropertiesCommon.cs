@@ -24,7 +24,7 @@ using HCL_ODA_TestPAD.Dialogs;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -43,7 +43,7 @@ public class PropertiesCommon : UserControl
         Grid.SetRow(lbl, layots[0]);
         Grid.SetColumn(lbl, layots[1]);
         Colorpicker clrp = new Colorpicker(color, DeviceId, isObjColor);
-        if (color.getType() == OdTvColorDef.ColorType.kDefault)
+        if (color.getType() == OdTvColorDef_ColorType.kDefault)
             lbl.Foreground = new SolidColorBrush() { Color = Colors.Gray };
         Grid.SetRow(clrp, layots[2]);
         Grid.SetColumn(clrp, layots[3]);

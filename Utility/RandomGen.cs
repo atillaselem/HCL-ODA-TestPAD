@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 
 namespace HCL_ODA_TestPAD.Utility
 {
@@ -13,9 +9,9 @@ namespace HCL_ODA_TestPAD.Utility
     /// </summary>
     public class RandomGen
     {
-        private static Random _RNG1;
-        private static double _StoredUniformDeviate;
-        private static bool _StoredUniformDeviateIsGood = false;
+        private static Random _rng1;
+        private static double _storedUniformDeviate;
+        private static bool _storedUniformDeviateIsGood = false;
 
         #region -- Construction/Initialization --
 
@@ -25,7 +21,7 @@ namespace HCL_ODA_TestPAD.Utility
         }
         public static void Reset()
         {
-            _RNG1 = new Random(Environment.TickCount);
+            _rng1 = new Random(Environment.TickCount);
         }
 
         #endregion
@@ -37,7 +33,7 @@ namespace HCL_ODA_TestPAD.Utility
         /// </summary>
         public static double Next()
         {
-            return _RNG1.NextDouble();
+            return _rng1.NextDouble();
         }
 
         /// <summary>
@@ -45,7 +41,7 @@ namespace HCL_ODA_TestPAD.Utility
         /// </summary>
         public static bool NextBoolean()
         {
-            if (_RNG1.Next(0, 2) == 0)
+            if (_rng1.Next(0, 2) == 0)
                 return false;
             else
                 return true;
@@ -56,7 +52,7 @@ namespace HCL_ODA_TestPAD.Utility
         /// </summary>
         public static double NextDouble()
         {
-            double rn = _RNG1.NextDouble();
+            double rn = _rng1.NextDouble();
             return rn;
         }
 
@@ -70,7 +66,7 @@ namespace HCL_ODA_TestPAD.Utility
                 string message = "Max must be greater than min.";
                 throw new ArgumentException(message);
             }
-            double rn = (max * 1.0 - min * 1.0) * _RNG1.NextDouble() + min * 1.0;
+            double rn = (max * 1.0 - min * 1.0) * _rng1.NextDouble() + min * 1.0;
             return Convert.ToInt16(rn);
         }
 
@@ -79,7 +75,7 @@ namespace HCL_ODA_TestPAD.Utility
         /// </summary>
         public static int Next(int min, int max)
         {
-            return _RNG1.Next(min, max);
+            return _rng1.Next(min, max);
         }
 
         /// <summary>
@@ -93,7 +89,7 @@ namespace HCL_ODA_TestPAD.Utility
                 throw new ArgumentException(message);
             }
 
-            double rn = (max * 1.0 - min * 1.0) * _RNG1.NextDouble() + min * 1.0;
+            double rn = (max * 1.0 - min * 1.0) * _rng1.NextDouble() + min * 1.0;
             return Convert.ToInt64(rn);
         }
 
@@ -108,7 +104,7 @@ namespace HCL_ODA_TestPAD.Utility
                 throw new ArgumentException(message);
             }
 
-            double rn = (max * 1.0 - min * 1.0) * _RNG1.NextDouble() + min * 1.0;
+            double rn = (max * 1.0 - min * 1.0) * _rng1.NextDouble() + min * 1.0;
             return Convert.ToSingle(rn);
         }
 
@@ -117,13 +113,13 @@ namespace HCL_ODA_TestPAD.Utility
         /// </summary>
         public static double Next(double min, double max)
         {
-            if (max <= min)
+            if (max < min)
             {
                 string message = "Max must be greater than min.";
                 throw new ArgumentException(message);
             }
 
-            double rn = (max - min) * _RNG1.NextDouble() + min;
+            double rn = (max - min) * _rng1.NextDouble() + min;
             return rn;
         }
 
@@ -140,7 +136,7 @@ namespace HCL_ODA_TestPAD.Utility
             long minTicks = min.Ticks;
             long maxTicks = max.Ticks;
             double rn = (Convert.ToDouble(maxTicks)
-               - Convert.ToDouble(minTicks)) * _RNG1.NextDouble()
+               - Convert.ToDouble(minTicks)) * _rng1.NextDouble()
                + Convert.ToDouble(minTicks);
             return new DateTime(Convert.ToInt64(rn));
         }
@@ -159,7 +155,7 @@ namespace HCL_ODA_TestPAD.Utility
             long minTicks = min.Ticks;
             long maxTicks = max.Ticks;
             double rn = (Convert.ToDouble(maxTicks)
-               - Convert.ToDouble(minTicks)) * _RNG1.NextDouble()
+               - Convert.ToDouble(minTicks)) * _rng1.NextDouble()
                + Convert.ToDouble(minTicks);
             return new TimeSpan(Convert.ToInt64(rn));
         }
@@ -210,10 +206,10 @@ namespace HCL_ODA_TestPAD.Utility
         public static double NextNormal()
         {
             // based on algorithm from Numerical Recipes
-            if (_StoredUniformDeviateIsGood)
+            if (_storedUniformDeviateIsGood)
             {
-                _StoredUniformDeviateIsGood = false;
-                return _StoredUniformDeviate;
+                _storedUniformDeviateIsGood = false;
+                return _storedUniformDeviate;
             }
             else
             {
@@ -227,8 +223,8 @@ namespace HCL_ODA_TestPAD.Utility
                 }
                 fac = System.Math.Sqrt(-2.0
                    * System.Math.Log(rsq, System.Math.E) / rsq);
-                _StoredUniformDeviate = v1 * fac;
-                _StoredUniformDeviateIsGood = true;
+                _storedUniformDeviate = v1 * fac;
+                _storedUniformDeviateIsGood = true;
                 return v2 * fac;
             }
         }
@@ -248,10 +244,10 @@ namespace HCL_ODA_TestPAD.Utility
             Console.WriteLine("Random Boolean = " + RandomGen.NextBoolean());
 
             // Random DateTime [1/1/1998, 6/1/1998)
-            DateTime minDT = DateTime.Parse("1/1/1998");
-            DateTime maxDT = DateTime.Parse("6/1/1998");
-            DateTime ranDT = RandomGen.Next(minDT, maxDT);
-            Console.WriteLine("Random DateTime [1/1/1998, 6/1/1998) = " + ranDT);
+            DateTime minDt = DateTime.Parse("1/1/1998");
+            DateTime maxDt = DateTime.Parse("6/1/1998");
+            DateTime ranDt = RandomGen.Next(minDt, maxDt);
+            Console.WriteLine("Random DateTime [1/1/1998, 6/1/1998) = " + ranDt);
 
             // Random TimeSpan [3 hours, 7 hours)
             TimeSpan minTs = new TimeSpan(3, 0, 0);

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HCL_ODA_TestPAD.Settings
+﻿namespace HCL_ODA_TestPAD.Settings
 {
     public interface ISettingsProvider
     {

@@ -23,8 +23,8 @@
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -49,12 +49,12 @@ class TvRasterImageDataProperties : TvBaseGeometryProperties
 
     private OdTvPoint2dArray _pointsArr;
     private bool _isChanged = false;
-    private UIElement currentPanel;
+    private UIElement _currentPanel;
 
     public TvRasterImageDataProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvRasterImageData img = GeomId.openAsRasterImage();
         int row = 0;
         AddLabelAndTextBox("Filename:", img.getImageId().openObject().getSourceFileName(), MainGrid, new[] { row, 0, row++, 1 }, true);
@@ -102,23 +102,23 @@ class TvRasterImageDataProperties : TvBaseGeometryProperties
         StretchingTreeViewItem cmn = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(cmn);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void ClipBoundary_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvRasterImageData img = GeomId.openAsRasterImage();
         _pointsArr = new OdTvPoint2dArray();
         img.getClipBoundary(_pointsArr);
         if (!CheckCountOfObject(_pointsArr.Count))
         {
             _pointsArr.Clear();
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
-        currentPanel = new StretchingTreeView()
+        _currentPanel = new StretchingTreeView()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
@@ -129,20 +129,20 @@ class TvRasterImageDataProperties : TvBaseGeometryProperties
 
         LoadPoints();
 
-        if (CreateDialog("Clip boundary", new Size(300, 300), currentPanel).ShowDialog() == true && _isChanged)
+        if (CreateDialog("Clip boundary", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             img.setClipBoundary(_pointsArr);
             Update();
         }
         _pointsArr.Clear();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadPoints()
     {
         for (int i = 0; i < _pointsArr.Count; i++)
         {
-            StretchingTreeViewItem itm = AddTreeItem("Point_" + i, (StretchingTreeView)currentPanel);
+            StretchingTreeViewItem itm = AddTreeItem("Point_" + i, (StretchingTreeView)_currentPanel);
             itm.Tag = i;
             itm.Items.Add(null);
             itm.Expanded += Point_Expanded;
@@ -185,11 +185,11 @@ class TvRasterImageDataProperties : TvBaseGeometryProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvRasterImageData img = GeomId.openAsRasterImage();
         img.setClipInverted(cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void SimpleTextType_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -197,7 +197,7 @@ class TvRasterImageDataProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvRasterImageData img = GeomId.openAsRasterImage();
         sbyte val = sbyte.Parse(tb.Text);
         switch ((Properties)tb.Tag)
@@ -216,7 +216,7 @@ class TvRasterImageDataProperties : TvBaseGeometryProperties
                 break;
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void PointType_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -224,7 +224,7 @@ class TvRasterImageDataProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvRasterImageData img = GeomId.openAsRasterImage();
         OdGePoint3d or = new OdGePoint3d();
         OdGeVector3d u = new OdGeVector3d(), v = new OdGeVector3d();
@@ -255,6 +255,6 @@ class TvRasterImageDataProperties : TvBaseGeometryProperties
                 }
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

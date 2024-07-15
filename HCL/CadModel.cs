@@ -1,12 +1,9 @@
-﻿using HCL_ODA_TestPAD.Utility;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
 using Size = System.Windows.Size;
 
 namespace HCL_ODA_TestPAD.HCL;
@@ -15,7 +12,7 @@ public interface ILogger
 {
 
 }
-internal class HPLLogger : ILogger
+internal class HplLogger : ILogger
 {
 }
 
@@ -47,19 +44,19 @@ public class CadModel : ICadModel
     /// </summary>
     public void UpdateWritableBitmap()
     {
-        if (WritableBackBuffer != IntPtr.Zero)
+        if (_writableBackBuffer != IntPtr.Zero)
         {
-            using var pDev = TvGsDeviceId.openObject(OpenMode.kForRead);
+            using var pDev = TvGsDeviceId.openObject(OdTv_OpenMode.kForRead);
             using var pRastImg = pDev?.getRasterImage();
             if (pRastImg != null)
             {
                 byte[] bufferedRasterImage = pRastImg.scanLines();
-                Marshal.Copy(bufferedRasterImage, 0, WritableBackBuffer, bufferedRasterImage.Length);
+                Marshal.Copy(bufferedRasterImage, 0, _writableBackBuffer, bufferedRasterImage.Length);
             }
         }
     }
 
-    private IntPtr WritableBackBuffer;
+    private IntPtr _writableBackBuffer;
     public OdTvGsDeviceId TvGsDeviceId { get; set; }
 
     public event EventHandler ViewUpdateRequested;
@@ -74,7 +71,7 @@ public class CadModel : ICadModel
     {
         if (TvGsDeviceId != null && !TvGsDeviceId.isNull() && writableBitmap != null)
         {
-            using var odTvGsDevice = TvGsDeviceId.openObject(OpenMode.kForWrite);
+            using var odTvGsDevice = TvGsDeviceId.openObject(OdTv_OpenMode.kForWrite);
             odTvGsDevice.setDirectRenderBuffer(writableBitmap.BackBuffer);
             Update(false);
         }
@@ -86,11 +83,11 @@ public class CadModel : ICadModel
         if (TvGsDeviceId != null && !TvGsDeviceId.isNull())
         {
             {
-                using var odTvGsDevice = TvGsDeviceId.openObject(OpenMode.kForWrite);
+                using var odTvGsDevice = TvGsDeviceId.openObject(OdTv_OpenMode.kForWrite);
                 using var rect = new OdTvDCRect(0, (int)size.Width, (int)size.Height, 0);
                 odTvGsDevice.onSize(rect);
                 odTvGsDevice.invalidate();
-                odTvGsDevice.regen(OdTvGsDevice.RegenMode.kRegenVisible);
+                odTvGsDevice.regen(OdTvGsDevice_RegenMode.kRegenVisible);
                 _isViewResized = true;
             }
             Update(false);
@@ -102,7 +99,7 @@ public class CadModel : ICadModel
     {
         if (_isViewResized && TvGsDeviceId != null && !TvGsDeviceId.isNull())
         {
-            using var odTvGsDevice = TvGsDeviceId.openObject(OpenMode.kForWrite);
+            using var odTvGsDevice = TvGsDeviceId.openObject(OdTv_OpenMode.kForWrite);
 
             if (odTvGsDevice.isValid() && invalidate == false)
             {
@@ -122,7 +119,7 @@ public class CadModel : ICadModel
     public void Dispose()
     {
         ViewUpdateRequested = null;
-        WritableBackBuffer = IntPtr.Zero;
+        _writableBackBuffer = IntPtr.Zero;
         GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
         GC.Collect(GC.MaxGeneration);
     }

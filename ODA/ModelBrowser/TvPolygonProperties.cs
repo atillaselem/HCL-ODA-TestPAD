@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -48,7 +48,7 @@ class TvPolygonProperties : TvBaseGeometryProperties
     public TvPolygonProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
       : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvPolygonData pol = GeomId.openAsPolygon();
         int row = 0;
         AddLabelAndTextBox("Number of points:", pol.getPointsCount().ToString(), MainGrid, new[] { row, 0, row++, 1 }, true);
@@ -64,7 +64,7 @@ class TvPolygonProperties : TvBaseGeometryProperties
         StretchingTreeViewItem common = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(common);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void InvNormal_Click(object sender, RoutedEventArgs e)
@@ -72,10 +72,10 @@ class TvPolygonProperties : TvBaseGeometryProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         GeomId.openAsPolygon().setUseInverseNormal(cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Filled_Click(object sender, RoutedEventArgs e)
@@ -83,17 +83,17 @@ class TvPolygonProperties : TvBaseGeometryProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         GeomId.openAsPolygon().setFilled(cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void ShowPoint_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvPolygonData pol = GeomId.openAsPolygon();
-        OdTvPointArray pnts = new OdTvPointArray();
+        OdGePoint3dVector pnts = new OdGePoint3dVector();
         pol.getPoints(pnts);
 
         StretchingTreeView tree = new StretchingTreeView()
@@ -137,7 +137,7 @@ class TvPolygonProperties : TvBaseGeometryProperties
             }
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Point_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)

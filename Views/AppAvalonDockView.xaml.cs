@@ -26,14 +26,14 @@ namespace HCL_ODA_TestPAD.Views
 
         private void AppAvalonDockView_Loaded(object sender, RoutedEventArgs e)
         {
-            var VM = DataContext as AppAvalonDockViewModel;
-            VM?.LoadDockLayout(() => _dockingManager);
+            var vm = DataContext as AppAvalonDockViewModel;
+            vm?.LoadDockLayout(() => _dockingManager);
         }
 
         private void MainWindowClosing(object sender, EventArgs e)
         {
-            var VM = DataContext as AppAvalonDockViewModel;
-            VM?.SaveLayout(() => _dockingManager);
+            var vm = DataContext as AppAvalonDockViewModel;
+            vm?.SaveLayout(() => _dockingManager);
         }
     }
 }

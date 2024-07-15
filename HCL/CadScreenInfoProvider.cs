@@ -22,8 +22,8 @@ public interface ICadScreenInfoProvider
 }
 internal enum DpiType
 {
-    EFFECTIVE = 0,
-    RAW = 2,
+    Effective = 0,
+    Raw = 2,
 }
 public sealed class CadScreenInfoProvider : ICadScreenInfoProvider
 {
@@ -32,17 +32,17 @@ public sealed class CadScreenInfoProvider : ICadScreenInfoProvider
     /// <summary>
     /// Value indicating <see cref="NativeMethods.MonitorFromPoint"/> to return a handle to the display monitor that is nearest to the point.
     /// </summary>
-    private const int _MONITOR_DEFAULT_TO_NEAREST = 2;
+    private const int MonitorDefaultToNearest = 2;
 
     /// <summary>
     /// Value returned if <see cref="NativeMethods.GetDpiForMonitor"/> successfully returns the X and Y DPI values for the specified monitor.
     /// </summary>
-    private const int _S_OK = 0;
+    private const int SOk = 0;
 
     /// <summary>
     /// Value returned if <see cref="NativeMethods.GetDpiForMonitor"/> the DPI type, or pointers passed in are not valid.
     /// </summary>
-    private const int _E_INVALID_ARG = -2147024809;
+    private const int EInvalidArg = -2147024809;
 
     /// <summary>
     /// Persistent values for effective and raw dpi in x and y directions
@@ -60,13 +60,13 @@ public sealed class CadScreenInfoProvider : ICadScreenInfoProvider
         try
         {
             var point = new System.Drawing.Point(1, 1);
-            var monitor = NativeMethods.MonitorFromPoint(point, _MONITOR_DEFAULT_TO_NEAREST);
+            var monitor = NativeMethods.MonitorFromPoint(point, MonitorDefaultToNearest);
 
             switch (NativeMethods.GetDpiForMonitor(monitor, dpiType, out dpiX, out dpiY).ToInt32())
             {
-                case _S_OK:
+                case SOk:
                     return;
-                case _E_INVALID_ARG:
+                case EInvalidArg:
                     throw new ArgumentException(
                         "Invalid Argument. See https://msdn.microsoft.com/en-us/library/windows/desktop/dn280510.aspx for more information.");
                 default:
@@ -89,7 +89,7 @@ public sealed class CadScreenInfoProvider : ICadScreenInfoProvider
     {
         if (_rawDpiX == 0 || _rawDpiY == 0)
         {
-            GetDpi(DpiType.RAW, out _rawDpiX, out _rawDpiY);
+            GetDpi(DpiType.Raw, out _rawDpiX, out _rawDpiY);
         }
 
         if (_rawDpiX == 165 && _rawDpiY == 184)
@@ -106,7 +106,7 @@ public sealed class CadScreenInfoProvider : ICadScreenInfoProvider
     {
         if (_effectiveDpiX == 0 || _effectiveDpiY == 0)
         {
-            GetDpi(DpiType.EFFECTIVE, out _effectiveDpiX, out _effectiveDpiY);
+            GetDpi(DpiType.Effective, out _effectiveDpiX, out _effectiveDpiY);
         }
 
         return (_effectiveDpiX, _effectiveDpiY);

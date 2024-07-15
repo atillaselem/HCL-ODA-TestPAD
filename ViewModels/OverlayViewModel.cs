@@ -1,6 +1,7 @@
 ﻿
 
 using HCL_ODA_TestPAD.Mvvm;
+using System.Threading;
 
 namespace HCL_ODA_TestPAD.ViewModels
 {
@@ -20,5 +21,8 @@ namespace HCL_ODA_TestPAD.ViewModels
             get => _title;
             set => SetProperty(ref _title, value);
         }
+
+        public CancellationTokenSource CancelTokenSource { get; set; }
+        public CancellationToken Token => CancelTokenSource.Token;
     }
 }

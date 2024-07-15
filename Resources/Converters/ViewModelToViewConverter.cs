@@ -9,7 +9,7 @@ namespace HCL_ODA_TestPAD.Resources.Converters
 {
     public class ViewModelToViewConverter : IValueConverter
     {
-        private Dictionary<Type, Type> ViewModelViewMapper = new Dictionary<Type, Type>()
+        private Dictionary<Type, Type> _viewModelViewMapper = new Dictionary<Type, Type>()
         {
             { typeof(HclCadImageViewModel), typeof(HclCadImageView) }
         };
@@ -21,9 +21,9 @@ namespace HCL_ODA_TestPAD.Resources.Converters
 
             //use naming convention or custom settings here to get view type
             var viewModelType = value.GetType();
-            if (ViewModelViewMapper.ContainsKey(viewModelType))
+            if (_viewModelViewMapper.ContainsKey(viewModelType))
             {
-                var viewType = ViewModelViewMapper[viewModelType];
+                var viewType = _viewModelViewMapper[viewModelType];
                 HclCadImageView view = null;
                 var modelTitle = ((HclCadImageViewModel)value).TabItemTitle;
                 if (!DictModelView.ContainsKey(modelTitle))

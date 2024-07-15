@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -44,18 +44,18 @@ class TvNurbsProperties : TvBaseGeometryProperties
 
     private TypeOfPropety _type;
 
-    private OdTvPointArray _pointArr;
-    private OdGeDoubleArray _doubleArr;
-    private int CountOfObjectsForLoad = 200;
-    private bool isChanged = false;
+    private OdGePoint3dVector _pointArr;
+    private OdDoubleArray _doubleArr;
+    private int _countOfObjectsForLoad = 200;
+    private bool _isChanged = false;
     private int _countOfLoadedObjects = 0;
-    private UIElement currentPanel;
+    private UIElement _currentPanel;
     private bool _isScrollableControl;
 
     public TvNurbsProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvNurbsData nurbs = GeomId.openAsNurbs();
         int row = 0;
         TextBox degree = AddLabelAndTextBox("Degree:", nurbs.getDegree().ToString(), MainGrid, new[] { row, 0, row++, 1 });
@@ -86,7 +86,7 @@ class TvNurbsProperties : TvBaseGeometryProperties
 
         StretchingTreeViewItem cmn = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(cmn);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
     }
 
@@ -95,7 +95,7 @@ class TvNurbsProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvNurbsData nurbs = GeomId.openAsNurbs();
         switch ((TypeOfPropety)tb.Tag)
         {
@@ -121,7 +121,7 @@ class TvNurbsProperties : TvBaseGeometryProperties
                 }
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Thickness_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -129,7 +129,7 @@ class TvNurbsProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvNurbsData nurbs = GeomId.openAsNurbs();
         bool bFilled;
         if (!nurbs.getThickness(out bFilled).Equals(double.Parse(tb.Text)))
@@ -137,7 +137,7 @@ class TvNurbsProperties : TvBaseGeometryProperties
             nurbs.setThickness(double.Parse(tb.Text));
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Filled_Click(object sender, RoutedEventArgs e)
@@ -145,12 +145,12 @@ class TvNurbsProperties : TvBaseGeometryProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvNurbsData nurbs = GeomId.openAsNurbs();
         bool bFilled;
         nurbs.setThickness(nurbs.getThickness(out bFilled), cb.IsChecked == true);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     protected override void ScrollDialog_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -182,7 +182,7 @@ class TvNurbsProperties : TvBaseGeometryProperties
 
     private void ShowPoints_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvNurbsData nurbs = GeomId.openAsNurbs();
         _pointArr = nurbs.getControlPoints();
 
@@ -190,11 +190,11 @@ class TvNurbsProperties : TvBaseGeometryProperties
         {
             _pointArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
-        currentPanel = new StretchingTreeView()
+        _currentPanel = new StretchingTreeView()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
@@ -206,23 +206,23 @@ class TvNurbsProperties : TvBaseGeometryProperties
         _isScrollableControl = true;
         LoadPoints();
 
-        if (CreateDialog("Nurbs points", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Nurbs points", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             nurbs.set(nurbs.getDegree(), _pointArr, nurbs.getWeights(), nurbs.getKnots());
             Update();
         }
         _pointArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadPoints()
     {
-        for (int i = 0; i < CountOfObjectsForLoad; i++, _countOfLoadedObjects++)
+        for (int i = 0; i < _countOfObjectsForLoad; i++, _countOfLoadedObjects++)
         {
             if (_countOfLoadedObjects >= _pointArr.Count)
                 return;
-            StretchingTreeViewItem itm = AddTreeItem("Point_" + _countOfLoadedObjects, (StretchingTreeView)currentPanel);
+            StretchingTreeViewItem itm = AddTreeItem("Point_" + _countOfLoadedObjects, (StretchingTreeView)_currentPanel);
             itm.Tag = _countOfLoadedObjects;
             itm.Items.Add(null);
             itm.Expanded += Point_Expanded;
@@ -256,7 +256,7 @@ class TvNurbsProperties : TvBaseGeometryProperties
         if (newPt != _pointArr[ind])
         {
             _pointArr[ind] = newPt;
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
     }
     #endregion
@@ -265,7 +265,7 @@ class TvNurbsProperties : TvBaseGeometryProperties
 
     private void ShowWeights_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvNurbsData nurbs = GeomId.openAsNurbs();
         _doubleArr = nurbs.getWeights();
 
@@ -273,34 +273,34 @@ class TvNurbsProperties : TvBaseGeometryProperties
         {
             _doubleArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.Weights;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _isScrollableControl = false;
         LoadWeights();
 
-        if (CreateDialog("Nurbs weights", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Nurbs weights", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             nurbs.set(nurbs.getDegree(), nurbs.getControlPoints(), _doubleArr, nurbs.getKnots());
             Update();
         }
         _doubleArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadWeights()
     {
-        for (int i = 0; i < CountOfObjectsForLoad; i++, _countOfLoadedObjects++)
+        for (int i = 0; i < _countOfObjectsForLoad; i++, _countOfLoadedObjects++)
         {
             if (_countOfLoadedObjects >= _doubleArr.Count)
                 return;
 
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(26) });
             TextBox txtBox = AddLabelAndTextBox("Radius_" + _countOfLoadedObjects, _doubleArr[_countOfLoadedObjects].ToString(CultureInfo.InvariantCulture),
                 grid, new[] { _countOfLoadedObjects, 0, _countOfLoadedObjects, 1 });
@@ -319,7 +319,7 @@ class TvNurbsProperties : TvBaseGeometryProperties
         if (!_doubleArr[ind].Equals(double.Parse(tb.Text)))
         {
             _doubleArr[ind] = double.Parse(tb.Text);
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
     }
     #endregion
@@ -328,7 +328,7 @@ class TvNurbsProperties : TvBaseGeometryProperties
 
     private void ShowKnots_Click(object sender, RoutedEventArgs e)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvNurbsData nurbs = GeomId.openAsNurbs();
         _doubleArr = nurbs.getKnots();
 
@@ -336,34 +336,34 @@ class TvNurbsProperties : TvBaseGeometryProperties
         {
             _doubleArr.Clear();
             _countOfLoadedObjects = 0;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
         _type = TypeOfPropety.Knots;
 
-        currentPanel = CreateGrid(2, 0);
+        _currentPanel = CreateGrid(2, 0);
         _isScrollableControl = false;
         LoadKnots();
 
-        if (CreateDialog("Nurbs knots", new Size(300, 300), currentPanel).ShowDialog() == true && isChanged)
+        if (CreateDialog("Nurbs knots", new Size(300, 300), _currentPanel).ShowDialog() == true && _isChanged)
         {
             nurbs.set(nurbs.getDegree(), nurbs.getControlPoints(), nurbs.getWeights(), _doubleArr);
             Update();
         }
         _doubleArr.Clear();
         _countOfLoadedObjects = 0;
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void LoadKnots()
     {
-        for (int i = 0; i < CountOfObjectsForLoad; i++, _countOfLoadedObjects++)
+        for (int i = 0; i < _countOfObjectsForLoad; i++, _countOfLoadedObjects++)
         {
             if (_countOfLoadedObjects >= _doubleArr.Count)
                 return;
 
-            Grid grid = (Grid)currentPanel;
+            Grid grid = (Grid)_currentPanel;
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(26) });
             TextBox txtBox = AddLabelAndTextBox("Radius_" + _countOfLoadedObjects, _doubleArr[_countOfLoadedObjects].ToString(CultureInfo.InvariantCulture),
                 grid, new[] { _countOfLoadedObjects, 0, _countOfLoadedObjects, 1 });
@@ -382,7 +382,7 @@ class TvNurbsProperties : TvBaseGeometryProperties
         if (!_doubleArr[ind].Equals(double.Parse(tb.Text)))
         {
             _doubleArr[ind] = double.Parse(tb.Text);
-            if (!isChanged) isChanged = true;
+            if (!_isChanged) _isChanged = true;
         }
     }
     #endregion

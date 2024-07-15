@@ -21,8 +21,8 @@
 // acknowledge and accept the above terms.
 ///////////////////////////////////////////////////////////////////////////////
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Navigation;
 
@@ -35,7 +35,7 @@ public class OdTvPanDragger : OdTvDragger
 
     private Cursor _panCursor = Cursors.Arrow;
 
-    private new MemoryManager MM = MemoryManager.GetMemoryManager();
+    private new MemoryManager _mm = MemoryManager.GetMemoryManager();
 
     public OdTvPanDragger(OdTvGsDeviceId tvDeviceId, OdTvModelId tvDraggersModelId)
         : base(tvDeviceId, tvDraggersModelId)
@@ -49,10 +49,10 @@ public class OdTvPanDragger : OdTvDragger
     {
         if (State == DraggerState.Waiting || TvView == null)
             return DraggerResult.NothingToDo;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         _pos = TvView.openObject().position();
         _prevPt = ToEyeToWorld(x, y) - _pos.asVector();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return DraggerResult.NothingToDo;
     }
@@ -68,7 +68,7 @@ public class OdTvPanDragger : OdTvDragger
         // obtain delta for dolly
         OdGeVector3d delta = (_prevPt - (pt - _pos)).asVector();
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGsView view = TvView.openObject();
         // transform delta to eye
         delta.transformBy(view.viewingMatrix());
@@ -82,7 +82,7 @@ public class OdTvPanDragger : OdTvDragger
         // remember camera current position
         _pos = view.position();
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return DraggerResult.NeedUpdateView;
     }

@@ -21,21 +21,21 @@
 // acknowledge and accept the above terms.
 ///////////////////////////////////////////////////////////////////////////////
 using System;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers;
 
 public class OdTvAxisControl
 {
-    protected MemoryManager MM = MemoryManager.GetMemoryManager();
+    protected MemoryManager _mm = MemoryManager.GetMemoryManager();
 
-    public const uint DEVICE_AXIS_LENGTH = 75;
-    public const uint DEVICE_AXISARROW_LENGTH = 15;
-    public const uint DEVICE_AXIS_RADIUS = 1;
-    public const double DEVICE_AXIS_ARROW_COEFF = 6d;
-    public const double DEVICE_ROTATION_AXIS_COEFF = 6d;
-    public const double DEVICE_ROTATION_ORIGIN_AXIS_COEFF = 10d;
+    public const uint DeviceAxisLength = 75;
+    public const uint DeviceAxisarrowLength = 15;
+    public const uint DeviceAxisRadius = 1;
+    public const double DeviceAxisArrowCoeff = 6d;
+    public const double DeviceRotationAxisCoeff = 6d;
+    public const double DeviceRotationOriginAxisCoeff = 10d;
 
     // model for temp axis object
     protected OdTvModelId _modelId;
@@ -69,7 +69,7 @@ public class OdTvAxisControl
         if (IsAttached)
             Detach();
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         if (_modelId != null && !_modelId.isNull())
         {
@@ -82,7 +82,7 @@ public class OdTvAxisControl
 
             if (dbId != null && !dbId.isNull())
             {
-                OdTvDatabase pTvDb = dbId.openObject(OpenMode.kForWrite);
+                OdTvDatabase pTvDb = dbId.openObject(OdTv_OpenMode.kForWrite);
                 pTvDb.removeModel(_modelId);
             }
         }
@@ -97,10 +97,10 @@ public class OdTvAxisControl
             }
 
             if (tvDeviceId != null && !tvDeviceId.isNull())
-                tvDeviceId.openObject(OpenMode.kForWrite).eraseView(_viewId);
+                tvDeviceId.openObject(OdTv_OpenMode.kForWrite).eraseView(_viewId);
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     //initialize
@@ -116,17 +116,17 @@ public class OdTvAxisControl
         if (_parentViewId.isNull())
             return false;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
-        OdTvGsView pParentView = _parentViewId.openObject(OpenMode.kForWrite);
+        OdTvGsView pParentView = _parentViewId.openObject(OdTv_OpenMode.kForWrite);
         // get parent device
         OdTvGsDeviceId devId = pParentView.device();
         if (devId.isNull())
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return false;
         }
-        OdTvGsDevice pDevice = devId.openObject(OpenMode.kForWrite);
+        OdTvGsDevice pDevice = devId.openObject(OdTv_OpenMode.kForWrite);
 
         // 1. create or update new view
         if (_viewId == null || _viewId.isNull())
@@ -135,7 +135,7 @@ public class OdTvAxisControl
 
             if (_viewId.isNull())
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return false;
             }
 
@@ -143,10 +143,10 @@ public class OdTvAxisControl
             pDevice.addView(_viewId);
 
             // 1.2 setup new view
-            OdTvGsView pView = _viewId.openObject(OpenMode.kForWrite);
-            pView.setMode(OdTvGsView.RenderMode.kFlatShaded);
+            OdTvGsView pView = _viewId.openObject(OdTv_OpenMode.kForWrite);
+            pView.setMode(OdTvGsView_RenderMode.kFlatShaded);
             pView.setView(pParentView.position(), pParentView.target(), pParentView.upVector(), pParentView.fieldWidth(), pParentView.fieldHeight()
-                , pParentView.isPerspective() ? OdTvGsView.Projection.kPerspective : OdTvGsView.Projection.kParallel);
+                , pParentView.isPerspective() ? OdTvGsView_Projection.kPerspective : OdTvGsView_Projection.kParallel);
 
             //add view as sibling (need for the automatic transfer of the main view changes to the control view)
             pParentView.addSibling(_viewId);
@@ -157,18 +157,18 @@ public class OdTvAxisControl
         // 2. create model or use existing
         if (_modelId == null || _modelId.isNull())
         {
-            OdTvDatabase pTvDb = pDevice.getDatabase().openObject(OpenMode.kForWrite);
+            OdTvDatabase pTvDb = pDevice.getDatabase().openObject(OdTv_OpenMode.kForWrite);
             // create model
-            _modelId = pTvDb.createModel("$" + pParentView.getName() + "_AXISCONTROLMODEL", OdTvModel.Type.kMain, false);
+            _modelId = pTvDb.createModel("$" + pParentView.getName() + "_AXISCONTROLMODEL", OdTvModel_Type.kMain, false);
             if (_modelId.isNull())
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return false;
             }
         }
 
         // 2.1 Add model to view
-        _viewId.openObject(OpenMode.kForWrite).addModel(_modelId);
+        _viewId.openObject(OdTv_OpenMode.kForWrite).addModel(_modelId);
 
         IsAttached = true;
 
@@ -176,25 +176,25 @@ public class OdTvAxisControl
         // create X axis
         if (!ConstructAxisGeometry("X", new OdTvColorDef(234, 47, 47)))
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return false;
         }
 
         // create Y axis
         if (!ConstructAxisGeometry("Y", new OdTvColorDef(40, 240, 50)))
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return false;
         }
 
         // create Z axis
         if (!ConstructAxisGeometry("Z", new OdTvColorDef(35, 72, 245)))
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return false;
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return true;
     }
@@ -202,19 +202,19 @@ public class OdTvAxisControl
     //construct the axis geometry
     protected virtual bool ConstructAxisGeometry(string name, OdTvColorDef color)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
-        OdTvModel pModel = _modelId.openObject(OpenMode.kForWrite);
+        OdTvModel pModel = _modelId.openObject(OdTv_OpenMode.kForWrite);
         if (pModel == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return false;
         }
 
-        OdTvGsView pParentView = _parentViewId.openObject(OpenMode.kForWrite);
+        OdTvGsView pParentView = _parentViewId.openObject(OdTv_OpenMode.kForWrite);
         if (pParentView == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return false;
         }
 
@@ -222,9 +222,9 @@ public class OdTvAxisControl
         OdGePoint2d pixArea = new OdGePoint2d(OdGePoint2d.kOrigin);
         pParentView.getNumPixelsInUnitSquare(_wcsInsertPoint, pixArea, false);
         _wcsScaleCoef = Math.Max(pixArea.x, pixArea.y);
-        double axisWcsLength = DEVICE_AXIS_LENGTH / _wcsScaleCoef;
-        double axisArrowWcsLength = DEVICE_AXISARROW_LENGTH / _wcsScaleCoef;
-        double cylinderRadius = DEVICE_AXIS_RADIUS / _wcsScaleCoef;
+        double axisWcsLength = DeviceAxisLength / _wcsScaleCoef;
+        double axisArrowWcsLength = DeviceAxisarrowLength / _wcsScaleCoef;
+        double cylinderRadius = DeviceAxisRadius / _wcsScaleCoef;
 
         OdGePoint3d startPt = new OdGePoint3d(_wcsInsertPoint);
         OdGePoint3d endPt = new OdGePoint3d(startPt);
@@ -247,46 +247,46 @@ public class OdTvAxisControl
         }
         else
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return false;
         }
 
         //create entity with axis
         OdTvEntityId axisId = pModel.appendEntity(name);
-        OdTvEntity pAxis = axisId.openObject(OpenMode.kForWrite);
+        OdTvEntity pAxis = axisId.openObject(OdTv_OpenMode.kForWrite);
 
         // set color to the entity
         pAxis.setColor(color);
 
         // create axis as a set of cylinders
-        OdTvPointArray vertices = new OdTvPointArray();
+        OdGePoint3dVector vertices = new OdGePoint3dVector();
         vertices.Add(startPt);
         vertices.Add(endPt);
         vertices.Add(endPt);
         vertices.Add(lastPt);
 
-        OdGeDoubleArray radii = new OdGeDoubleArray();
+        OdDoubleArray radii = new OdDoubleArray();
         radii.Add(cylinderRadius);
         radii.Add(cylinderRadius);
-        radii.Add(cylinderRadius * DEVICE_AXIS_ARROW_COEFF);
+        radii.Add(cylinderRadius * DeviceAxisArrowCoeff);
         radii.Add(0d);
 
-        pAxis.appendShellFromCylinder(vertices, radii, OdTvCylinderData.Capping.kBoth, 50);
+        pAxis.appendShellFromCylinder(vertices, radii, OdTvCylinderData_Capping.kBoth, 50);
 
         // add xline
-        OdTvGeometryDataId xlineId = pAxis.appendInfiniteLine(startPt, endPt, OdTvInfiniteLineData.Type.kLine);
+        OdTvGeometryDataId xlineId = pAxis.appendInfiniteLine(startPt, endPt, OdTvInfiniteLineData_Type.kLine);
         OdTvGeometryData pGeom = xlineId.openObject();
         pGeom.setVisibility(new OdTvVisibilityDef(false));
         pGeom.setColor(color);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return true;
     }
 
     //remove control from the parent view
     public void Detach()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         IsAttached = false;
 
@@ -295,28 +295,28 @@ public class OdTvAxisControl
             if (_viewId == null || _modelId == null || _parentViewId == null
                 || _viewId.isNull() || _modelId.isNull() || _parentViewId.isNull())
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return;
             }
 
-            OdTvGsView pParentView = _parentViewId.openObject(OpenMode.kForWrite);
+            OdTvGsView pParentView = _parentViewId.openObject(OdTv_OpenMode.kForWrite);
             if (pParentView == null)
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return;
             }
 
             OdTvGsDeviceId devId = pParentView.device();
             if (devId.isNull())
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return;
             }
 
-            OdTvGsDevice pDevice = devId.openObject(OpenMode.kForWrite);
+            OdTvGsDevice pDevice = devId.openObject(OdTv_OpenMode.kForWrite);
             pDevice.removeView(_viewId);
 
-            OdTvModel pModel = _modelId.openObject(OpenMode.kForWrite);
+            OdTvModel pModel = _modelId.openObject(OdTv_OpenMode.kForWrite);
             if (pModel != null)
                 pModel.clearEntities();
         }
@@ -325,24 +325,24 @@ public class OdTvAxisControl
 
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     //scale control according to the current view parameters
     public virtual void Scale()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
-        OdTvGsView pParentView = _parentViewId.openObject(OpenMode.kForWrite);
+        OdTvGsView pParentView = _parentViewId.openObject(OdTv_OpenMode.kForWrite);
         if (pParentView == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
-        OdTvModel pModel = _modelId.openObject(OpenMode.kForWrite);
+        OdTvModel pModel = _modelId.openObject(OdTv_OpenMode.kForWrite);
         if (pModel == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
@@ -357,17 +357,17 @@ public class OdTvAxisControl
 
         ApplyCurrentTransform();
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     protected void ApplyCurrentTransform()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
-        OdTvModel pModel = _modelId.openObject(OpenMode.kForWrite);
+        OdTvModel pModel = _modelId.openObject(OdTv_OpenMode.kForWrite);
         if (pModel == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
@@ -383,7 +383,7 @@ public class OdTvAxisControl
         //if after setting the new transfrom matrix the entities will be regenerated
         pModel.setModelingMatrix(xFullTrans);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     public bool Hover(int x, int y)
@@ -391,14 +391,14 @@ public class OdTvAxisControl
         if (_viewId.isNull())
             return false;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
-        OdTvGsView pMoveView = _viewId.openObject(OpenMode.kForWrite);
+        OdTvGsView pMoveView = _viewId.openObject(OdTv_OpenMode.kForWrite);
         OdTvDCPoint[] pnts = new OdTvDCPoint[1];
         pnts[0] = new OdTvDCPoint(x, y);
 
         OdTvSelectionOptions selOpt = new OdTvSelectionOptions();
-        selOpt.setMode(OdTvSelectionOptions.Mode.kPoint);
+        selOpt.setMode(OdTvSelectionOptions_Mode.kPoint);
 
         //check about something selected
         OdTvSelectionSet pSset = pMoveView.select(pnts, selOpt, _modelId);
@@ -413,7 +413,7 @@ public class OdTvAxisControl
                 Highlight(_highlightedAxis, false);
                 Highlight(selEntity, true);
                 _highlightedAxis = selEntity;
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return true;
             }
         }
@@ -421,11 +421,11 @@ public class OdTvAxisControl
         {
             Highlight(_highlightedAxis, false);
             _highlightedAxis.setNull();
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return true;
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return false;
     }
@@ -435,10 +435,10 @@ public class OdTvAxisControl
         if (axisId == null || axisId.isNull())
             return;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         //open Entity
-        OdTvEntity pAxis = axisId.openObject(OpenMode.kForWrite);
+        OdTvEntity pAxis = axisId.openObject(OdTv_OpenMode.kForWrite);
 
         //get xLine
         OdTvGeometryDataIterator pGeometryIt = pAxis.getGeometryDataIterator();
@@ -465,7 +465,7 @@ public class OdTvAxisControl
         if (pXLine != null)
             pXLine.setVisibility(new OdTvVisibilityDef(bHighlight));
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     public bool HasSelectedControl()
@@ -494,9 +494,9 @@ public class OdTvAxisControl
         if (_parentViewId.isNull())
             return wcsPt;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
-        OdTvGsView pView = _parentViewId.openObject(OpenMode.kForWrite);
+        OdTvGsView pView = _parentViewId.openObject(OdTv_OpenMode.kForWrite);
         if (pView.isPerspective())
             wcsPt.z = pView.projectionMatrix()[2, 3];
         wcsPt = wcsPt.transformBy((pView.screenMatrix() * pView.projectionMatrix()).inverse());
@@ -504,27 +504,27 @@ public class OdTvAxisControl
 
         wcsPt = wcsPt.transformBy(pView.eyeToWorldMatrix());
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return wcsPt;
     }
 
     public void Finish()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         _wcsInsertPoint = _wcsInsertPoint.transformBy(_xForm);
 
         //append last transfrom matrix to the internal entities
         if (!_modelId.isNull())
         {
-            OdTvEntitiesIterator pEntIter = _modelId.openObject(OpenMode.kForWrite).getEntitiesIterator();
+            OdTvEntitiesIterator pEntIter = _modelId.openObject(OdTv_OpenMode.kForWrite).getEntitiesIterator();
             while (!pEntIter.done())
             {
                 OdTvEntityId entityId = pEntIter.getEntity();
-                if (entityId.getType() == OdTvEntityId.EntityTypes.kEntity)
+                if (entityId.getType() == OdTvEntityId_EntityTypes.kEntity)
                 {
-                    OdTvEntity pEntity = entityId.openObject(OpenMode.kForWrite);
+                    OdTvEntity pEntity = entityId.openObject(OdTv_OpenMode.kForWrite);
                     pEntity.appendModelingMatrix(_xForm);
                 }
 
@@ -537,7 +537,7 @@ public class OdTvAxisControl
 
         ApplyCurrentTransform();
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     public virtual OdGeMatrix3d GetTransform(int x, int y, out OdTvResult rc)
@@ -549,7 +549,7 @@ public class OdTvAxisControl
             return newTransform;
         }
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         string name = _highlightedAxis.openObject().getName();
         OdGePoint3d newPoint = ToEyeToWorld(x, y);
@@ -575,7 +575,7 @@ public class OdTvAxisControl
         //apply current transform
         ApplyCurrentTransform();
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         rc = OdTvResult.tvOk;
 

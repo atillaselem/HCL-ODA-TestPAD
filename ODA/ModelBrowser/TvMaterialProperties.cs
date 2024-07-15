@@ -24,8 +24,8 @@ using HCL_ODA_TestPAD.Dialogs;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -66,15 +66,15 @@ class TvMaterialProperties : BasePaletteProperties
         : base(devId, renderArea)
     {
         _matId = matId;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvMaterial mat = matId.openObject();
         int row = 0;
         AddLabelAndTextBox("Name:", mat.getName(), MainGrid, new[] { row, 0, row++, 1 }, true);
         AddLabelAndTextBox("Description:", mat.getDescription(), MainGrid, new[] { row, 0, row++, 1 }, true);
         OdTvMaterialMap map = new OdTvMaterialMap();
-        double d_opacity;
-        mat.getOpacity(out d_opacity, map);
-        TextBox opacity = AddLabelAndTextBox("Opacity:", d_opacity.ToString(), MainGrid, new[] { row, 0, row++, 1 });
+        double dOpacity;
+        mat.getOpacity(out dOpacity, map);
+        TextBox opacity = AddLabelAndTextBox("Opacity:", dOpacity.ToString(), MainGrid, new[] { row, 0, row++, 1 });
         opacity.Tag = ValueProperty.Opacity;
         opacity.LostKeyboardFocus += ValueType_LostKeyboardFocus;
         TextBox specClogg = AddLabelAndTextBox("Specular gloss:", mat.getSpecularGloss().ToString(), MainGrid, new[] { row, 0, row++, 1 });
@@ -133,7 +133,7 @@ class TvMaterialProperties : BasePaletteProperties
         StretchingTreeViewItem emisItm = AddTreeItem("Emission", MainGrid, new[] { row++, 0 });
         Grid emGrid = CreateGrid(2, 3);
         emisItm.Items.Add(emGrid);
-        OdTvMaterialColor emis = mat.getEmission();
+        OdTvMaterialColor emis = mat.getEmission(null);
         ComboBox emisColorMethod = AddLabelAndComboBox("Color method:", colorMethods, (int)emis.getMethod(), emGrid, new[] { 0, 0, 0, 1 });
         emisColorMethod.Tag = ComboboxProperty.EmissionColorMethod;
         emisColorMethod.SelectionChanged += Combobox_SelectionChanged;
@@ -160,7 +160,7 @@ class TvMaterialProperties : BasePaletteProperties
         specFactor.Tag = ValueProperty.SpecularFactor;
         specFactor.LostKeyboardFocus += ValueType_LostKeyboardFocus;
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Combobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -168,8 +168,8 @@ class TvMaterialProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvMaterial mat = _matId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvMaterial mat = _matId.openObject(OdTv_OpenMode.kForWrite);
         switch ((ComboboxProperty)cb.Tag)
         {
             case ComboboxProperty.AmbitientColorMethod:
@@ -177,7 +177,7 @@ class TvMaterialProperties : BasePaletteProperties
                     OdTvMaterialColor amb = mat.getAmbient();
                     if ((int)amb.getMethod() != cb.SelectedIndex)
                     {
-                        amb.setMethod((OdTvMaterialColor.Method)cb.SelectedIndex);
+                        amb.setMethod((OdTvMaterialColor_Method)cb.SelectedIndex);
                         mat.setAmbient(amb);
                     }
                     break;
@@ -189,7 +189,7 @@ class TvMaterialProperties : BasePaletteProperties
                     mat.getDiffuse(dif, map);
                     if ((int)dif.getMethod() != cb.SelectedIndex)
                     {
-                        dif.setMethod((OdTvMaterialColor.Method)cb.SelectedIndex);
+                        dif.setMethod((OdTvMaterialColor_Method)cb.SelectedIndex);
                         mat.setDiffuse(dif, map);
                     }
                     break;
@@ -202,7 +202,7 @@ class TvMaterialProperties : BasePaletteProperties
                     if ((int)map.getMapper().uTiling() != cb.SelectedIndex)
                     {
                         OdTvTextureMapper texMap = map.getMapper();
-                        texMap.setUTiling((OdTvTextureMapper.Tiling)cb.SelectedIndex);
+                        texMap.setUTiling((OdTvTextureMapper_Tiling)cb.SelectedIndex);
                         map.setMapper(texMap);
                         mat.setDiffuse(dif, map);
                     }
@@ -216,18 +216,18 @@ class TvMaterialProperties : BasePaletteProperties
                     if ((int)map.getMapper().vTiling() != cb.SelectedIndex)
                     {
                         OdTvTextureMapper texMap = map.getMapper();
-                        texMap.setVTiling((OdTvTextureMapper.Tiling)cb.SelectedIndex);
+                        texMap.setVTiling((OdTvTextureMapper_Tiling)cb.SelectedIndex);
                         map.setMapper(texMap); mat.setDiffuse(dif, map);
                     }
                     break;
                 }
             case ComboboxProperty.EmissionColorMethod:
                 {
-                    OdTvMaterialColor emis = mat.getEmission();
+                    OdTvMaterialColor emis = mat.getEmission(null);
                     if ((int)emis.getMethod() != cb.SelectedIndex)
                     {
-                        emis.setMethod((OdTvMaterialColor.Method)cb.SelectedIndex);
-                        mat.setEmission(emis);
+                        emis.setMethod((OdTvMaterialColor_Method)cb.SelectedIndex);
+                        mat.setEmission(emis, null);
                     }
                     break;
                 }
@@ -238,7 +238,7 @@ class TvMaterialProperties : BasePaletteProperties
                     mat.getSpecular(spec, out fact);
                     if ((int)spec.getMethod() != cb.SelectedIndex)
                     {
-                        spec.setMethod((OdTvMaterialColor.Method)cb.SelectedIndex);
+                        spec.setMethod((OdTvMaterialColor_Method)cb.SelectedIndex);
                         mat.setSpecular(spec, fact);
                     }
                     break;
@@ -246,7 +246,7 @@ class TvMaterialProperties : BasePaletteProperties
         }
 
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Color_ColorChanged(object sender, OdTvColorDef newColor)
@@ -254,8 +254,8 @@ class TvMaterialProperties : BasePaletteProperties
         Colorpicker cp = sender as Colorpicker;
         if (cp == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvMaterial mat = _matId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvMaterial mat = _matId.openObject(OdTv_OpenMode.kForWrite);
         switch ((ColorProperty)cp.Tag)
         {
             case ColorProperty.AmbitientColor:
@@ -286,7 +286,7 @@ class TvMaterialProperties : BasePaletteProperties
                     if (emis.getColor() != newColor)
                     {
                         emis.setColor(newColor);
-                        mat.setEmission(emis);
+                        mat.setEmission(emis, null);
                     }
                     break;
                 }
@@ -304,7 +304,7 @@ class TvMaterialProperties : BasePaletteProperties
                 }
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void ValueType_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -312,17 +312,17 @@ class TvMaterialProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvMaterial mat = _matId.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvMaterial mat = _matId.openObject(OdTv_OpenMode.kForWrite);
         tb.Text = tb.Text.Replace(".", ",");
         double val = double.Parse(tb.Text);
         switch ((ValueProperty)tb.Tag)
         {
             case ValueProperty.Opacity:
                 OdTvMaterialMap map_ = new OdTvMaterialMap();
-                double d_opacity;
-                mat.getOpacity(out d_opacity, map_);
-                if (!d_opacity.Equals(val))
+                double dOpacity;
+                mat.getOpacity(out dOpacity, map_);
+                if (!dOpacity.Equals(val))
                     mat.setOpacity(val);
                 break;
             case ValueProperty.SpecularGloss:
@@ -365,11 +365,11 @@ class TvMaterialProperties : BasePaletteProperties
                 }
             case ValueProperty.EmissionFactor:
                 {
-                    OdTvMaterialColor emis = mat.getEmission();
+                    OdTvMaterialColor emis = mat.getEmission(null);
                     if (!emis.getFactor().Equals(val))
                     {
                         emis.setFactor(val);
-                        mat.setEmission(emis);
+                        mat.setEmission(emis, null);
                     }
                     break;
                 }
@@ -387,6 +387,6 @@ class TvMaterialProperties : BasePaletteProperties
                 }
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

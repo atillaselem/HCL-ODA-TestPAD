@@ -7,8 +7,9 @@ namespace HCL_ODA_TestPAD.Utility;
 
 public class AssemblyHelper
 {
-    private const string X32_BIT = "(32-bit)";
-    private const string X64_BIT = "(64-bit)";
+    private const string X32Bit = "(32-bit)";
+    private const string X64Bit = "(64-bit)";
+    private const string OdaRel = "[ODA Rel : 25.4]";
     /// <summary>
     /// Call this method at the beginning of the program
     /// </summary>
@@ -51,13 +52,14 @@ public class AssemblyHelper
 
     private static string GetProcessArchitecture()
     {
-        return RuntimeInformation.ProcessArchitecture == Architecture.X86 ? X32_BIT : X64_BIT; ;
+        return RuntimeInformation.ProcessArchitecture == Architecture.X86 ? X32Bit : X64Bit; ;
     }
 
     public static string GetAppTitle()
     {
         var assemblyFullPath = Assembly.GetExecutingAssembly().Location;
         var assemblyName = AssemblyName.GetAssemblyName(assemblyFullPath).Name;
-        return $"{assemblyName.Substring(0, assemblyName.Length)} {GetProcessArchitecture().ToLower()} - Version {{0.{GetAssemblyVersionText()}}}";
+        //return $"{assemblyName.Substring(0, assemblyName.Length)} {GetProcessArchitecture().ToLower()} {ODA_REL}- Version {{0.{GetAssemblyVersionText()}}}";
+        return $"{assemblyName.Substring(0, assemblyName.Length)} - {OdaRel} - Version {{0.{GetAssemblyVersionText()}}}";
     }
 }

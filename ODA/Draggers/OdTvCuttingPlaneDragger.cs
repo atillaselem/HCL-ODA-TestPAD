@@ -21,24 +21,24 @@
 // acknowledge and accept the above terms.
 ///////////////////////////////////////////////////////////////////////////////
 using System;
-using Teigha.Core;
-using Teigha.Visualize;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using HCL_ODA_TestPAD.ODA.WCS;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using HCL_ODA_TestPAD.ViewModels;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers;
 
 class OdTvCuttingPlaneDragger : OdTvDragger
 {
-    protected new MemoryManager MM = MemoryManager.GetMemoryManager();
+    protected new MemoryManager _mm = MemoryManager.GetMemoryManager();
 
-    public const double OD_TV_CUTTINGPLANE_SIZE_COEFF = 1.3;
-    public const byte OD_TV_CUTTINGPLANE_EDGE_DEFAULT_LINEWEIGHT = 3;
-    public const byte OD_TV_CUTTINGPLANE_EDGE_SELECTED_LINEWEIGHT = 5;
+    public const double OdTvCuttingplaneSizeCoeff = 1.3;
+    public const byte OdTvCuttingplaneEdgeDefaultLineweight = 3;
+    public const byte OdTvCuttingplaneEdgeSelectedLineweight = 5;
 
     public enum CuttingState
     {
@@ -73,7 +73,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
     {
         _wpfView = wpfView;
         IsCanFinish = false;
-        _selectionOptions.setMode(OdTvSelectionOptions.Mode.kPoint);
+        _selectionOptions.setMode(OdTvSelectionOptions_Mode.kPoint);
 
         _cuttingPlanesViewId = wpfView.CuttingPlanesViewId;
         _cuttingPlanesModelId = wpfView.CuttingPlaneModelId;
@@ -89,12 +89,12 @@ class OdTvCuttingPlaneDragger : OdTvDragger
     {
         if (entId.isNull())
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         OdTvEntity pEntity = entId.openObject();
         if (pEntity == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
@@ -112,7 +112,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
             }
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     public void OnRemoveCuttingPlanes()
@@ -123,16 +123,16 @@ class OdTvCuttingPlaneDragger : OdTvDragger
         ProcessEscape();
     }
 
-    public override DraggerResult Start(OdTvDragger prevDragger, int activeView, Cursor cursor, TvWpfViewWCS wcs)
+    public override DraggerResult Start(OdTvDragger prevDragger, int activeView, Cursor cursor, TvWpfViewWcs wcs)
     {
         _state = CuttingState.WaitingForCutPlSelect;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         //fill map with entities used for the visualization of the cutting planes
         if (!_cuttingPlanesModelId.isNull())
         {
-            OdTvModel pModel = _cuttingPlanesModelId.openObject(OpenMode.kForWrite);
+            OdTvModel pModel = _cuttingPlanesModelId.openObject(OdTv_OpenMode.kForWrite);
             if (pModel != null)
             {
                 OdTvEntitiesIterator pIt = pModel.getEntitiesIterator();
@@ -145,7 +145,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
             }
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return DraggerResult.NeedUpdateView | base.Start(prevDragger, activeView, cursor, wcs);
     }
@@ -154,13 +154,13 @@ class OdTvCuttingPlaneDragger : OdTvDragger
     {
         DraggerResult res = DraggerResult.NothingToDo;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         //first of all we need the active view to perform selection
-        OdTvGsView pView = _cuttingPlanesViewId.openObject(OpenMode.kForWrite);
+        OdTvGsView pView = _cuttingPlanesViewId.openObject(OdTv_OpenMode.kForWrite);
         if (pView == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return DraggerResult.NothingToDo;
         }
 
@@ -191,27 +191,27 @@ class OdTvCuttingPlaneDragger : OdTvDragger
         else
             res = DraggerResult.NeedUpdateView;
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return res;
     }
 
     public override DraggerResult Drag(int x, int y)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         if (_state == CuttingState.WaitingForCutPlSelect)
         {
             //first of all we need the active view to perform selection
-            OdTvGsView pView = _cuttingPlanesViewId.openObject(OpenMode.kForWrite);
+            OdTvGsView pView = _cuttingPlanesViewId.openObject(OdTv_OpenMode.kForWrite);
             if (pView == null)
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return DraggerResult.NothingToDo;
             }
             // highlight thecutting plane
             OdTvSelectionOptions selOpt = new OdTvSelectionOptions();
-            selOpt.setMode(OdTvSelectionOptions.Mode.kPoint);
+            selOpt.setMode(OdTvSelectionOptions_Mode.kPoint);
             OdTvDCPoint[] pnt = new OdTvDCPoint[1];
             pnt[0] = new OdTvDCPoint(x, y);
             // check about something selected
@@ -225,7 +225,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
                     Highlight(_highlightedCuttingPlaneId, false);
                     Highlight(selEntity, true);
                     _highlightedCuttingPlaneId = selEntity;
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     return DraggerResult.NeedUpdateView;
                 }
             }
@@ -233,7 +233,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
             {
                 Highlight(_highlightedCuttingPlaneId, false);
                 _highlightedCuttingPlaneId.setNull();
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return DraggerResult.NeedUpdateView;
             }
         }
@@ -243,10 +243,10 @@ class OdTvCuttingPlaneDragger : OdTvDragger
             {
                 if (_axisControl.Hover(x, y))
                 {
-                    MM.StopTransaction(mtr);
+                    _mm.StopTransaction(mtr);
                     return DraggerResult.NeedUpdateView;
                 }
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return DraggerResult.NothingToDo;
             }
         }
@@ -254,17 +254,17 @@ class OdTvCuttingPlaneDragger : OdTvDragger
         {
             if (_selectedCuttingPlaneEntityId == null || _selectedCuttingPlaneEntityId.isNull())
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return DraggerResult.NothingToDo;
             }
-            OdTvEntity pEntity = _selectedCuttingPlaneEntityId.openObject(OpenMode.kForWrite);
+            OdTvEntity pEntity = _selectedCuttingPlaneEntityId.openObject(OdTv_OpenMode.kForWrite);
             int index = -1;
             if (!_cuttingPlanesDict.TryGetValue(pEntity.getName(), out index))
                 index = -1;
-            OdTvGsView pView = TvView.openObject(OpenMode.kForWrite);
+            OdTvGsView pView = TvView.openObject(OdTv_OpenMode.kForWrite);
             if (pView == null || index < 0)
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return DraggerResult.NothingToDo;
             }
             OdGePlane cuttingPlane = new OdGePlane();
@@ -272,7 +272,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
             OdTvResult res = pView.getCuttingPlane((uint)index, cuttingPlane);
             if (res != OdTvResult.tvOk)
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return DraggerResult.NothingToDo;
             }
 
@@ -285,7 +285,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
             OdGeMatrix3d transform = _axisControl.GetTransform(x, y, out rc);
             if (rc != OdTvResult.tvOk)
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return DraggerResult.NothingToDo;
             }
 
@@ -306,11 +306,11 @@ class OdTvCuttingPlaneDragger : OdTvDragger
                 pDevice.invalidate();
             }
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return DraggerResult.NeedUpdateView;
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return DraggerResult.NothingToDo;
     }
 
@@ -318,7 +318,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
     {
         _state = CuttingState.WaitingForCutPlSelect;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         if (_axisControl != null)
         {
@@ -330,15 +330,15 @@ class OdTvCuttingPlaneDragger : OdTvDragger
         // reset cutting plane color
         if (!_selectedCuttingPlaneEntityId.isNull())
         {
-            OdTvEntity pSelectedCuttingPlaneEntity = _selectedCuttingPlaneEntityId.openObject(OpenMode.kForWrite);
+            OdTvEntity pSelectedCuttingPlaneEntity = _selectedCuttingPlaneEntityId.openObject(OdTv_OpenMode.kForWrite);
             pSelectedCuttingPlaneEntity.setColor(new OdTvColorDef(175, 175, 175));
-            pSelectedCuttingPlaneEntity.setLineWeight(new OdTvLineWeightDef(OD_TV_CUTTINGPLANE_EDGE_DEFAULT_LINEWEIGHT));
+            pSelectedCuttingPlaneEntity.setLineWeight(new OdTvLineWeightDef(OdTvCuttingplaneEdgeDefaultLineweight));
         }
 
         // unselect cutting plane
         _selectedCuttingPlaneEntityId.setNull();
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return DraggerResult.NeedUpdateView;
     }
@@ -397,7 +397,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
 
     protected void Merge(OdTvSelectionSet pSSet)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvSelectionSetIterator pSelectIter = pSSet.getIterator();
         if (!pSelectIter.done())
         {
@@ -406,14 +406,14 @@ class OdTvCuttingPlaneDragger : OdTvDragger
                 _selectedCuttingPlaneEntityId = pSelectIter.getEntity();
                 if (!_selectedCuttingPlaneEntityId.isNull())
                 {
-                    OdTvEntity pSelectedCuttingPlaneEntity = _selectedCuttingPlaneEntityId.openObject(OpenMode.kForWrite);
+                    OdTvEntity pSelectedCuttingPlaneEntity = _selectedCuttingPlaneEntityId.openObject(OdTv_OpenMode.kForWrite);
                     int cuttingPlaneIndex = -1;
                     if (!_cuttingPlanesDict.TryGetValue(pSelectedCuttingPlaneEntity.getName(), out cuttingPlaneIndex))
                         cuttingPlaneIndex = -1;
 
                     if (cuttingPlaneIndex < 0)
                     {
-                        MM.StopTransaction(mtr);
+                        _mm.StopTransaction(mtr);
                         return;
                     }
 
@@ -426,7 +426,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
 
                     // Change color
                     pSelectedCuttingPlaneEntity.setColor(new OdTvColorDef(255, 0, 0));
-                    pSelectedCuttingPlaneEntity.setLineWeight(new OdTvLineWeightDef(OD_TV_CUTTINGPLANE_EDGE_SELECTED_LINEWEIGHT));
+                    pSelectedCuttingPlaneEntity.setLineWeight(new OdTvLineWeightDef(OdTvCuttingplaneEdgeSelectedLineweight));
 
                     OdGePlane cuttingPlane = new OdGePlane();
                     OdTvGsView pView = null;
@@ -434,7 +434,7 @@ class OdTvCuttingPlaneDragger : OdTvDragger
                         pView = TvView.openObject();
                     if (pView != null && pView.getCuttingPlane((uint)cuttingPlaneIndex, cuttingPlane) != OdTvResult.tvOk)
                     {
-                        MM.StopTransaction(mtr);
+                        _mm.StopTransaction(mtr);
                         return;
                     }
 
@@ -458,29 +458,29 @@ class OdTvCuttingPlaneDragger : OdTvDragger
                 }
             }
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     protected void Highlight(OdTvEntityId planeId, bool bHighlight)
     {
         if (planeId.isNull())
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
-        OdTvEntity pPlane = planeId.openObject(OpenMode.kForWrite);
+        OdTvEntity pPlane = planeId.openObject(OdTv_OpenMode.kForWrite);
 
         // perform highlight
         if (bHighlight)
         {
             pPlane.setColor(new OdTvColorDef(255, 128, 0));
-            pPlane.setLineWeight(new OdTvLineWeightDef(OD_TV_CUTTINGPLANE_EDGE_SELECTED_LINEWEIGHT));
+            pPlane.setLineWeight(new OdTvLineWeightDef(OdTvCuttingplaneEdgeSelectedLineweight));
         }
         else
         {
             pPlane.setColor(new OdTvColorDef(175, 175, 175));
-            pPlane.setLineWeight(new OdTvLineWeightDef(OD_TV_CUTTINGPLANE_EDGE_DEFAULT_LINEWEIGHT));
+            pPlane.setLineWeight(new OdTvLineWeightDef(OdTvCuttingplaneEdgeDefaultLineweight));
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

@@ -32,6 +32,7 @@
                 BorderThickness="3"
                 CornerRadius="1" />
         </Canvas>
+        <ContentControl d:IsHidden="True" Content="{Binding OverlayViewModel}"/>
     </Grid>
 
 </UserControl>

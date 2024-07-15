@@ -8,16 +8,16 @@ namespace HCL_ODA_TestPAD.Splash
     /// <summary>
     /// 
     /// </summary>
-    public partial class AboutTestPAD : Form
+    public partial class AboutTestPad : Form
     {
-        private EventHandler ShowGUIEvent = null;
-        private float angle = 0;
-        private int counter = 0;
+        private EventHandler _showGuiEvent = null;
+        private float _angle = 0;
+        private int _counter = 0;
 
         /// <summary>
         /// 
         /// </summary>
-        public AboutTestPAD()
+        public AboutTestPad()
         {
             InitializeComponent();
         }
@@ -28,7 +28,7 @@ namespace HCL_ODA_TestPAD.Splash
         /// <param name="del"></param>
         public void SuperLogo(EventHandler del)
         {
-            ShowGUIEvent = del;
+            _showGuiEvent = del;
             InitializeComponent();
         }
 
@@ -121,22 +121,22 @@ namespace HCL_ODA_TestPAD.Splash
 
         private void Rotate(Graphics graphics, LinearGradientBrush brush)
         {
-            brush.RotateTransform(angle);
+            brush.RotateTransform(_angle);
             brush.SetBlendTriangularShape(.5F);
             graphics.FillRectangle(brush, brush.Rectangle);
         }
 
         private void Rotate(Graphics graphics)
         {
-            angle += 5 % 360;
+            _angle += 5 % 360;
             Rotate(graphics, GetBrush());
         }
 
         private void timer1_Tick(object sender, System.EventArgs e)
         {
             Rotate(CreateGraphics());
-            counter++;
-            if (counter > 100)
+            _counter++;
+            if (_counter > 100)
             {
                 ((Timer)sender).Stop();
                 OnShowTestGUI();
@@ -155,7 +155,7 @@ namespace HCL_ODA_TestPAD.Splash
 
         private void OnShowTestGUI()
         {
-            ShowGUIEvent?.Invoke(this, EventArgs.Empty);
+            _showGuiEvent?.Invoke(this, EventArgs.Empty);
         }
     }
 }

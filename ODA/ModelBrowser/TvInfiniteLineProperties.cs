@@ -23,8 +23,8 @@
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -33,7 +33,7 @@ class TvInfiniteLineProperties : TvBaseGeometryProperties
     public TvInfiniteLineProperties(OdTvGeometryDataId geomId, OdTvGsDeviceId devId, IOdaSectioning renderArea)
         : base(geomId, devId, renderArea)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvInfiniteLineData iline = GeomId.openAsInfiniteLine();
         int row = 0;
         TextBox[] fPt = AddPoint3D("First point", iline.getFirst(), MainGrid, new[] { row, 0, row++, 1 });
@@ -49,7 +49,7 @@ class TvInfiniteLineProperties : TvBaseGeometryProperties
 
         StretchingTreeViewItem cmn = AddTreeItem("Common properties", MainGrid, new[] { row, 0 });
         GetProperties(cmn);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
     }
 
@@ -58,10 +58,10 @@ class TvInfiniteLineProperties : TvBaseGeometryProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
-        GeomId.openAsInfiniteLine().setType((OdTvInfiniteLineData.Type)cb.SelectedIndex);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        GeomId.openAsInfiniteLine().setType((OdTvInfiniteLineData_Type)cb.SelectedIndex);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void SecondPoint_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -69,7 +69,7 @@ class TvInfiniteLineProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvInfiniteLineData iline = GeomId.openAsInfiniteLine();
         OdGePoint3d newPt = SetPointCoordByType(iline.getSecond(), (CoordinateType)tb.Tag, tb.Text);
         if (iline.getSecond() != newPt)
@@ -77,7 +77,7 @@ class TvInfiniteLineProperties : TvBaseGeometryProperties
             iline.setSecond(newPt);
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void FirstPoint_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -85,7 +85,7 @@ class TvInfiniteLineProperties : TvBaseGeometryProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvInfiniteLineData iline = GeomId.openAsInfiniteLine();
         OdGePoint3d newPt = SetPointCoordByType(iline.getFirst(), (CoordinateType)tb.Tag, tb.Text);
         if (iline.getFirst() != newPt)
@@ -93,6 +93,6 @@ class TvInfiniteLineProperties : TvBaseGeometryProperties
             iline.setFirst(newPt);
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

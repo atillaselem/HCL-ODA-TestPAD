@@ -1,6 +1,5 @@
-﻿using HCL_ODA_TestPAD.Mvvm;
+using HCL_ODA_TestPAD.Mvvm;
 using HCL_ODA_TestPAD.Mvvm.Events;
-using Prism.Events;
 using System.Windows.Media;
 using System.Windows;
 using System;
@@ -12,6 +11,9 @@ namespace HCL_ODA_TestPAD.ViewModels
     {
         private readonly IServiceFactory _serviceFactory;
         private string _statusMessage;
+        private string _screenCoordinates;
+        private string _cadCoordinates;
+        private string _scaleFactor;
         private int _progressValue;
         private int _progressMax;
         private string _progressInfo;
@@ -31,11 +33,22 @@ namespace HCL_ODA_TestPAD.ViewModels
             _serviceFactory.EventSrv.GetEvent<ProgressStepChangedEvent>().Subscribe(OnProgressStepChangedEvent);
             _serviceFactory.EventSrv.GetEvent<ProgressMaxChangedEvent>().Subscribe(OnProgressMaxEvent);
             _serviceFactory.EventSrv.GetEvent<AppStatusTextChanged>().Subscribe(OnAppStatusTextChanged);
+            _serviceFactory.EventSrv.GetEvent<ScreenCoordinatesChanged>().Subscribe(OnScreenCoordinatesChanged);
+            _serviceFactory.EventSrv.GetEvent<ScaleFactorChanged>().Subscribe(OnScaleFactorChanged);
         }
 
         private void OnAppStatusTextChanged(string statusText)
         {
             StatusMessage = statusText;
+        }
+        private void OnScreenCoordinatesChanged(string coordinates)
+        {
+            ScreenCoordinates = coordinates.Split(';')[0];
+            CadCoordinates = coordinates.Split(';')[1];
+        }
+        private void OnScaleFactorChanged(string scaleFactor)
+        {
+            ScaleFactor = scaleFactor;
         }
 
         private void OnProgressMaxEvent(int progressMax)
@@ -98,6 +111,21 @@ namespace HCL_ODA_TestPAD.ViewModels
         {
             get => _progressBarVisibility;
             set => SetProperty(ref _progressBarVisibility, value);
+        }
+        public string ScreenCoordinates
+        {
+            get => _screenCoordinates;
+            set => SetProperty(ref _screenCoordinates, value);
+        }
+        public string CadCoordinates
+        {
+            get => _cadCoordinates;
+            set => SetProperty(ref _cadCoordinates, value);
+        }
+        public string ScaleFactor
+        {
+            get => _scaleFactor;
+            set => SetProperty(ref _scaleFactor, value);
         }
     }
 }

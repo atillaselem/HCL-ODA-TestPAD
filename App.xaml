@@ -21,8 +21,8 @@
             <DataTemplate DataType="{x:Type vms:OdaDatabaseExplorerViewModel}">
                 <views:OdaDatabaseExplorerView />
             </DataTemplate>
-            <DataTemplate DataType="{x:Type vms:TestPADSettingsViewModel}">
-                <views:TestPADSettingsView />
+            <DataTemplate DataType="{x:Type vms:TestPadSettingsViewModel}">
+                <views:TestPadSettingsView />
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type vms:OverlayViewModel}">
@@ -54,6 +54,7 @@
             <!--  Context Menu images  -->
             <BitmapImage x:Key="OpenImg" UriSource="pack://application:,,,/Images/HCL/ContextMenu/open.png" />
             <BitmapImage x:Key="CloseImg" UriSource="pack://application:,,,/Images/HCL/ContextMenu/close.png" />
+            <BitmapImage x:Key="SaveImg" UriSource="pack://application:,,,/Images/HCL/ContextMenu/save.png" />
             <BitmapImage x:Key="SettingsImg" UriSource="pack://application:,,,/Images/HCL/ContextMenu/settings.png" />
             <BitmapImage x:Key="ExitImg" UriSource="pack://application:,,,/Images/HCL/ContextMenu/exit.png" />
             <!--  HCL-Navigation images  -->
@@ -97,6 +98,10 @@
             <BitmapImage x:Key="RegenAllImg" UriSource="pack://application:,,,/Images/Regen/regenAll.png" />
             <BitmapImage x:Key="RegenVisibleImg" UriSource="pack://application:,,,/Images/Regen/regenVisible.png" />
             <BitmapImage x:Key="RegenViewImg" UriSource="pack://application:,,,/Images/Regen/regenVp.png" />
+            <!--  HCL images  -->
+            <BitmapImage x:Key="StationImg" UriSource="pack://application:,,,/Images/HCL/Tools/Station.png" />
+            <BitmapImage x:Key="PrismImg" UriSource="pack://application:,,,/Images/HCL/Tools/Prism.png" />
+            <BitmapImage x:Key="PointsImg" UriSource="pack://application:,,,/Images/HCL/Tools/Points.png" />
             <!--  Sectioning images  -->
             <BitmapImage x:Key="AddCuttingPlaneX" UriSource="pack://application:,,,/Images/Sectioning/AddCuttingPlaneX.png" />
             <BitmapImage x:Key="AddCuttingPlaneY" UriSource="pack://application:,,,/Images/Sectioning/AddCuttingPlaneY.png" />

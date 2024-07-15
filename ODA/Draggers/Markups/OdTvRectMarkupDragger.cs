@@ -23,8 +23,8 @@
 
 using HCL_ODA_TestPAD.ODA.WCS;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Markups;
 
@@ -55,9 +55,9 @@ public class OdTvRectMarkupDragger : OdTvMarkupDragger
 
         _points = new OdGePoint3d[4];
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         // create main entity
-        OdTvModel pModel = markupModelId.openObject(OpenMode.kForWrite);
+        OdTvModel pModel = markupModelId.openObject(OdTv_OpenMode.kForWrite);
         if (pModel == null)
             return;
 
@@ -65,18 +65,18 @@ public class OdTvRectMarkupDragger : OdTvMarkupDragger
         if (_entityId == null)
         {
             _entityId = pModel.appendEntity(NameOfMarkupTempEntity);
-            _entityId.openObject(OpenMode.kForWrite).setColor(MarkupColor);
+            _entityId.openObject(OdTv_OpenMode.kForWrite).setColor(MarkupColor);
         }
 
         // crate rectangles subEntity if not exist
         _rectFoldId = FindSubEntity(_entityId.openObject().getGeometryDataIterator(), NameOfMarkupRectFold) ??
-                      _entityId.openObject(OpenMode.kForWrite).appendSubEntity(NameOfMarkupRectFold);
+                      _entityId.openObject(OdTv_OpenMode.kForWrite).appendSubEntity(NameOfMarkupRectFold);
 
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
-    public override DraggerResult Start(OdTvDragger prevDragger, int activeView, Cursor cursor, TvWpfViewWCS wcs)
+    public override DraggerResult Start(OdTvDragger prevDragger, int activeView, Cursor cursor, TvWpfViewWcs wcs)
     {
         TvActiveViewport = activeView;
         DraggerResult res = DraggerResult.NothingToDo;
@@ -103,10 +103,10 @@ public class OdTvRectMarkupDragger : OdTvMarkupDragger
         else
         {
             _isPressed = false;
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
             if (_rectEntityId != null)
                 _rectEntityId.openAsSubEntity().setLineWeight(LineWeight);
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return DraggerResult.NeedUpdateView;
         }
         return DraggerResult.NothingToDo;
@@ -150,10 +150,10 @@ public class OdTvRectMarkupDragger : OdTvMarkupDragger
     {
         if (!_isSuccess && _rectEntityId != null)
         {
-            MemoryTransaction mtr = MM.StartTransaction();
-            _rectFoldId.openAsSubEntity(OpenMode.kForWrite).removeGeometryData(_rectEntityId);
+            MemoryTransaction mtr = _mm.StartTransaction();
+            _rectFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite).removeGeometryData(_rectEntityId);
             TvDeviceId.openObject().update();
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         return base.Finish(out rc);
@@ -163,7 +163,7 @@ public class OdTvRectMarkupDragger : OdTvMarkupDragger
     {
         if (TvView == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         OdTvGsView view = TvView.openObject(); ;
 
@@ -185,18 +185,18 @@ public class OdTvRectMarkupDragger : OdTvMarkupDragger
         // update or create entity
         if (isNeedCreate)
         {
-            _rectEntityId = _rectFoldId.openAsSubEntity(OpenMode.kForWrite).appendSubEntity("RectEntity");
-            OdTvEntity rectEnt = _rectEntityId.openAsSubEntity(OpenMode.kForWrite);
+            _rectEntityId = _rectFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite).appendSubEntity("RectEntity");
+            OdTvEntity rectEnt = _rectEntityId.openAsSubEntity(OdTv_OpenMode.kForWrite);
             _rectId = rectEnt.appendPolygon(_points);
         }
         else
         {
             OdTvGeometryData pFrame = _rectId.openObject();
-            if (pFrame == null || pFrame.getType() != OdTvGeometryDataType.kPolygon)
+            if (pFrame == null || pFrame.getType() != OdTv_OdTvGeometryDataType.kPolygon)
                 return;
             OdTvPolygonData polygon = pFrame.getAsPolygon();
             polygon.setPoints(_points);
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

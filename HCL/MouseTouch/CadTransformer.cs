@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 using System.Windows;
 using HCL_ODA_TestPAD.HCL.CadUnits;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.HCL.MouseTouch
 {
@@ -37,7 +33,7 @@ namespace HCL_ODA_TestPAD.HCL.MouseTouch
         /// </summary>
         public Point TransformWorldToScreen(double x, double y)
         {
-            using var odTvGsView = _odTvGsViewId.openObject(OpenMode.kForWrite);
+            using var odTvGsView = _odTvGsViewId.openObject(OdTv_OpenMode.kForWrite);
             _wcsPt.set(UnitConverter.MetersToMapUnits(x), UnitConverter.MetersToMapUnits(y), 0);
             _wcsPt.transformBy(odTvGsView.worldToDeviceMatrix());
             return new Point(_wcsPt.x, _wcsPt.y);
@@ -55,7 +51,7 @@ namespace HCL_ODA_TestPAD.HCL.MouseTouch
                 return;
             }
 
-            using var odTvGsView = _odTvGsViewId.openObject(OpenMode.kForWrite);
+            using var odTvGsView = _odTvGsViewId.openObject(OdTv_OpenMode.kForWrite);
             point.transformBy((odTvGsView.screenMatrix() * odTvGsView.projectionMatrix()).inverse());
             point.z = 0.0;
             point.transformBy(odTvGsView.eyeToWorldMatrix());
@@ -63,7 +59,7 @@ namespace HCL_ODA_TestPAD.HCL.MouseTouch
 
         public OdGePoint3d ToEyeToWorld(int x, int y)
         {
-            using var odTvGsView = _odTvGsViewId.openObject(OpenMode.kForWrite);
+            using var odTvGsView = _odTvGsViewId.openObject(OdTv_OpenMode.kForWrite);
             var wcsPt = new OdGePoint3d(x, y, 0.0);
             wcsPt = wcsPt.transformBy((odTvGsView.screenMatrix() * odTvGsView.projectionMatrix()).inverse());
             wcsPt = new OdGePoint3d(wcsPt.x, wcsPt.y, 0.0);

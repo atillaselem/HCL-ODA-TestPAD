@@ -11,27 +11,27 @@ namespace HCL_ODA_TestPAD.Views;
 /// </summary>
 public partial class MainView : Window
 {
-    private MainViewModel VM;
+    private MainViewModel _vm;
 
     public MainView(MainViewModel vm)
     {
         InitializeComponent();
         DataContext = vm;
-        VM = vm;
-        VM.ActivateODA();
+        _vm = vm;
+        _vm.ActivateOda();
         Closing += OnClosing;
         Title = AssemblyHelper.GetAppTitle();
     }
 
     private void WindowInitializing(object sender, EventArgs e)
     {
-        VM.ShowSplashScreen();
+        _vm.ShowSplashScreen();
     }
 
     private void OnClosing(object sender, CancelEventArgs e)
     {
-        VM.DoAppSpecificClosing();
-        VM.TeighaDeactivate();
+        _vm.DoAppSpecificClosing();
+        _vm.TeighaDeactivate();
     }
 
 }

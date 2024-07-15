@@ -1,7 +1,8 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using HCL_ODA_TestPAD.HCL.CadUnits;
+using HCL_ODA_TestPAD.HCL.Visualize;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
-using static Teigha.Visualize.OdTvGsDevice;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.Settings;
 
@@ -12,14 +13,31 @@ public enum AppLayout
 }
 public enum RenderDevice
 {
-    OpenGL_Bitmap,
-    OpenGL_GPU
+    OpenGlBitmap,
+    OpenGlGpu
 }
 
 public enum SettingsMode
 {
-    HCL,
+    Hcl,
     Custom
+}
+
+public enum HPLReflector
+{
+    CatEye360,
+    CatEyePrism,
+    GlassPrism360,
+    LaserPrism,
+    MiniGlassPrism360,
+    OverAllPrism,
+    POA101,
+    POA102,
+    POA103,
+    ReflectivePlate,
+    ReflectiveSticker,
+    SlidingPrism,
+    WallPrism
 }
 
 [CategoryOrder("OpenGLES2 Device", 1)]
@@ -28,11 +46,12 @@ public enum SettingsMode
 [CategoryOrder("DWG & DXF Import Parameters", 4)]
 [CategoryOrder("IFC Import Parameters", 5)] 
 [CategoryOrder("CAD Units", 6)] 
-[CategoryOrder("CAD Custom Models", 7)] 
-[CategoryOrder("User Interface", 8)] 
-[CategoryOrder("On Start", 9)]
-[CategoryOrder("About App", 10)] 
-[CategoryOrder("Preferences", 11)] 
+[CategoryOrder("HCL CAD Domain", 7)] 
+[CategoryOrder("CAD Custom Models", 8)] 
+[CategoryOrder("User Interface", 9)] 
+[CategoryOrder("On Start", 10)]
+[CategoryOrder("About App", 11)] 
+[CategoryOrder("Preferences", 12)] 
 
 public record AppSettings
 {
@@ -97,7 +116,7 @@ public record AppSettings
     [Category("Regeneration")]
     [DisplayName("RegenMode")]
     [Description("Set Regeneration Mode")]
-    public RegenMode RegenMode { get; init; }
+    public OdTvGsDevice_RegenMode RegenMode { get; init; }
     #endregion
 
     #region Performance
@@ -109,7 +128,7 @@ public record AppSettings
     [Category("Performance")]
     [DisplayName("Interactive FPS")]
     [Description("Set minimum FPS during Interactivity")]
-    public double InteractiveFPS { get; init; }
+    public double InteractiveFps { get; init; }
     #endregion
 
     #region DWG & DXF Import Parameters
@@ -132,11 +151,11 @@ public record AppSettings
     [Category("DWG & DXF Import Parameters")]
     [DisplayName("Need CDA Tree")]
     [Description("Set Object Naming")]
-    public bool DwgSetNeedCDATree { get; init; }
+    public bool DwgSetNeedCdaTree { get; init; }
     [Category("DWG & DXF Import Parameters")]
     [DisplayName("Need Collect Properties In CDA")]
     [Description("Set NeedCollectPropertiesInCDA")]
-    public bool DwgSetNeedCollectPropertiesInCDA { get; init; }
+    public bool DwgSetNeedCollectPropertiesInCda { get; init; }
     #endregion
 
     #region IFC Import Parameters 
@@ -147,11 +166,11 @@ public record AppSettings
     [Category("IFC Import Parameters")]
     [DisplayName("Need CDA Tree")]
     [Description("Set Object Naming")]
-    public bool IfcSetNeedCDATree { get; init; }
+    public bool IfcSetNeedCdaTree { get; init; }
     [Category("IFC Import Parameters")]
     [DisplayName("Need Collect Properties In CDA")]
     [Description("Set NeedCollectPropertiesInCDA")]
-    public bool IfcSetNeedCollectPropertiesInCDA { get; init; }
+    public bool IfcSetNeedCollectPropertiesInCda { get; init; }
     #endregion
     
     #region CAD Units
@@ -169,16 +188,36 @@ public record AppSettings
     [Description("Selected Survey Unit will be set for the imported CAD File Unit. Original CAD Unit of the file will not change.")]
     public SurveyUnits CadImportUnit { get; init; }
     #endregion
-    
+
+    #region HCL CAD Domain
+    [Category("HCL CAD Domain")]
+    [DisplayName("HPL Reflector")]
+    [Description("Active Prism Type used as Reflector")]
+    public HPLReflector PrismType { get; init; }
+
+    [Category("HCL CAD Domain")]
+    [DisplayName("Number of Points")]
+    [Description("Set the number of points created")]
+    public int NumberOfPoints { get; init; }
+    [Category("HCL CAD Domain")]
+    [DisplayName("Random Point Color")]
+    [Description("Enables random colors for the points to be created")]
+    public bool IsRandomColor { get; init; }
+    [Category("HCL CAD Domain")]
+    [DisplayName("Point Color")]
+    [Description("Color of the points to be created if not random")]
+    public PointColor PointColor { get; init; }
+    #endregion
+
     #region CAD Custom Models
     [Category("CAD Custom Models")]
     [DisplayName("FPS")]
     [Description("Show FPS model")]
-    public bool ShowFPS { get; init; }
+    public bool ShowFps { get; init; }
     [Category("CAD Custom Models")]
     [DisplayName("WCS")]
     [Description("Show World Coordinate System model")]
-    public bool ShowWCS { get; init; }
+    public bool ShowWcs { get; init; }
     [Category("CAD Custom Models")]
     [DisplayName("View Cube")]
     [Description("Show View Cube model")]

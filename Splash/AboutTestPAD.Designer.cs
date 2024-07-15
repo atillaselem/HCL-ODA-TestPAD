@@ -1,6 +1,6 @@
 ﻿namespace HCL_ODA_TestPAD.Splash
 {
-    partial class AboutTestPAD
+    partial class AboutTestPad
     {
         /// <summary>
         /// Required designer variable.

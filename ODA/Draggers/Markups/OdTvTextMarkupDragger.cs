@@ -24,8 +24,8 @@
 using HCL_ODA_TestPAD.ODA.WCS;
 using System;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Markups;
 
@@ -48,24 +48,24 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
 
     private bool _isNeedStartTextInput;
 
-    private static int NumOfTxtmarkup = 0;
+    private static int _numOfTxtmarkup = 0;
 
     public OdTvTextMarkupDragger(OdTvGsDeviceId deviceId, OdTvModelId markupModelId)
         : base(deviceId, markupModelId)
     {
         NeedFreeDrag = true;
 
-        MemoryTransaction mTr = MM.StartTransaction();
+        MemoryTransaction mTr = _mm.StartTransaction();
         // create main entity
-        OdTvModel pModel = markupModelId.openObject(OpenMode.kForWrite);
+        OdTvModel pModel = markupModelId.openObject(OdTv_OpenMode.kForWrite);
         _entityId = FindMarkupEntity(NameOfMarkupTempEntity, true);
         OdTvEntity entity;
         if (_entityId != null)
-            entity = _entityId.openObject(OpenMode.kForWrite);
+            entity = _entityId.openObject(OdTv_OpenMode.kForWrite);
         else
         {
             _entityId = pModel.appendEntity(NameOfMarkupTempEntity);
-            entity = _entityId.openObject(OpenMode.kForWrite);
+            entity = _entityId.openObject(OdTv_OpenMode.kForWrite);
             entity.setColor(MarkupColor);
         }
 
@@ -73,15 +73,15 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
         _textFoldId = FindSubEntity(entity.getGeometryDataIterator(), NameOfMarkupCloudFold);
         if (_textFoldId == null)
             _textFoldId = entity.appendSubEntity(NameOfMarkupCloudFold);
-        OdTvEntity textFold = _textFoldId.openAsSubEntity(OpenMode.kForWrite);
+        OdTvEntity textFold = _textFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite);
 
         // create text style
-        OdTvModel draggerModel = TvDraggerModelId.openObject(OpenMode.kForWrite);
+        OdTvModel draggerModel = TvDraggerModelId.openObject(OdTv_OpenMode.kForWrite);
         OdTvTextStyleId txtStyleId = FindTextStyle(draggerModel.getDatabase().openObject().getTextStylesIterator(), NameOfMarkupTextStyle);
         if (txtStyleId == null)
         {
-            txtStyleId = draggerModel.getDatabase().openObject(OpenMode.kForWrite).createTextStyle(NameOfMarkupTextStyle);
-            txtStyleId.openObject(OpenMode.kForWrite).setFont("Calibri", false, false, 0, 0);
+            txtStyleId = draggerModel.getDatabase().openObject(OdTv_OpenMode.kForWrite).createTextStyle(NameOfMarkupTextStyle);
+            txtStyleId.openObject(OdTv_OpenMode.kForWrite).setFont("Calibri", false, false, 0, 0);
         }
 
         // set text style to the entity
@@ -89,20 +89,20 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
         // clear instruction text for new text input
         _isNeedStartTextInput = true;
 
-        MM.StopTransaction(mTr);
+        _mm.StopTransaction(mTr);
     }
 
     ~OdTvTextMarkupDragger()
     {
         if (!_isSuccess && _textId != null)
         {
-            MemoryTransaction mtr = MM.StartTransaction();
-            _textFoldId.openAsSubEntity(OpenMode.kForWrite).removeGeometryData(_textId);
-            MM.StopTransaction(mtr);
+            MemoryTransaction mtr = _mm.StartTransaction();
+            _textFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite).removeGeometryData(_textId);
+            _mm.StopTransaction(mtr);
         }
     }
 
-    public override DraggerResult Start(OdTvDragger prevDragger, int activeView, Cursor cursor, TvWpfViewWCS wcs)
+    public override DraggerResult Start(OdTvDragger prevDragger, int activeView, Cursor cursor, TvWpfViewWcs wcs)
     {
         TvActiveViewport = activeView;
         DraggerResult res = DraggerResult.NothingToDo;
@@ -152,7 +152,7 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
     {
         if (_textId != null)
         {
-            MemoryTransaction mtr = MM.StartTransaction();
+            MemoryTransaction mtr = _mm.StartTransaction();
 
             // Clear row for text input from information
             if (_isNeedStartTextInput)
@@ -167,7 +167,7 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
 
             UpdateFrame(false);
 
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
         }
 
         return false;
@@ -175,7 +175,7 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
 
     public override DraggerResult ProcessBackspace()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         OdTvGeometryDataId curRowId = GetActiveRow();
         if (curRowId != null)
@@ -208,7 +208,7 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
             }
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return DraggerResult.NothingToDo;
     }
@@ -222,14 +222,14 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
 
     public override OdTvDragger Finish(out DraggerResult rc)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         // If there was no text input, remove row with instruction
         if (_isNeedStartTextInput)
             RemoveGeometryData(ref _textFoldId, ref _textId);
         if (_textId != null)
         {
             // Remove empty rows
-            OdTvGeometryDataIterator pIter = _textId.openAsSubEntity(OpenMode.kForWrite).getGeometryDataIterator();
+            OdTvGeometryDataIterator pIter = _textId.openAsSubEntity(OdTv_OpenMode.kForWrite).getGeometryDataIterator();
             while (!pIter.done())
             {
                 OdTvGeometryDataId rowId = pIter.getGeometryData();
@@ -245,7 +245,7 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
             else // Else, make text bold
             {
                 _isSuccess = true;
-                _textId.openAsSubEntity(OpenMode.kForWrite).setLineWeight(LineWeight);
+                _textId.openAsSubEntity(OdTv_OpenMode.kForWrite).setLineWeight(LineWeight);
             }
         }
 
@@ -263,7 +263,7 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
 
         rc = rcFinish | DraggerResult.NeedUpdateView;
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return retFinish;
     }
@@ -280,12 +280,12 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
         if (TvView == null)
             return;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         if (isNeedCreate)
         {
             // create new text subentity
-            _textId = _textFoldId.openAsSubEntity(OpenMode.kForWrite).appendSubEntity("TextMarkup" + NumOfTxtmarkup++);
+            _textId = _textFoldId.openAsSubEntity(OdTv_OpenMode.kForWrite).appendSubEntity("TextMarkup" + _numOfTxtmarkup++);
             if (_textId != null)
                 AddText(_textId, _firstPoint, "Enter text");
         }
@@ -315,7 +315,7 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
             }
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void UpdateCaretpos()
@@ -323,14 +323,14 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
         if (_textId == null || _caretId == null || TvView == null)
             return;
 
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         OdGePoint3d pos = null;
         OdTvTextData pCaret = _caretId.openAsText();
 
         OdTvTextData pCurRow = GetActiveRow().openAsText();
         // Get bounding points of curent row
-        OdTvPointArray points = new OdTvPointArray();
+        OdGePoint3dVector points = new OdGePoint3dVector();
         pCurRow.getBoundingPoints(points);
 
         pos = GetActiveRow().openAsText().getAlignmentPoint();
@@ -357,14 +357,14 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
         pos.setToProduct(matr, pos);
         pCaret.setAlignmentPoint(pos);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private OdTvGeometryDataId AddText(OdTvGeometryDataId geomId, OdGePoint3d pos, string text)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
-        OdTvGeometryDataId textId = geomId.openAsSubEntity(OpenMode.kForWrite).appendText(pos, text);
+        OdTvGeometryDataId textId = geomId.openAsSubEntity(OdTv_OpenMode.kForWrite).appendText(pos, text);
         OdTvGsView view = TvView.openObject();
 
         //get eye to world matrix
@@ -382,7 +382,7 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
         {
             MessageBox.Show("Wrong parameters!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             angle += Math.PI;
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return textId;
         }
 
@@ -400,14 +400,14 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
 
         pText.setTextSize(textSize * textScale);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return textId;
     }
 
     private void MoveFirstPoint(OdGeVector3d dir)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         // Move point for row adding
         OdTvTextStyleId textStyle = FindTextStyle(TvDraggerModelId.openObject().getDatabase().openObject().getTextStylesIterator(), NameOfMarkupTextStyle);
         if (textStyle != null && TvView != null)
@@ -415,7 +415,7 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
         OdGeMatrix3d matr = new OdGeMatrix3d();
         matr.setTranslation(dir);
         _firstPoint.setToProduct(matr, _firstPoint);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private OdTvTextStyleId FindTextStyle(OdTvTextStylesIterator pIt, string name)
@@ -437,11 +437,11 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
 
     private OdTvGeometryDataId GetActiveRow()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGeometryDataId id = null;
         if (_textId != null)
         {
-            OdTvEntity txt = _textId.openAsSubEntity(OpenMode.kForWrite);
+            OdTvEntity txt = _textId.openAsSubEntity(OdTv_OpenMode.kForWrite);
             OdTvGeometryDataIterator geomIter = txt.getGeometryDataIterator();
             while (!geomIter.done())
             {
@@ -449,18 +449,18 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
                 geomIter.step();
             }
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return id;
     }
 
     private OdTvGeometryDataId GetPrevRow()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         OdTvGeometryDataId curId = null, prevId = null;
         if (_textId != null)
         {
-            OdTvEntity pTxt = _textId.openAsSubEntity(OpenMode.kForWrite);
+            OdTvEntity pTxt = _textId.openAsSubEntity(OdTv_OpenMode.kForWrite);
             OdTvGeometryDataIterator geomIter = pTxt.getGeometryDataIterator();
             // Get first row
             if (!geomIter.done())
@@ -477,15 +477,15 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
             }
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return prevId;
     }
 
     uint GetSubGeometryDataCount(ref OdTvGeometryDataId id)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGeometryDataIterator pIter = id.openAsSubEntity(OpenMode.kForWrite).getGeometryDataIterator();
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvGeometryDataIterator pIter = id.openAsSubEntity(OdTv_OpenMode.kForWrite).getGeometryDataIterator();
         uint counter = 0;
         while (!pIter.done())
         {
@@ -493,7 +493,7 @@ public class OdTvTextMarkupDragger : OdTvMarkupDragger
             pIter.step();
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return counter;
     }
 }

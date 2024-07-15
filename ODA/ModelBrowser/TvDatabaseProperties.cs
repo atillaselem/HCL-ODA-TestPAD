@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -37,7 +37,7 @@ class TvDatabaseProperties : BasePaletteProperties
     {
         if (devId == null || renderArea == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         TvDatabaseInfo dbInfo = renderArea.DatabaseInfo;
         int row = 0;
         if (dbInfo.Type == TvDatabaseInfo.ProfilingType.Import)
@@ -69,7 +69,7 @@ class TvDatabaseProperties : BasePaletteProperties
         else
             AddLabelAndTextBox("Type:", "Custom model", MainGrid, new[] { row, 0, row, 1 }, true);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     StretchingTreeViewItem AddImportNode(string text, Grid grid, int[] arr)

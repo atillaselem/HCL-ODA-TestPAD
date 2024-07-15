@@ -5,29 +5,29 @@ namespace HCL_ODA_TestPAD.EventBroker
     /// <summary>
     /// Event Message Info Type
     /// </summary>
-    public enum EMIT
+    public enum Emit
     {
-        DEBUG,
-        WARNING,
-        INFO,
-        ERROR,
-        FATAL,
-        APP_EXCEPTION,
-        TEST,
-        USER,
-        PRISM,
-        APP,
-        PASS,
-        FAIL,
-        WPF_EXCEPTION,
-        MODULE_LOADED,
-        MODULE_FAILED,
-        MODULES_INITIALIZED
+        Debug,
+        Warning,
+        Info,
+        Error,
+        Fatal,
+        AppException,
+        Test,
+        User,
+        Prism,
+        App,
+        Pass,
+        Fail,
+        WpfException,
+        ModuleLoaded,
+        ModuleFailed,
+        ModulesInitialized
     }
     public interface IEventMessageInfo
     {
         DateTime EventTime { get; set; }
-        EMIT EventType { get; set; }
+        Emit EventType { get; set; }
         string EventName { get; set; }
         Type EventSender { get; set; }
         Type EventReceiver { get; set; }
@@ -40,7 +40,7 @@ namespace HCL_ODA_TestPAD.EventBroker
     public class EventMessageInfo : IEventMessageInfo
     {
         public DateTime EventTime { get; set; }
-        public EMIT EventType { get; set; }
+        public Emit EventType { get; set; }
         public string EventName { get; set; }
         public Type EventSender { get; set; }
         public Type EventReceiver { get; set; }

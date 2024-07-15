@@ -23,8 +23,8 @@
 
 using System;
 using System.Windows.Threading;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Markups;
 

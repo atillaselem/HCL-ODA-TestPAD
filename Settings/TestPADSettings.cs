@@ -1,15 +1,14 @@
 ﻿using HCL_ODA_TestPAD.Mvvm.Events;
 using System;
-using Prism.Events;
 
 namespace HCL_ODA_TestPAD.Settings;
 
-public class TestPADSettings
+public class TestPadSettings
 {
     private readonly IServiceFactory _serviceFactory;
     public event Action<string, object> OneOfTheSettingsChanged;
     
-    public TestPADSettings(IServiceFactory serviceFactory)
+    public TestPadSettings(IServiceFactory serviceFactory)
     {
         _serviceFactory = serviceFactory;
     }

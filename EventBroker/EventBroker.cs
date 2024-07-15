@@ -175,7 +175,7 @@ namespace HCL_ODA_TestPAD.EventBroker
 
         #region IDisposable Support
 
-        private bool disposedValue = false; // To detect redundant calls
+        private bool _disposedValue = false; // To detect redundant calls
 
         /// <summary>
         ///
@@ -183,13 +183,13 @@ namespace HCL_ODA_TestPAD.EventBroker
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
                     _subscribers?.Clear();
                 }
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

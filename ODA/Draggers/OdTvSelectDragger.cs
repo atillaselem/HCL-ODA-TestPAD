@@ -24,8 +24,8 @@
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
 using System.Windows.Forms;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers;
 
@@ -37,9 +37,9 @@ public class OdTvSelectDragger : OdTvDragger
 
     enum SelectState
     {
-        kPoint = 0,
-        kWindow = 1,
-        kCrossing = 2
+        KPoint = 0,
+        KWindow = 1,
+        KCrossing = 2
     };
 
     public const string TvSelectorView = "$ODA_WPF_TVVIEWER_SELECTORVIEW";
@@ -50,7 +50,7 @@ public class OdTvSelectDragger : OdTvDragger
     // model for selection
     private OdTvModelId _modelId;
     // dragger state
-    private SelectState _state = SelectState.kPoint;
+    private SelectState _state = SelectState.KPoint;
     // first cliked point (Device CS)
     private OdTvDCPoint _firstDevicePt = new OdTvDCPoint();
     // temporary view for draggers geometry
@@ -70,7 +70,7 @@ public class OdTvSelectDragger : OdTvDragger
     public OdTvSelectDragger(/*IOpenGLES2Control*/ IOdaSectioning wpfView, OdTvModelId modelId, OdTvGsDeviceId tvDeviceId, OdTvModelId tvDraggersModelId)
         : base(tvDeviceId, tvDraggersModelId)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         _pts[0] = new OdTvDCPoint();
         _pts[1] = new OdTvDCPoint();
@@ -79,7 +79,7 @@ public class OdTvSelectDragger : OdTvDragger
         // In this dragger we will be used a separate special view for drawing temporary objects like selection rectangles
         // Such technique will allow doesn't depend on the render mode at the current active view. Also we will not have any problems 
         // with linetype scale for our temporary objects
-        OdTvGsDevice dev = tvDeviceId.openObject(OpenMode.kForWrite);
+        OdTvGsDevice dev = tvDeviceId.openObject(OdTv_OpenMode.kForWrite);
         _tempViewId = dev.createView(TvSelectorView, false);
 
         // Get specific linetype for the selection rectangle boundary
@@ -94,12 +94,12 @@ public class OdTvSelectDragger : OdTvDragger
             OdTvLinetypeElementPtr ltSpace = new OdTvLinetypeElementPtr(space, OdRxObjMod.kOdRxObjAttach);
             OdTvLinetypeElementArray ltArr = new OdTvLinetypeElementArray() { ltDash, ltSpace };
 
-            _frameLinetypeId = dbId.openObject(OpenMode.kForWrite).createLinetype(TvSelectorLinetype, ltArr);
+            _frameLinetypeId = dbId.openObject(OdTv_OpenMode.kForWrite).createLinetype(TvSelectorLinetype, ltArr);
 
             GC.SuppressFinalize(ltDash);
             GC.SuppressFinalize(ltSpace);
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     ~OdTvSelectDragger()
@@ -114,11 +114,11 @@ public class OdTvSelectDragger : OdTvDragger
         //first of all we need the active view to perform selection
         if (_view == null && TvView != null)
         {
-            _view = TvView.openObject(OpenMode.kForWrite);
+            _view = TvView.openObject(OdTv_OpenMode.kForWrite);
         }
 
         //perform selection
-        if (_state == SelectState.kPoint)
+        if (_state == SelectState.KPoint)
         {
             //remember first click
             _firstDevicePt.x = x;
@@ -127,17 +127,17 @@ public class OdTvSelectDragger : OdTvDragger
             _pts[1] = new OdTvDCPoint(_firstDevicePt.x, _firstDevicePt.y);
             //update base color
             UpdateBaseColor();
-            _opt.setMode(OdTvSelectionOptions.Mode.kPoint);
+            _opt.setMode(OdTvSelectionOptions_Mode.kPoint);
         }
         else
         {
             //remember second click
             _pts[1] = new OdTvDCPoint(x, y);
 
-            if (_state == SelectState.kWindow)
-                _opt.setMode(OdTvSelectionOptions.Mode.kWindow);
+            if (_state == SelectState.KWindow)
+                _opt.setMode(OdTvSelectionOptions_Mode.kWindow);
             else
-                _opt.setMode(OdTvSelectionOptions.Mode.kCrossing);
+                _opt.setMode(OdTvSelectionOptions_Mode.kCrossing);
 
             // setup temporary view and model
             DisableTemporaryObjects();
@@ -150,9 +150,9 @@ public class OdTvSelectDragger : OdTvDragger
         OdTvSelectionSet pSSet = _view.select(_pts, _opt, _modelId);
 
         //check selection results
-        if (pSSet != null && pSSet.numItems() == 0 && _state == SelectState.kPoint) // start window or crossing mode
+        if (pSSet != null && pSSet.numItems() == 0 && _state == SelectState.KPoint) // start window or crossing mode
         {
-            _state = SelectState.kWindow;
+            _state = SelectState.KWindow;
 
             // setup temporary view and model
             EnableTemporaryObjects();
@@ -160,8 +160,8 @@ public class OdTvSelectDragger : OdTvDragger
             //mark that we want to receive drag without pressed mouse button
             NeedFreeDrag = true;
         }
-        else if (_state != SelectState.kPoint)
-            _state = SelectState.kPoint;
+        else if (_state != SelectState.KPoint)
+            _state = SelectState.KPoint;
 
         if (pSSet != null && pSSet.numItems() != 0)
         {
@@ -177,33 +177,33 @@ public class OdTvSelectDragger : OdTvDragger
 
     public override DraggerResult Drag(int x, int y)
     {
-        if (_state == SelectState.kPoint)
+        if (_state == SelectState.KPoint)
             return DraggerResult.NothingToDo;
 
         //filter coordinates
         //if (x >= _wpfView.Width || x < 1 || y >= _wpfView.Height || y < 1)
         //    return DraggerResult.NothingToDo;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         // create temporary geometry if need
         OdTvEntity entity = null;
         if (_entityId != null && !_entityId.isNull())
-            entity = _entityId.openObject(OpenMode.kForWrite);
+            entity = _entityId.openObject(OdTv_OpenMode.kForWrite);
         UpdateFrame(entity == null, x, y);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         return DraggerResult.NeedUpdateView;
     }
 
     public override DraggerResult ProcessEscape()
     {
-        if (_state != SelectState.kPoint)
+        if (_state != SelectState.KPoint)
             return DraggerResult.NothingToDo;
 
         //unhighlight current selection set
         Highlight(_sSet, false);
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         TvDeviceId.openObject().update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
         //remove current selection set
         if (_sSet != null)
@@ -223,12 +223,12 @@ public class OdTvSelectDragger : OdTvDragger
 
     private void EnableTemporaryObjects()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         //get device
-        OdTvGsDevice dev = TvDeviceId.openObject(OpenMode.kForWrite);
+        OdTvGsDevice dev = TvDeviceId.openObject(OdTv_OpenMode.kForWrite);
         if (dev == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
@@ -236,10 +236,10 @@ public class OdTvSelectDragger : OdTvDragger
         dev.addView(_tempViewId);
 
         //get view ptr
-        OdTvGsView view = _tempViewId.openObject(OpenMode.kForWrite);
+        OdTvGsView view = _tempViewId.openObject(OdTv_OpenMode.kForWrite);
         if (view == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
@@ -248,26 +248,26 @@ public class OdTvSelectDragger : OdTvDragger
 
         //add draggers model to view
         view.addModel(TvDraggerModelId);
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void DisableTemporaryObjects()
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         //remove view from the device
-        OdTvGsDevice dev = TvDeviceId.openObject(OpenMode.kForWrite);
+        OdTvGsDevice dev = TvDeviceId.openObject(OdTv_OpenMode.kForWrite);
         dev.removeView(_tempViewId);
         //erase draggers model fromview
-        _tempViewId.openObject(OpenMode.kForWrite).eraseModel(TvDraggerModelId);
+        _tempViewId.openObject(OdTv_OpenMode.kForWrite).eraseModel(TvDraggerModelId);
         //remove entities from the temporary model
-        TvDraggerModelId.openObject(OpenMode.kForWrite).clearEntities();
+        TvDraggerModelId.openObject(OdTv_OpenMode.kForWrite).clearEntities();
         dev.update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void UpdateFrame(bool bCreate, int x, int y)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
 
         OdGePoint3d[] pts = new OdGePoint3d[5];
 
@@ -278,7 +278,7 @@ public class OdTvSelectDragger : OdTvDragger
         OdTvGsView pLocalView = _tempViewId.openObject();
         if (pLocalView == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
 
@@ -291,9 +291,9 @@ public class OdTvSelectDragger : OdTvDragger
 
         bool bCrossing = p0.x > p2.x;
 
-        _state = SelectState.kWindow;
+        _state = SelectState.KWindow;
         if (bCrossing)
-            _state = SelectState.kCrossing;
+            _state = SelectState.KCrossing;
 
         matr = pLocalView.eyeToWorldMatrix();
         pts[1].transformBy(matr);
@@ -302,10 +302,10 @@ public class OdTvSelectDragger : OdTvDragger
         //update or create entity
         if (bCreate)
         {
-            OdTvModel model = TvDraggerModelId.openObject(OpenMode.kForWrite);
+            OdTvModel model = TvDraggerModelId.openObject(OdTv_OpenMode.kForWrite);
             _entityId = model.appendEntity();
             {
-                OdTvEntity entityNew = _entityId.openObject(OpenMode.kForWrite);
+                OdTvEntity entityNew = _entityId.openObject(OdTv_OpenMode.kForWrite);
 
                 //create frame
                 _frameId = entityNew.appendPolygon(new[] { pts[0], pts[1], pts[2], pts[3] });
@@ -328,9 +328,9 @@ public class OdTvSelectDragger : OdTvDragger
         else
         {
             OdTvGeometryData frame = _frameId.openObject();
-            if (frame == null || frame.getType() != OdTvGeometryDataType.kPolygon)
+            if (frame == null || frame.getType() != OdTv_OdTvGeometryDataType.kPolygon)
             {
-                MM.StopTransaction(mtr);
+                _mm.StopTransaction(mtr);
                 return;
             }
 
@@ -341,22 +341,22 @@ public class OdTvSelectDragger : OdTvDragger
 
             if (bCrossing)
             {
-                _entityId.openObject(OpenMode.kForWrite).setColor(new OdTvColorDef(0, 255, 0));
-                _entityId.openObject(OpenMode.kForWrite).setLinetypeScale(0.03);
+                _entityId.openObject(OdTv_OpenMode.kForWrite).setColor(new OdTvColorDef(0, 255, 0));
+                _entityId.openObject(OdTv_OpenMode.kForWrite).setLinetypeScale(0.03);
                 _frameIdContourId.openObject().setLinetype(new OdTvLinetypeDef(_frameLinetypeId));
             }
             else
             {
-                _entityId.openObject(OpenMode.kForWrite).setColor(new OdTvColorDef(0, 0, 255));
+                _entityId.openObject(OdTv_OpenMode.kForWrite).setColor(new OdTvColorDef(0, 0, 255));
                 _frameIdContourId.openObject().setLinetype(new OdTvLinetypeDef());
             }
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private OdGePoint3d ToEyeToWorldLocal(int x, int y)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdGePoint3d wcsPt = new OdGePoint3d(x, y, 0);
         OdTvGsView view = _tempViewId.openObject();
 
@@ -366,7 +366,7 @@ public class OdTvSelectDragger : OdTvDragger
         wcsPt.z = 0;
         //transform to world coordinate system
         wcsPt.transformBy(view.eyeToWorldMatrix());
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
         return wcsPt;
     }
 
@@ -385,14 +385,14 @@ public class OdTvSelectDragger : OdTvDragger
 
         if (ObjectSelected != null)
         {
-            if (sSet.getOptions().getMode() == OdTvSelectionOptions.Mode.kPoint)
+            if (sSet.getOptions().getMode() == OdTvSelectionOptions_Mode.kPoint)
                 ObjectSelected(sSet, _modelId);
             else
                 ObjectsSelected(sSet, _modelId);
         }
 
-        if (sSet.getOptions().getMode() == OdTvSelectionOptions.Mode.kWindow ||
-            sSet.getOptions().getMode() == OdTvSelectionOptions.Mode.kCrossing)
+        if (sSet.getOptions().getMode() == OdTvSelectionOptions_Mode.kWindow ||
+            sSet.getOptions().getMode() == OdTvSelectionOptions_Mode.kCrossing)
         {
             if (_sSet == null)
             {
@@ -407,29 +407,29 @@ public class OdTvSelectDragger : OdTvDragger
     {
         if (sSet == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvSelectionSetIterator pIter = sSet.getIterator();
         for (; pIter != null && !pIter.done(); pIter.step())
             Highlight(pIter, bDoIt);
 
         if (ObjectSelected != null)
         {
-            if (sSet.getOptions().getMode() == OdTvSelectionOptions.Mode.kPoint)
+            if (sSet.getOptions().getMode() == OdTvSelectionOptions_Mode.kPoint)
                 ObjectSelected(sSet, _modelId);
             else
                 ObjectsSelected(sSet, _modelId);
         }
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Highlight(OdTvSelectionSetIterator pIter, bool bDoIt)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
-        OdTvGsView view = TvView.openObject(OpenMode.kForWrite);
+        MemoryTransaction mtr = _mm.StartTransaction();
+        OdTvGsView view = TvView.openObject(OdTv_OpenMode.kForWrite);
         if (view == null)
         {
-            MM.StopTransaction(mtr);
+            _mm.StopTransaction(mtr);
             return;
         }
         //get entity
@@ -440,7 +440,7 @@ public class OdTvSelectDragger : OdTvDragger
         //perform highlight
         view.highlight(id, path, bDoIt);
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
 }

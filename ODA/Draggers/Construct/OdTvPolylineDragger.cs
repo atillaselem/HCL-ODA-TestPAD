@@ -20,7 +20,7 @@
 // By use of this software, its documentation or related materials, you 
 // acknowledge and accept the above terms.
 ///////////////////////////////////////////////////////////////////////////////
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.Draggers.Construct;
 
@@ -41,10 +41,10 @@ public class OdTvPolylineDragger : OdTvBaseConstructDragger
         //update or create entity
         if (bCreate)
         {
-            OdTvModel modelPtr = TvDraggerModelId.openObject(OpenMode.kForWrite);
+            OdTvModel modelPtr = TvDraggerModelId.openObject(OdTv_OpenMode.kForWrite);
             _entityId = modelPtr.appendEntity();
             {
-                OdTvEntity entityNewPtr = _entityId.openObject(OpenMode.kForWrite);
+                OdTvEntity entityNewPtr = _entityId.openObject(OdTv_OpenMode.kForWrite);
                 entityNewPtr.setColor(TvDraggerColor);
                 //create line
                 _newGeometryId = entityNewPtr.appendPolyline(_clickedPts[0], _clickedPts[1]);
@@ -55,7 +55,7 @@ public class OdTvPolylineDragger : OdTvBaseConstructDragger
         else
         {
             OdTvGeometryData geometryPtr = _newGeometryId.openObject();
-            if (geometryPtr == null || geometryPtr.getType() != OdTvGeometryDataType.kPolyline)
+            if (geometryPtr == null || geometryPtr.getType() != OdTv_OdTvGeometryDataType.kPolyline)
             {
                 pView.Dispose();
                 geometryPtr.Dispose();

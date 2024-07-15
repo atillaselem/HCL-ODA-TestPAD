@@ -21,7 +21,7 @@
 // acknowledge and accept the above terms.
 ///////////////////////////////////////////////////////////////////////////////
 using System;
-using Teigha.Visualize;
+using ODA.Visualize.TV_Visualize;
 using Microsoft.Win32;
 using System.Windows.Media;
 using HCL_ODA_TestPAD.Dialogs;
@@ -30,59 +30,59 @@ namespace HCL_ODA_TestPAD.ODA.Draggers;
 
 public class OdTvSectioningOptions
 {
-    public static int ODTV_CUTTING_PLANES_MAX_NUM = 5;
+    public static int _odtvCuttingPlanesMaxNum = 5;
     public bool IsNeedSaveSettings { get; set; }
     public bool IsShown { get; set; }
     public bool IsFilled { get; set; }
     public uint FillingColor { get; set; }
     public bool FillingPatternEnabled { get; set; }
-    public OdTvGsView.CuttingPlaneFillStyle FillingPaternStyle { get; set; }
+    public OdTvGsView_CuttingPlaneFillStyle FillingPaternStyle { get; set; }
     public uint FillingPatternColor { get; set; }
 
-    private const string SECTIONING_OPTIONS_SUBKEY = "WpfVisualizeViewer_SectioningOptions";
-    private const string FILL_KEY = "FILL";
-    private const string FILLING_COLOR_KEY = "FillingColor";
-    private const string FILLING_PATTERN_ENABLED_KEY = "FillingPatternEnabled";
-    private const string FILLING_PATTERN_STYLE_KEY = "FillingPatternStyle";
-    private const string FILLING_PATTERN_COLOR_KEY = "FillingPatternColor";
+    private const string SectioningOptionsSubkey = "WpfVisualizeViewer_SectioningOptions";
+    private const string FillKey = "FILL";
+    private const string FillingColorKey = "FillingColor";
+    private const string FillingPatternEnabledKey = "FillingPatternEnabled";
+    private const string FillingPatternStyleKey = "FillingPatternStyle";
+    private const string FillingPatternColorKey = "FillingPatternColor";
 
     public OdTvSectioningOptions()
     {
         IsNeedSaveSettings = true;
         IsShown = true;
 
-        RegistryKey key = Registry.CurrentUser.OpenSubKey(SECTIONING_OPTIONS_SUBKEY, true);
+        RegistryKey key = Registry.CurrentUser.OpenSubKey(SectioningOptionsSubkey, true);
         if (key == null)
         {
-            key = Registry.CurrentUser.CreateSubKey(SECTIONING_OPTIONS_SUBKEY);
-            key.SetValue(FILL_KEY, true);
+            key = Registry.CurrentUser.CreateSubKey(SectioningOptionsSubkey);
+            key.SetValue(FillKey, true);
             Color fillColor = new Color();
             fillColor.R = 255;
             fillColor.G = 0;
             fillColor.B = 0;
             fillColor.A = 255;
-            key.SetValue(FILLING_COLOR_KEY, BasePaletteProperties.ColorToUInt(fillColor));
-            key.SetValue(FILLING_PATTERN_ENABLED_KEY, true);
-            key.SetValue(FILLING_PATTERN_STYLE_KEY, (int)OdTvGsView.CuttingPlaneFillStyle.kCheckerboard);
-            key.SetValue(FILLING_PATTERN_COLOR_KEY, BasePaletteProperties.ColorToUInt(new OdTvColorDef(0, 0, 255)));
+            key.SetValue(FillingColorKey, BasePaletteProperties.ColorToUInt(fillColor));
+            key.SetValue(FillingPatternEnabledKey, true);
+            key.SetValue(FillingPatternStyleKey, (int)OdTvGsView_CuttingPlaneFillStyle.kCheckerboard);
+            key.SetValue(FillingPatternColorKey, BasePaletteProperties.ColorToUInt(new OdTvColorDef(0, 0, 255)));
         }
 
-        IsFilled = Convert.ToBoolean(key.GetValue(FILL_KEY));
-        FillingColor = Convert.ToUInt32(key.GetValue(FILLING_COLOR_KEY));
-        FillingPatternEnabled = Convert.ToBoolean(key.GetValue(FILLING_PATTERN_ENABLED_KEY));
-        FillingPaternStyle = (OdTvGsView.CuttingPlaneFillStyle)Convert.ToInt32(key.GetValue(FILLING_PATTERN_STYLE_KEY));
-        FillingPatternColor = Convert.ToUInt32(key.GetValue(FILLING_PATTERN_COLOR_KEY));
+        IsFilled = Convert.ToBoolean(key.GetValue(FillKey));
+        FillingColor = Convert.ToUInt32(key.GetValue(FillingColorKey));
+        FillingPatternEnabled = Convert.ToBoolean(key.GetValue(FillingPatternEnabledKey));
+        FillingPaternStyle = (OdTvGsView_CuttingPlaneFillStyle)Convert.ToInt32(key.GetValue(FillingPatternStyleKey));
+        FillingPatternColor = Convert.ToUInt32(key.GetValue(FillingPatternColorKey));
     }
 
     public void SaveToRegister()
     {
-        RegistryKey key = Registry.CurrentUser.OpenSubKey(SECTIONING_OPTIONS_SUBKEY, true);
+        RegistryKey key = Registry.CurrentUser.OpenSubKey(SectioningOptionsSubkey, true);
         if (key == null)
-            key = Registry.CurrentUser.CreateSubKey(SECTIONING_OPTIONS_SUBKEY);
-        key.SetValue(FILL_KEY, IsFilled);
-        key.SetValue(FILLING_COLOR_KEY, FillingColor);
-        key.SetValue(FILLING_PATTERN_ENABLED_KEY, FillingPatternEnabled);
-        key.SetValue(FILLING_PATTERN_STYLE_KEY, (int)FillingPaternStyle);
-        key.SetValue(FILLING_PATTERN_COLOR_KEY, FillingPatternColor);
+            key = Registry.CurrentUser.CreateSubKey(SectioningOptionsSubkey);
+        key.SetValue(FillKey, IsFilled);
+        key.SetValue(FillingColorKey, FillingColor);
+        key.SetValue(FillingPatternEnabledKey, FillingPatternEnabled);
+        key.SetValue(FillingPatternStyleKey, (int)FillingPaternStyle);
+        key.SetValue(FillingPatternColorKey, FillingPatternColor);
     }
 }

@@ -25,8 +25,8 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using Teigha.Core;
-using Teigha.Visualize;
+using ODA.Kernel.TD_RootIntegrated;
+using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.ODA.ModelBrowser;
 
@@ -58,7 +58,7 @@ class TvBaseGeometryProperties : BasePaletteProperties
 
     protected void GetProperties(StretchingTreeViewItem parent)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGeometryData geom = GeomId.openObject();
         Grid newGrid = CreateGrid(2, 9);
         parent.Items.Add(newGrid);
@@ -89,7 +89,7 @@ class TvBaseGeometryProperties : BasePaletteProperties
         dispMode.Tag = ComboboxType.DisplayMode;
         dispMode.SelectionChanged += Combobox_SelectionChanged;
 
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Matrix_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -97,13 +97,13 @@ class TvBaseGeometryProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGeometryData geom = GeomId.openObject();
         OdGeMatrix3d matr = geom.getModelingMatrix();
         SetMatrix(matr, (MatrixData)tb.Tag, tb.Text);
         geom.setModelingMatrix(matr);
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Visibility_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -111,22 +111,22 @@ class TvBaseGeometryProperties : BasePaletteProperties
         CheckBox cb = sender as CheckBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         GeomId.openObject().setVisibility(new OdTvVisibilityDef(cb.IsChecked == true));
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Color_ColorChanged(object sender, OdTvColorDef newColor)
     {
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGeometryData geom = GeomId.openObject();
         if (geom.getColor() != newColor)
         {
             geom.setColor(newColor);
             Update();
         }
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
 
     }
 
@@ -135,7 +135,7 @@ class TvBaseGeometryProperties : BasePaletteProperties
         TextBox tb = sender as TextBox;
         if (tb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGeometryData geom = GeomId.openObject();
         switch ((TextType)tb.Tag)
         {
@@ -153,7 +153,7 @@ class TvBaseGeometryProperties : BasePaletteProperties
                 break;
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 
     private void Combobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -161,7 +161,7 @@ class TvBaseGeometryProperties : BasePaletteProperties
         ComboBox cb = sender as ComboBox;
         if (cb == null)
             return;
-        MemoryTransaction mtr = MM.StartTransaction();
+        MemoryTransaction mtr = _mm.StartTransaction();
         OdTvGeometryData geom = GeomId.openObject();
         switch ((ComboboxType)cb.Tag)
         {
@@ -172,10 +172,10 @@ class TvBaseGeometryProperties : BasePaletteProperties
                 geom.setLinetype(GetLinetypeDef(cb.SelectedItem.ToString()));
                 break;
             case ComboboxType.DisplayMode:
-                geom.setTargetDisplayMode((OdTvGeometryData.TargetDisplayMode)cb.SelectedIndex);
+                geom.setTargetDisplayMode((OdTvGeometryData_TargetDisplayMode)cb.SelectedIndex);
                 break;
         }
         Update();
-        MM.StopTransaction(mtr);
+        _mm.StopTransaction(mtr);
     }
 }

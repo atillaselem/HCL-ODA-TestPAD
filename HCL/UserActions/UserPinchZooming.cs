@@ -7,6 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using HCL_ODA_TestPAD.HCL.Exceptions;
 using HCL_ODA_TestPAD.HCL.MouseTouch;
+using HCL_ODA_TestPAD.HCL.Profiler;
+using HCL_ODA_TestPAD.HCL.Visualize;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using ODA.Visualize.TV_Visualize;
@@ -117,6 +119,7 @@ namespace HCL_ODA_TestPAD.HCL.UserActions
 
             try
             {
+                using var _ = CadProfiler.LogFps($"Point Tx - # of Points {HclPointContainer.PointListCount}", "Mouse/Touch Move - Pinch Zooming");
                 _cadZoomOperations.Zoom(scale);
                 _viewControl.UpdateView();
             }

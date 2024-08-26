@@ -131,6 +131,8 @@ Section "MainSection" SEC02
   File "..\${SourceMainDir}\appsettings.json"
   File "..\${SourceMainDir}\Autofac.dll"
   File "..\${SourceMainDir}\Autofac.Extensions.DependencyInjection.dll"
+  File "..\${SourceMainDir}\Autofac.Extras.CommonServiceLocator.dll"
+  File "..\${SourceMainDir}\CommonServiceLocator.dll"
   File "..\${SourceMainDir}\Microsoft.Extensions.Configuration.Abstractions.dll"
   File "..\${SourceMainDir}\Microsoft.Extensions.Configuration.Binder.dll"
   File "..\${SourceMainDir}\Microsoft.Extensions.Configuration.dll"
@@ -160,7 +162,7 @@ Section "MainSection" SEC02
   File "..\${SourceMainDir}\Serilog.Settings.Configuration.dll"
   File "..\${SourceMainDir}\Serilog.Sinks.File.dll"
   ;File "..\${SourceMainDir}\System.Text.Encodings.Web.dll"
-  ;File "..\${SourceMainDir}\System.Text.Json.dll"
+  File "..\${SourceMainDir}\System.Text.Json.dll"
   File "..\${SourceMainDir}\Wpf.TabControl.dll"  
   File "..\${SourceMainDir}\Xceed.Wpf.AvalonDock.dll"
   File "..\${SourceMainDir}\Xceed.Wpf.AvalonDock.Themes.Aero.dll"
@@ -172,7 +174,12 @@ Section "MainSection" SEC02
   File /r "..\${SourceMainDir}\libs\"
   SetOutPath "$INSTDIR\common"
   File /r "..\${SourceMainDir}\common\"
-
+  
+  SetOutPath "$INSTDIR\Logs"
+  FileOpen $0 "$INSTDIR\Logs\HCL_ODA_TestPAD.log" w
+  FileClose $0
+  
+  AccessControl::GrantOnFile "$INSTDIR\Logs" "(BU)" "FullAccess"
   AccessControl::GrantOnFile "$INSTDIR\common" "(BU)" "FullAccess"
   
   WriteUninstaller "$INSTDIR\uninst.exe"

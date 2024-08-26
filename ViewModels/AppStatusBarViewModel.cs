@@ -4,6 +4,8 @@ using System.Windows.Media;
 using System.Windows;
 using System;
 using HCL_ODA_TestPAD.Settings;
+using Microsoft.Extensions.Logging;
+using HCL_ODA_TestPAD.HCL.Profiler;
 
 namespace HCL_ODA_TestPAD.ViewModels
 {
@@ -18,13 +20,16 @@ namespace HCL_ODA_TestPAD.ViewModels
         private int _progressMax;
         private string _progressInfo;
         private Visibility _progressBarVisibility = Visibility.Collapsed;
+        //private readonly ILogger<AppStatusBarViewModel> _logger;
 
         private LinearGradientBrush _exceptionBrush = new LinearGradientBrush(Colors.LightPink, Colors.IndianRed, new Point(0.5, 0), new Point(0.5, 1));
         private LinearGradientBrush _brushStatusBar = new LinearGradientBrush(Colors.LightGray, Colors.DarkGray, new Point(0.5, 0), new Point(0.5, 1));
-        public AppStatusBarViewModel(IServiceFactory serviceFactory)
+        public AppStatusBarViewModel(IServiceFactory serviceFactory/*, ILogger<AppStatusBarViewModel> logger*/)
         {
             _serviceFactory = serviceFactory;
             StatusMessage = "HCL-ODA-TestPAD loaded successfully";
+            //_logger = logger;
+            //_logger.LogInformation(StatusMessage);
             SubscribeEvents();
         }
 

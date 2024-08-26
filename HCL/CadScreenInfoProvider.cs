@@ -27,7 +27,7 @@ internal enum DpiType
 }
 public sealed class CadScreenInfoProvider : ICadScreenInfoProvider
 {
-    //private static readonly ILogger _logger = new HPLLogger(typeof(CadScreenInfoProvider));
+    //private static readonly IHplLogger _logger = new HPLLogger(typeof(CadScreenInfoProvider));
 
     /// <summary>
     /// Value indicating <see cref="NativeMethods.MonitorFromPoint"/> to return a handle to the display monitor that is nearest to the point.

@@ -15,6 +15,7 @@ using HCL_ODA_TestPAD.UserControls;
 using HCL_ODA_TestPAD.Mvvm;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using System.Windows.Forms.Integration;
+using HCL_ODA_TestPAD.HCL.Profiler;
 
 namespace HCL_ODA_TestPAD.ViewModels;
 
@@ -235,7 +236,7 @@ public class MainWindowViewModel : BindableBase
             _winHost.Child = (WinFormsCadImageViewControl)_hclGles2Control;
             AppMainWindow.RenderArea.Children.Add(_winHost);
         }
-
+        CadProfiler.TryUseIt();
     }
 
     internal void ClearRenderArea()
@@ -554,7 +555,8 @@ public class MainWindowViewModel : BindableBase
             ResizeMode = ResizeMode.NoResize,
             WindowStartupLocation = WindowStartupLocation.CenterScreen
         };
-        window.ShowDialog();
+        window.Show();
+        CadProfiler.TryUseIt();
     }
     private void OpenCommand_Clicked()
     {
@@ -585,13 +587,8 @@ public class MainWindowViewModel : BindableBase
         ClearRenderArea();
         if (_hclGles2Control == null)
             AddView();
-        //_hclGLES2_Control?.ClearDevices();
-        //if (_hclGLES2_Control == null)
-        //AddView(false);
 
         _hclGles2Control.LoadFile(dlg.FileName);
-        //_hclGLES2_Control.OnOffFPS(true);
-        //_hclGLES2_Control.ShowCustomModels();
         //UncheckDraggersBtns();
     }
 

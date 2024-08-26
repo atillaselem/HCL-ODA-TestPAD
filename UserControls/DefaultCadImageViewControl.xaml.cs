@@ -145,6 +145,11 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
         {
             _vmAdapter.ChangePrismLocation(e.GetPosition(this));
         }
+        if (_userActionState.ActiveAction is UserInteraction.Orbiting or UserInteraction.ZoomToScale && _serviceFactory.AppSettings.HidePointTextTransformation)
+        {
+            _vmAdapter.ToggleTextTransformation(false);
+        }
+
         ToggleAsyncPbo(true);
     }
 
@@ -171,12 +176,12 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
     {
         ArgumentNullException.ThrowIfNull(e);
         _userActionState.ExecuteMouseTouchUp(e, this);
-        if (_userActionState.ActiveAction == UserInteraction.ZoomToArea)
-        {
-            _vmAdapter.UpdateHclZoomTransformations();
-            _vmAdapter.UpdateCadView();
-        }
         ToggleAsyncPbo(false);
+        _vmAdapter.UpdateHclZoomTransformations();
+        if (_userActionState.ActiveAction is UserInteraction.Orbiting or UserInteraction.ZoomToScale && _serviceFactory.AppSettings.HidePointTextTransformation)
+        {
+            _vmAdapter.ToggleTextTransformation(true);
+        }
     }
 
     protected override void OnMouseWheel(MouseWheelEventArgs e)
@@ -197,7 +202,7 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
     protected override void OnTouchMove(TouchEventArgs e)
     {
         _actionZoomToScale.ExecuteMouseTouchMove(e, this);
-        _vmAdapter.UpdateHclZoomTransformations();
+        _vmAdapter.UpdateHclZoomTransformations(isPinchZoom: true);
     }
     protected override void OnTouchUp(TouchEventArgs e)
     {
@@ -206,6 +211,7 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
     protected override void OnTouchLeave(TouchEventArgs e)
     {
         _actionZoomToScale!.ExecuteTouchLeave(e, this);
+        _vmAdapter.UpdateHclZoomTransformations();
     }
     #endregion
 

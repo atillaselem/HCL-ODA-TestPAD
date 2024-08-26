@@ -61,9 +61,11 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
                     var entityName = $"Point-{i}";
                     using var entityId = AppendPoint(location, color, entityName);
                     AppendText(entityId, location, Color.Black, $"P-{i+1}");
+                    _hclPointContainer.AddPoint(location);
                 }
             }
             _hclPointContainer.SetViewMatrixCoordinates();
+            _hclPointContainer.SetPointCount();
             return _hclPointContainer;
         }
         public static void Dispose(IHclTooling hclViewModel)
@@ -87,6 +89,10 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             using var odTvGsViewId = _hclTooling.GetViewId();
             // Create model
             _hclPointContainer.TvModelId = tvDatabase.createModel("Tv_Model_Points", OdTvModel_Type.kDirect);
+            using var modelPtr = _hclPointContainer.TvModelId.openObject(OdTv_OpenMode.kForWrite);
+            using var selectability = new OdTvSelectabilityDef();
+            selectability.setGeometries(true);
+            modelPtr.setSelectability(selectability);
             using var odTvGsView = odTvGsViewId.openObject(OdTv_OpenMode.kForWrite);
             odTvGsView.addModel(_hclPointContainer.TvModelId);
         }
@@ -111,7 +117,6 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             using var pointEntityGeometryId = entity.appendCircle(cadPoint.CenterLoc, cadPoint.Radius, cadPoint.Normal);
             using var pointEntityGeometry = pointEntityGeometryId.openAsCircle();
             pointEntityGeometry.setFilled(cadPoint.Filled);
-            _hclPointContainer.PointPositionList.Add(CadPoint3D.With(location));
             return entityId;
         }
         private static void AppendText(OdTvEntityId entityId, CadPoint3D location, Color color, string pointText)

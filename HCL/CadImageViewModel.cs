@@ -9,11 +9,11 @@ public class CadImageViewModel
 {
     private readonly ICadModel _cadModel;
     private readonly ICadImageViewControl _control;
-    private readonly ILogger _logger;
+    private readonly ITestPadLogger _logger;
     private readonly ICadImageViewBitmapService _cadImageViewBitmapService;
 
     public CadImageViewModel(ICadImageViewControl control,
-                             ILogger logger,
+                             ITestPadLogger logger,
                              ICadModel cadModel,
                              ICadImageViewBitmapService cadImageViewBitmapService)
     {

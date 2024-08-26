@@ -1,4 +1,5 @@
-﻿using HCL_ODA_TestPAD.ViewModels;
+﻿using HCL_ODA_TestPAD.HCL.CAD.Math.API;
+using HCL_ODA_TestPAD.ViewModels;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using ODA.Visualize.TV_Visualize;
 using System.Collections.Generic;
@@ -8,7 +9,6 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
 {
     public class HclPrism : HclToolBase
     {
-        public Dictionary<VisibleEntityType, ulong> VisibleEntityDict { get; } = new();
         public HclPrism(IHclTooling hclTooling)
         {
             HclTooling = hclTooling;
@@ -30,16 +30,21 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             UpdateOrientation();
             UpdatePrismVisibility();
         }
+        public override void UpdateViewTransformation()
+        {
+            var tvModel = new TvModel(TvModelId);
+            tvModel.UpdateModelViewTransformations(HclTooling.GetViewId(), ToolLocationList, VisibleEntityDict.Values.ToArray());
+        }
+
         public override void Remove()
         { 
             var model = new TvModel(TvModelId);
             model.RemoveModel(HclTooling);
+            ToolLocationList.ForEach(p => p.Dispose());
+            ToolLocationList.Clear();
             Dispose();
         }
-        public void AddVisibleEntity(VisibleEntityType type, ulong entityHandleId)
-        {
-            VisibleEntityDict.Add(type, entityHandleId);
-        }
+
 
 
     }

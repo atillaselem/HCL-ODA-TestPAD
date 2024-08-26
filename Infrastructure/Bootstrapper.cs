@@ -8,6 +8,10 @@ using Prism.Events;
 using System;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels.Base;
+using HCL_ODA_TestPAD.HCL.Profiler;
+using Autofac.Extras.CommonServiceLocator;
+using CommonServiceLocator;
+using HCL_ODA_TestPAD.HCL;
 
 namespace HCL_ODA_TestPAD.Infrastructure;
 
@@ -40,11 +44,19 @@ public class Bootstrapper
         builder.RegisterType<SettingsProvider>().As<ISettingsProvider>().SingleInstance();
         builder.RegisterType<MainWindowViewModel>().AsSelf();
         builder.RegisterType<MainWindow>().AsSelf();
+        builder.RegisterType<TestPadLogger>().AsSelf();
         builder.RegisterType<ServiceFactory>().As<IServiceFactory>().SingleInstance();
         builder.RegisterType<TestPadSettings>().AsSelf();
 
+        builder.RegisterType<CadLogProfiler>().AsSelf();
+        builder.RegisterType<CadFpsProfiler>().AsSelf();
+
+        // Perform registrations and build the container.
         var container = builder.Build();
-        return new AutofacServiceProvider(container);
+        // Set the service locator to an AutofacServiceLocator.
+        var csl = new AutofacServiceLocator(container);
+        ServiceLocator.SetLocatorProvider(() => csl);
+        return csl;
     }
 
 }

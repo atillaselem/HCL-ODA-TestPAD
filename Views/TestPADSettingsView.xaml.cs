@@ -35,6 +35,11 @@ namespace HCL_ODA_TestPAD.Views
                 if (e.OriginalSource is PropertyItem propItem && (e.OldValue.ToString() != e.NewValue.ToString()))
                 {
                     Vm.TestPadSettings.OnDispatchChange(propItem.PropertyName, e.NewValue.ToString());
+                    if (propItem.PropertyName == "PrismType")
+                    {
+                        var prismType = e.NewValue.ToString();
+                        Vm.EventFactory().GetEvent<PrismTypeChangedEvent>().Publish(prismType);
+                    }
                 }
             }
             catch (Exception exception)

@@ -33,13 +33,16 @@ using System.Threading;
 using System.Runtime.ExceptionServices;
 using System.Security;
 using HCL_ODA_TestPAD.HCL.UserActions.States;
+using HCL_ODA_TestPAD.HCL.Profiler;
+using Microsoft.Extensions.Logging;
 
 namespace HCL_ODA_TestPAD.ViewModels;
 public enum VisibleEntityType
 {
     PrismImageEntity,
     ArrowLineEntity,
-    ArrowEntity
+    ArrowEntity,
+    StationImageEntity
 }
 
 public class HclCadImageViewModel : CadImageTabViewModelBase,
@@ -115,11 +118,15 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     public CadPoint3D HclStationLocation { get; set; }
     public double LastRadius { get; set; } = 1;
     public double PointScaleFactor { get; set; } = 1;
+    public double PrismScaleFactor { get; set; } = 1;
     private HclStation _hclStation;
     private HclPrism _hclPrism;
+
     private HclPointContainer _hclPointContainer;
     private CadLine _hclToolLine;
-    public bool PointScaleFactorSet { get; set; } = false;
+    public bool PointScaleFactorSet { get; set; }
+    public bool PrismScaleFactorSet { get; set; }
+    private int _pointMoveCycle = default;
     #endregion
     public HclCadImageViewModel(IServiceFactory serviceFactory)
     : base(serviceFactory)
@@ -133,12 +140,20 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     }
     public void InitViewModel()
     {
-        ILogger logger = new HplLogger();
+        var logger = new TestPadLogger();
         var cadGenFactory = new CadRegenerator(ServiceFactory);
         _cadModel = new CadModel(() => cadGenFactory);
         _cadImageViewModel = new CadImageViewModel(ViewControl, logger, _cadModel, new CadImageViewBitmapService());
-
+        ServiceFactory.EventSrv.GetEvent<PrismTypeChangedEvent>().Subscribe(OnPrismTypeChanged);
     }
+    private void OnPrismTypeChanged(string prismType)
+    {
+        HclPrismBuilder.Dispose(this);
+        ShowTool(HclToolType.Prism);
+        //_hclPrism?.UpdateViewTransformation();
+        //UpdateCadView();
+    }
+
     private void AddDefaultView()
     {
         if (!AddDefaultViewOnLoad) return;
@@ -437,6 +452,8 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
             //Zoom(ZoomType.ZoomExtents);
             Set3DView(OdTvExtendedView_e3DViewType.kTop);
+            Regen(OdTvGsDevice_RegenMode.kRegenAll);
+            UpdateCadView(true);
         }
     }
 #pragma warning disable SYSLIB0032 // Type or member is obsolete
@@ -699,21 +716,62 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             {
                 DraggerResult res = _dragger.Drag((int)position.X, (int)position.Y);
                 //Debug.WriteLine("4-AtvViewer-MouseMoveEvent");
-                ActionAfterDragger(res);
-                //UpdateCadView();
                 if(userInteraction == UserInteraction.Orbiting)
                 {
                     UpdateDefaultModelModelingMatrix();
                     //OK : Arrow rotates properly 
-                    var scaleFactor = GetScaleFactor();
-                    _hclPrism?.UpdateTransformations(scaleFactor);
-                    _hclStation?.UpdateTransformations(scaleFactor);
-                    _hclPointContainer?.UpdateTransformations(GetPointScaleFactor());
+                    _hclPrism?.UpdateViewTransformation();
+                    _hclStation?.UpdateViewTransformation();
+                    using var _ = CadProfiler.LogFps($"Point Tx - # of Points {HclPointContainer.PointListCount}", "Mouse/Touch Move - Orbiting");
+                    OptimizePointTransformations();
+                    UpdateCadView();
+                }
+                else
+                {
+                    ActionAfterDragger(res);
                 }
             }
         }
     }
 
+    private void OptimizePointTransformations()
+    {
+        if (_hclPointContainer == null)
+        {
+            return;
+        }
+        if (ServiceFactory.AppSettings.EnablePointOptimization)
+        {
+            _pointMoveCycle++;
+            if (ServiceFactory.AppSettings.UseDynamicOptimization)
+            {
+                var countOfPointCycle = HclPointContainer.PointListCount / 1000 + 1;
+                if ((_pointMoveCycle % countOfPointCycle) == 0)
+                {
+                    DoPointTransformation();
+                }
+            }
+            else if (ServiceFactory.AppSettings.RenderEveryXCycle == 0)
+            {
+                return;
+            }
+            else if ((_pointMoveCycle % ServiceFactory.AppSettings.RenderEveryXCycle) == 0)
+            {
+                // Do fixed cycle point transformation
+                DoPointTransformation();
+            }
+        }
+        else
+        {
+            DoPointTransformation();
+        }
+    }
+
+    private void DoPointTransformation()
+    {
+        _pointMoveCycle = 0;
+        _hclPointContainer?.UpdateTransformations(GetPointScaleFactor());
+    }
 
     private void UpdateDefaultModelModelingMatrix()
     {
@@ -828,6 +886,8 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
                 break;
             case ZoomType.ZoomExtents:
                 {
+                    //using var _ = CadProfiler.Log("Time Elapsed", "ZoomExtents");
+                    //ServiceFactory.Logger.LogInformation("ZoomExtents");
                     exView.zoomToExtents();
                     //update cached extents if need
                     using var lastExt = new OdGeBoundBlock3d();
@@ -914,8 +974,10 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         UpdateDefaultModelModelingMatrix();
 
         var scaleFactor = GetScaleFactor();
-        _hclPrism?.UpdateTransformations(scaleFactor);
-        _hclStation?.UpdateTransformations(scaleFactor);
+        _hclPrism?.ScaleModelAtLocation(scaleFactor, HclPrismLocation);
+        _hclPrism?.UpdateViewTransformation();
+        _hclStation?.ScaleModelAtLocation(scaleFactor, HclStationLocation);
+        _hclStation?.UpdateViewTransformation();
         _hclPointContainer?.UpdateTransformations(GetPointScaleFactor());
         UpdateCadView();
 
@@ -1056,14 +1118,16 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         _cachedViewCenter = GetViewCenter();
         HclStationLocation ??= CadPoint3D.With(_cachedViewCenter);
         HclPrismLocation ??= CadPoint3D.With(_cachedViewCenter);
+        using var viewPos = ViewParameters.FromView(this);
         switch (type)
         {
             case HclToolType.PLTStation:
                 _hclStation = HclStationBuilder.ShowPltStation(this, HclStationLocation);
+                _hclStation?.UpdateViewTransformation();
                 break;
             case HclToolType.Prism:
                 _hclPrism = HclPrismBuilder.ShowPrism(this, HclPrismLocation);
-                _hclPrism?.UpdateTransformations(GetScaleFactor());
+                _hclPrism?.UpdateViewTransformation();
                 break;
             case HclToolType.Points:
                 if (_hclPointContainer == null)
@@ -1089,18 +1153,20 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     public void ChangePrismLocation(Point mousePosition)
     {
         if (_hclPrism == null) return;
+        using var oldLocation = CadPoint3D.With(HclPrismLocation!);
         HclPrismLocation?.Dispose();
         HclPrismLocation = UpdateStatusBarCoordinates(mousePosition);
-        _hclPrism?.UpdateLocation(HclPrismLocation);
+        _hclPrism?.UpdateLocationDelta(HclPrismLocation, oldLocation);
         UpdateToolLine();
         UpdateCadView();
     }
     public void ChangeStationLocation(Point mousePosition)
     {
         if (_hclStation == null) return;
+        using var oldLocation = CadPoint3D.With(HclStationLocation!);
         HclStationLocation?.Dispose();
         HclStationLocation = UpdateStatusBarCoordinates(mousePosition);
-        _hclStation?.UpdateLocation(HclStationLocation);
+        _hclStation?.UpdateLocationDelta(HclStationLocation, oldLocation);
         UpdateToolLine();
         UpdateCadView();
     }
@@ -1177,6 +1243,19 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         {
             PointScaleFactorSet = true;
             PointScaleFactor = scaleFactor;
+        }
+        return scaleFactor;
+    }
+    public double GetPrismScaleFactor()
+    {
+        using var viewId = GetViewId();
+        var radius = viewId.GetPixelScaleFactorAtViewTarget(100);
+        var scaleFactor = radius / PrismScaleFactor;
+
+        if (_hclPrism != null && !PrismScaleFactorSet)
+        {
+            PrismScaleFactorSet = true;
+            PrismScaleFactor = scaleFactor;
         }
         return scaleFactor;
     }
@@ -2239,6 +2318,8 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         ClearDevices();
         ClearDatabases();
         ViewControl?.SetFileLoaded(false, FilePath, (statusText) => ServiceFactory.EventSrv.GetEvent<AppStatusTextChanged>().Publish(statusText));
+        _isFileLoading = false;
+        ServiceFactory.EventSrv.GetEvent<PrismTypeChangedEvent>().Unsubscribe(OnPrismTypeChanged);
     }
 
     public void OnFileLoadingCancelled()
@@ -2353,12 +2434,23 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     }
     #endregion
 
-    public void UpdateHclZoomTransformations()
+    public void UpdateHclZoomTransformations(bool isPinchZoom = false)
     {
+        if (!_isFileLoading)
+        {
+            return;
+        }
         var scaleFactor = GetScaleFactor();
-        _hclStation?.ScaleModelAtEntityLevel(scaleFactor);
-        _hclPrism?.ScaleModelAtEntityLevel(scaleFactor);
-        _hclPointContainer?.UpdateTransformations(GetPointScaleFactor());
+        _hclStation?.ScaleModelAtLocation(scaleFactor, HclStationLocation);
+        _hclPrism?.ScaleModelAtLocation(scaleFactor, HclPrismLocation);
+        if (isPinchZoom)
+        {
+            OptimizePointTransformations();
+        }
+        else
+        {
+            _hclPointContainer?.UpdateTransformations(GetPointScaleFactor());
+        }
     }
 
     private void SetupStyles(OdTvDatabase database)
@@ -2373,8 +2465,14 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
 
     internal void SaveFileAsVsfx(string fileName)
     {
-        using var vsfxExportOptions = new OdTvVSFExportOptions(OdTvVSFExportOptions_Compression.kInt32, OdTvVSFExportOptions_NormalsCompression.kTwoInt32);
+        using var vsfxExportOptions = new OdTvVSFExportOptions(OdTvVSFExportOptions_Compression.kInt32,
+            OdTvVSFExportOptions_NormalsCompression.kTwoInt32);
         using var tvDatabase = TvDatabaseId.openObject(OdTv_OpenMode.kForWrite);
         tvDatabase.writeVSFX(fileName, vsfxExportOptions);
+    }
+    internal void ToggleTextTransformation(bool showText)
+    {
+        _hclPointContainer?.TogglePointText(showText);
+        UpdateCadView();
     }
 }

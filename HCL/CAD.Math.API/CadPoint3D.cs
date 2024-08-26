@@ -40,6 +40,7 @@ public record CadPoint3D : CadMathValue<OdGePoint3d>
 
     #region Overloaded Operators
     public static CadPoint3D operator +(CadPoint3D p, CadVector3D v) => p.Value.Add(v);
+    public static CadPoint3D operator +(CadPoint3D p, CadPoint3D pt2) => p.Value.Add(pt2.AsVector());
     public static CadPoint3D operator -(CadPoint3D p, CadVector3D v) => p.Value.Sub(v);
     public static CadVector3D operator -(CadPoint3D pt1, CadPoint3D pt2) => pt1.Value.Sub(pt2);
     public static CadPoint3D operator *(CadPoint3D p, double d) => p.Value.Mul(d);

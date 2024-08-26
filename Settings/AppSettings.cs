@@ -3,6 +3,7 @@ using HCL_ODA_TestPAD.HCL.CadUnits;
 using HCL_ODA_TestPAD.HCL.Visualize;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 using ODA.Visualize.TV_Visualize;
+using System.ComponentModel.DataAnnotations;
 
 namespace HCL_ODA_TestPAD.Settings;
 
@@ -46,12 +47,13 @@ public enum HPLReflector
 [CategoryOrder("DWG & DXF Import Parameters", 4)]
 [CategoryOrder("IFC Import Parameters", 5)] 
 [CategoryOrder("CAD Units", 6)] 
-[CategoryOrder("HCL CAD Domain", 7)] 
-[CategoryOrder("CAD Custom Models", 8)] 
-[CategoryOrder("User Interface", 9)] 
-[CategoryOrder("On Start", 10)]
-[CategoryOrder("About App", 11)] 
-[CategoryOrder("Preferences", 12)] 
+[CategoryOrder("HCL CAD Domain", 7)]
+[CategoryOrder("HCL Point Optimization", 8)]
+[CategoryOrder("CAD Custom Models", 9)] 
+[CategoryOrder("User Interface", 10)] 
+[CategoryOrder("On Start", 11)]
+[CategoryOrder("About App", 12)] 
+[CategoryOrder("Preferences", 13)] 
 
 public record AppSettings
 {
@@ -126,6 +128,11 @@ public record AppSettings
     public bool Interactivity { get; init; }
 
     [Category("Performance")]
+    [DisplayName("Use CadProfiler")]
+    [Description("Enable CadProfiler used during Debugging or Logging")]
+    public bool UseCadProfiler { get; init; }
+
+    [Category("Performance")]
     [DisplayName("Interactive FPS")]
     [Description("Set minimum FPS during Interactivity")]
     public double InteractiveFps { get; init; }
@@ -194,11 +201,11 @@ public record AppSettings
     [DisplayName("HPL Reflector")]
     [Description("Active Prism Type used as Reflector")]
     public HPLReflector PrismType { get; init; }
-
     [Category("HCL CAD Domain")]
     [DisplayName("Number of Points")]
     [Description("Set the number of points created")]
-    public int NumberOfPoints { get; init; }
+    [Range(1, 10000, ErrorMessage = "Value should be grater than 0 and less than 10000")]
+    public uint NumberOfPoints { get; init; } = 1;
     [Category("HCL CAD Domain")]
     [DisplayName("Random Point Color")]
     [Description("Enables random colors for the points to be created")]
@@ -207,6 +214,26 @@ public record AppSettings
     [DisplayName("Point Color")]
     [Description("Color of the points to be created if not random")]
     public PointColor PointColor { get; init; }
+    #endregion
+
+    #region HCL Point Optimization
+    [Category("HCL Point Optimization")]
+    [DisplayName("Use Point Optimization")]
+    [Description("Enables point rendering optimized")]
+    public bool EnablePointOptimization { get; init; }
+    [Category("HCL Point Optimization")]
+    [DisplayName("Dynamic Optimization")]
+    [Description("Use best optimization according number of points")]
+    public bool UseDynamicOptimization { get; init; }
+    [Category("HCL Point Optimization")]
+    [DisplayName("Render Every X Cycle")]
+    [Description("Render points in every X Cycle")]
+    [Range(1, 20, ErrorMessage = "Value should be grater than 0 and less than 10")]
+    public uint RenderEveryXCycle { get; init; } = 1;
+    [Category("HCL Point Optimization")]
+    [DisplayName("Hide Point Text Transformation")]
+    [Description("Hide Point Text during scaling and rotation")]
+    public bool HidePointTextTransformation { get; init; }
     #endregion
 
     #region CAD Custom Models

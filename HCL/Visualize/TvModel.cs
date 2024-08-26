@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using HCL_ODA_TestPAD.HCL.Visualize.Extensions;
 using HCL_ODA_TestPAD.ViewModels.Base;
+using Microsoft.Extensions.Logging;
 
 namespace HCL_ODA_TestPAD.HCL.Visualize
 {
@@ -105,6 +106,8 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             _hiddenEntityList.ForEach(Hide);
         }
 
+        #region Transformation Not Used
+
         public void UpdateScaleAtLocation(CadPoint3D location, double scaleFactor)
         {
             SetValue(m =>
@@ -141,7 +144,6 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
                 return m.setModelingMatrix(scaledModelingMatrix, true);
             });
         }
-
         //Fast Transform does not work for individual entity transformation.
         public void UpdateEntityDirection(OdTvGsViewId view, params ulong[] entityHandles)
         {
@@ -177,36 +179,10 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
                 return OdTvResult.tvOk;
             });
         }
-        public void UpdateVisibility(OdTvGsViewId view, params ulong[] entityHandles)
-        {
-            SetValue(m =>
-            {
-                entityHandles.ForEach(handleId =>
-                {
-                    var isCadRotated = view.IsCADRotated();
-                    if (isCadRotated)
-                    {
-                        Show(handleId);
-                        _hiddenEntityList.Remove(handleId);
-                    }
-                    else
-                    {
-                        Hide(handleId);
-                        if (!_hiddenEntityList.Contains(handleId))
-                        {
-                            _hiddenEntityList.Add(handleId);
-                        }
-                    }
-                });
-                return OdTvResult.tvOk;
-            });
-        }
 
-        internal void RemoveModel(OdTvDatabaseId dbId)
-        {
-            using var db = dbId.openObject(OdTv_OpenMode.kForWrite);
-            db.removeModel(_tvModelId);
-        }
+
+        #endregion
+
         internal void RemoveModel(IHclTooling hclTooling)
         {
             using var tvGsViewId = hclTooling.GetViewId();
@@ -216,7 +192,7 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             db.removeModel(_tvModelId);
         }
 
-        #region Transformations
+        #region Transformations Active
         public void UpdateLocation(CadPoint3D location)
         {
             SetValue(m =>
@@ -226,13 +202,32 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
                 return m.setModelingMatrix(translatedModelingMatrix, true);
             });
         }
+        public void UpdateLocationDelta(CadVector3D deltaLocation)
+        {
+            SetValue(m =>
+            {
+                using var modelingMatrix = GetValue(model => model.getModelingMatrix());
+                using var deltaMatrix = CadMatrix3D.Translation(deltaLocation);
+                using var translatedModelingMatrix = modelingMatrix.preMultBy(deltaMatrix);
+                return m.setModelingMatrix(translatedModelingMatrix, true);
+            });
+        }
+        public void UpdateModelScale(double scaleFactor, CadPoint3D location)
+        {
+            SetValue(m =>
+            {
+                using var modelingMatrix = m.getModelingMatrix();
+                using var scalingMatrix = CadMatrix3D.ScaleWithCenterPoint(scaleFactor, location);
+                using var scaledModelingMatrix = modelingMatrix.preMultBy(scalingMatrix);
+                return m.setModelingMatrix(scaledModelingMatrix, true);
+            });
+        }
         public void UpdateScaleOfEntity(double scaleFactor)
         {
             SetValue(m =>
             {
                 using var modelPtr = _tvModelId.openObject(OdTv_OpenMode.kForWrite);
                 using var entityIterator = modelPtr.getEntitiesIterator();
-                //int counter = 0;
                 for (; !entityIterator.done(); entityIterator.step())
                 {
                     using var entId = entityIterator.getEntity();
@@ -241,7 +236,24 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
                     using var scalingMatrix = CadMatrix3D.ScaleWith(scaleFactor);
                     using var scaledModelingMatrix = modelingMatrix.preMultBy(scalingMatrix);
                     entityObj.setModelingMatrix(scaledModelingMatrix);
-                    //Debug.WriteLine($"Update Point Scale : {counter++}");
+                }
+                return OdTvResult.tvOk;
+            });
+        }
+        public void UpdateScaleOfEntityAtLocation(double scaleFactor, CadPoint3D location)
+        {
+            SetValue(m =>
+            {
+                using var modelPtr = _tvModelId.openObject(OdTv_OpenMode.kForWrite);
+                using var entityIterator = modelPtr.getEntitiesIterator();
+                for (; !entityIterator.done(); entityIterator.step())
+                {
+                    using var entId = entityIterator.getEntity();
+                    using var entityObj = entId.openObject(OdTv_OpenMode.kForWrite);
+                    using var modelingMatrix = entityObj.getModelingMatrix();
+                    using var scalingMatrix = CadMatrix3D.ScaleWithCenterPoint(scaleFactor, location);
+                    using var scaledModelingMatrix = modelingMatrix.preMultBy(scalingMatrix);
+                    entityObj.setModelingMatrix(scaledModelingMatrix);
                 }
                 return OdTvResult.tvOk;
             });
@@ -252,7 +264,7 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             {
                 entityIds.ForEach(handleId =>
                 {
-                    var entityId = m.findEntity(handleId);
+                    using var entityId = m.findEntity(handleId);
                     using var entityObj = entityId.openObject(OdTv_OpenMode.kForWrite);
                     using var modelingMatrix = entityObj.getModelingMatrix();
                     using var eyeToWorldMatrix = view.EyeToWorldMatrix();
@@ -262,6 +274,65 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
                     using var orientationMatrix = eyeToWorldTranslatedMatrix * scaleMatrix;
                     entityObj.setModelingMatrix(orientationMatrix);
                 });
+                return OdTvResult.tvOk;
+            });
+        }
+
+        public void UpdateEntityOrientationEx(OdTvGsViewId view, params ulong[] entityIds)
+        {
+            SetValue(m =>
+            {
+                entityIds.ForEach(handleId =>
+                {
+                    using var entityId = m.findEntity(handleId);
+                    using var entityObj = entityId.openObject(OdTv_OpenMode.kForWrite);
+                    using var modelingMatrix = entityObj.getModelingMatrix();
+                    using var eyeToWorldMatrix = view.EyeToWorldMatrix();
+                    using var originVector = CadVector3D.Default;
+                    using var eyeToWorldTranslatedMatrix = eyeToWorldMatrix.SetTranslation(originVector);
+                    using var scaleMatrix = CadMatrix3D.ScaleWith(modelingMatrix.scale());
+                    using var orientationMatrix = eyeToWorldTranslatedMatrix * scaleMatrix;
+                    m.setModelingMatrix(entityId, orientationMatrix, true);
+                });
+                return OdTvResult.tvOk;
+            });
+        }
+        public void UpdateEntityOrientationAtLocation(OdTvGsViewId view, CadPoint3D location, params ulong[] entityIds)
+        {
+            SetValue(m =>
+            {
+                entityIds.ForEach(handleId =>
+                {
+                    using var entityId = m.findEntity(handleId);
+                    using var entityObj = entityId.openObject(OdTv_OpenMode.kForWrite);
+                    using var modelingMatrix = entityObj.getModelingMatrix();
+                    using var eyeToWorldMatrix = view.EyeToWorldMatrix();
+                    using var originVector = CadVector3D.Default;
+                    using var eyeToWorldTranslatedReset = eyeToWorldMatrix.SetTranslation(originVector);
+                    using var scaleMatrix = CadMatrix3D.ScaleWithCenterPoint(modelingMatrix.scale(), location);
+                    using var scaleMatrixTranslateReset = CadMatrix3D.ScaleWithCenterPoint(modelingMatrix.scale(), location);
+                    using var orientationMatrix = eyeToWorldTranslatedReset * scaleMatrixTranslateReset;
+                    entityObj.setModelingMatrix(orientationMatrix);
+                });
+                return OdTvResult.tvOk;
+            });
+        }
+        internal void UpdateModelViewTransformations(OdTvGsViewId view, List<CadPoint3D> locationList, params ulong[] entityIds)
+        {
+            SetValue(model =>
+            {
+                using var entityIterator = model.getEntitiesIterator();
+                using var eyeToWorldMatrix = view.EyeToWorldMatrix().SetTranslation(CadVector3D.Origin);
+
+                for (var index = 0; index < entityIds.Length; index++)
+                {
+                    using var entityId = model.findEntity(entityIds[index]);
+                    var entityLocation = locationList[index];
+                    using var alignCoordinateSysMatrix = CadMatrix3D.AlignCoordSys(
+                        entityLocation, CadVector3D.XAxis, CadVector3D.YAxis, CadVector3D.ZAxis,
+                        entityLocation, eyeToWorldMatrix.XAxis(), eyeToWorldMatrix.YAxis(), eyeToWorldMatrix.ZAxis());
+                    model.setModelingMatrix(entityId, alignCoordinateSysMatrix, true);
+                }
                 return OdTvResult.tvOk;
             });
         }
@@ -313,10 +384,9 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
         }
         internal void UpdateModelTransformation(OdTvGsViewId view, List<CadPoint3D> locationList, double scaleFactor, ViewInverseMatrix viewInverseMatrix)
         {
-            SetValue(m =>
+            SetValue(model =>
             {
-                using var modelPtr = _tvModelId.openObject(OdTv_OpenMode.kForWrite);
-                using var entityIterator = modelPtr.getEntitiesIterator();
+                using var entityIterator = model.getEntitiesIterator();
                 using var eyeToWorldMatrix = view.EyeToWorldMatrix();
 
                 for (int index = 0; !entityIterator.done(); entityIterator.step())
@@ -325,11 +395,58 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
                     var circleCenter = locationList[index++];
 
                     using var scaleAtPointCenterMatrix = CadMatrix3D.ScaleWithCenterPoint(scaleFactor, circleCenter);
-                    using var alingPointViewMatrix = CadMatrix3D.AlignCoordSys(
+                    using var alinePointViewMatrix = CadMatrix3D.AlignCoordSys(
                                circleCenter, viewInverseMatrix.XAxis, viewInverseMatrix.YAxis, viewInverseMatrix.ZAxis, 
                                circleCenter, eyeToWorldMatrix.XAxis(), eyeToWorldMatrix.YAxis(), eyeToWorldMatrix.ZAxis());
-                    using var modelingMatrix = scaleAtPointCenterMatrix * alingPointViewMatrix;
-                    m.setModelingMatrix(entId, modelingMatrix, true);
+                    using var modelingMatrix = scaleAtPointCenterMatrix * alinePointViewMatrix;
+                    model.setModelingMatrix(entId, modelingMatrix, true);
+                }
+                return OdTvResult.tvOk;
+            });
+        }
+
+        internal void ToogleVisibility(bool showText)
+        {
+            SetValue(model =>
+            {
+                using var entIterator = model.getEntitiesIterator();
+                for (; !entIterator.done(); entIterator.step())
+                {
+                    using var entId = entIterator.getEntity();
+                    using var entityOpen = entId.openObject(OdTv_OpenMode.kForRead);
+                    using var geoIterator = entityOpen.getGeometryDataIterator();
+                    for (; !geoIterator.done(); geoIterator.step())
+                    {
+                        using var geometryData = geoIterator.getGeometryData();
+                        using var geometryDataOpen = geometryData.openObject();
+                        var type = geometryDataOpen.getType();
+                        if (type == OdTv_OdTvGeometryDataType.kText)
+                        {
+                            if(showText)
+                            {
+                                model.unHide(geometryData);
+                            }
+                            else
+                            {
+                                model.hide(geometryData);
+                            }
+                        }
+                    }
+                }
+                return OdTvResult.tvOk;
+            });
+        }
+        internal void ToogleVisibility(OdTvEntityId odTvEntityId, bool showText)
+        {
+            SetValue(model =>
+            {
+                if (showText)
+                {
+                    model.unHide(odTvEntityId);
+                }
+                else
+                {
+                    model.hide(odTvEntityId);
                 }
                 return OdTvResult.tvOk;
             });
@@ -337,3 +454,4 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
         #endregion
     }
 }
+

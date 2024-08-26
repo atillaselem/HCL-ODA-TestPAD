@@ -8,11 +8,11 @@ using Size = System.Windows.Size;
 
 namespace HCL_ODA_TestPAD.HCL;
 
-public interface ILogger
+public interface ITestPadLogger
 {
 
 }
-internal class HplLogger : ILogger
+public class TestPadLogger : ITestPadLogger
 {
 }
 

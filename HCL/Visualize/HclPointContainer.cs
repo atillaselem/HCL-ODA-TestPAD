@@ -7,8 +7,8 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
 {
     public class HclPointContainer : HclContainerBase
     {
-        public List<CadPoint3D> PointPositionList { get; set; } = new();
-
+        private List<CadPoint3D> PointPositionList { get; set; } = new();
+        public static int PointListCount { get; set; }
         public HclPointContainer(IHclTooling hclTooling)
         {
             HclTooling = hclTooling;
@@ -18,6 +18,15 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             var tvModel = new TvModel(TvModelId);
             tvModel.UpdateModelTransformation(HclTooling.GetViewId(), PointPositionList, scaleFactor, ViewInverseMatrix);
             //tvModel.UpdateModelTransformationDelta(HclTooling.GetViewId(), PointPositionList, scaleFactor);
+        }
+
+        public void AddPoint(CadPoint3D point)
+        {
+            PointPositionList.Add(CadPoint3D.With(point));
+        }
+        public void SetPointCount()
+        {
+            PointListCount = PointPositionList.Count;
         }
         public override void Remove()
         {
@@ -49,7 +58,14 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
                 base.Dispose(isDisposing);
                 PointPositionList.ForEach(p => p.Dispose());
                 PointPositionList.Clear();
+                PointListCount = 0;
             }
+        }
+
+        internal void TogglePointText(bool showText)
+        {
+            var tvModel = new TvModel(TvModelId);
+            tvModel.ToogleVisibility(showText);
         }
 
         #endregion

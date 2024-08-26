@@ -16,28 +16,24 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
         private static HclPrism _hclPrism;
         private static IHclTooling _hclTooling;
         private const double PixelFactor = 100;
+        private static CadPoint3D _location;
+        private static double s_ArrowLength;
         public static HclPrism ShowPrism(IHclTooling hclViewModel, CadPoint3D location)
         {
             _hclTooling = hclViewModel;
             if (_hclPrism != null)
             {
                 Dispose(_hclTooling);
-                _hclPrism = null;
                 return _hclPrism;
             }
 
+            _location = location;
             _hclPrism = BuildModel();
 
-            //OK : All parts other than image transforms properly in dwg with rotated screen.
             AppendArrow();
             AppendCircle();
             AppendCrossLines();
             BuildImage();
-
-            //OK : Location Updates to click point
-            _hclPrism.UpdateLocation(location);
-            //OK : Orientation Updates to camera even rotated view
-            _hclPrism.UpdateOrientation();
 
             return _hclPrism;
         }
@@ -49,6 +45,7 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
                 _hclPrism = null;
             }
         }
+
         private static HclPrism BuildModel()
         {
             _hclPrism = new HclPrism(_hclTooling);
@@ -75,7 +72,8 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
 
             var arrowPointList = new CadPoint3D[4];
             //arrow bottom point
-            var startLocation = CadPoint3D.Origin;
+            //var startLocation = CadPoint3D.Origin;
+            using var startLocation = CadPoint3D.With(_location);
             using var middleTop = startLocation.Add(topVector);
             arrowPointList[0] = CadPoint3D.With(startLocation);
             //arrow left point
@@ -91,7 +89,8 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             arrow.IsSliceable = false;
             arrow.LineWeight = LineWeightType.BoldL;
             var reflector = _hclTooling.ServiceFactory.AppSettings.PrismType;
-            using var arrowLength = upVec.Mul(scaleFactor * GetArrowLength(reflector));
+            s_ArrowLength = scaleFactor * GetArrowLength(reflector);
+            using var arrowLength = upVec.Mul(s_ArrowLength);
 
             using var lineStartPoint = CadPoint3D.With(startLocation);
 
@@ -111,26 +110,31 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             using var color = new OdTvColorDef(arrow.Color.R, arrow.Color.G, arrow.Color.B);
             geometry.setColor(color);
             _hclPrism.VisibleEntityDict.Add(VisibleEntityType.ArrowEntity, entityArrow.getDatabaseHandle());
+            _hclPrism.AddLocation(startLocation);
 
             using var entityArrowLine = tvModel.OpenEntity("ToolPrism_ArrowLine");
             entityArrowLine.setLineWeight(lineWeight);
             using var polyLineGeometryId = entityArrowLine.appendPolyline(arrowLine.StartLoc, arrowLine.EndLoc);
             var entityHandle = entityArrowLine.getDatabaseHandle();
             _hclPrism.VisibleEntityDict.Add(VisibleEntityType.ArrowLineEntity, entityHandle);
+            _hclPrism.AddLocation(startLocation);
         }
         private static void AppendCircle()
         {
             using var odTvGsViewId = _hclTooling.GetViewId();
             var radius = odTvGsViewId.GetPixelScaleFactorAtViewTarget(PixelFactor);
-            using var origin = CadPoint3D.Default;
-            using var cadCircle = new CadCircle(radius, origin);
+            using var cadCircle = new CadCircle(radius, _location);
             cadCircle.Normal = CadVector3D.With(0, 0, 1);
             cadCircle.LineWeight = LineWeightType.BoldL;
             var tvModel = new TvModel(_hclPrism.TvModelId);
             using var entity = tvModel.OpenEntity("ToolPrism_Circle");
             using var lineWeight = new OdTvLineWeightDef((byte)cadCircle.LineWeight);
             entity.setLineWeight(lineWeight);
-            using var circleEntity = entity.appendCircle(cadCircle.CenterLoc, cadCircle.Radius, cadCircle.Normal);
+            using var arc = new OdGeCircArc3d(cadCircle.CenterLoc, cadCircle.Normal, cadCircle.Radius);
+            using var points = new OdGePoint3dArray();
+            arc.getSamplePoints(60, points);
+            points.Add(points.First());
+            using var polylineId = entity.appendPolyline(points.Select(p => p).ToArray());
             _hclTooling.LastRadius = radius;
         }
         private static void AppendCrossLines()
@@ -138,7 +142,7 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             using var odTvGsViewId = _hclTooling.GetViewId();
             var radius = odTvGsViewId.GetPixelScaleFactorAtViewTarget(PixelFactor);
             var length = radius * 0.9;
-            var location = CadPoint3D.Default;
+            using var location = CadPoint3D.With(_location);
             //First Cross Line (-)
             using var firstLineStartLoc = CadPoint3D.With(location.X - length, location.Y, location.Z);
             using var firstLineEndLoc = CadPoint3D.With(location.X + length, location.Y, location.Z);
@@ -190,10 +194,9 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
 
             var pixelFactor = odTvGsViewId.GetPixelScaleFactorAtViewTarget(PixelFactor / 2);
             var reflector = _hclTooling.ServiceFactory.AppSettings.PrismType;
-            using var arrowLength = upVector.Mul(pixelFactor * GetArrowLength(reflector));
 
             //OK : No Z-Axis shift
-            using var originPt = CadPoint3D.With(-width / 2 + arrowLength.X, -height / 2 + arrowLength.Y, 0);
+            using var originPt = CadPoint3D.With(-width / 2, -height / 2 , s_ArrowLength);
 
             var cadRasterImage = new CadRasterImage(rasterImage, originPt, xVec, yVec);
             // Create model
@@ -201,7 +204,16 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             var tvModel = new TvModel(_hclPrism.TvModelId);
             using var entityId = tvModel.AppendEntity("Tool" + resourceName);
             using var entity = entityId.openObject(OdTv_OpenMode.kForWrite);
-            entity.appendRasterImage(rasterImageId, cadRasterImage.Origin, cadRasterImage.XVector, cadRasterImage.YVector);
+
+            using var eyeToWorldMatrix = odTvGsViewId.EyeToWorldMatrix();
+            using var viewMatrix = odTvGsViewId.WorldToEyeMatrix();
+            using var shift = CadVector3D.With(-width / 2, height, s_ArrowLength);
+            using var transformedShift = shift.TransformWith(eyeToWorldMatrix);
+
+            using var viewTransformedShift = transformedShift.TransformWith(viewMatrix);
+            using var rasterImageLocation = CadPoint3D.With(_location + viewTransformedShift);
+            entity.appendRasterImage(rasterImageId, rasterImageLocation, cadRasterImage.XVector, cadRasterImage.YVector);
+            _hclPrism.AddLocation(_location);
             _hclPrism.AddVisibleEntity(VisibleEntityType.PrismImageEntity, entity.getDatabaseHandle());
             _hclPrism.ToolImageHandle = entity.getDatabaseHandle();
             _hclPrism.CadRasterImage = cadRasterImage;

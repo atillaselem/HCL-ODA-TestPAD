@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using HCL_ODA_TestPAD.HCL.Visualize.Extensions;
 using HCL_ODA_TestPAD.ViewModels.Base;
-using Microsoft.Extensions.Logging;
+using ODA.Kernel.TD_RootIntegrated;
+using System.Security.Cryptography;
 
 namespace HCL_ODA_TestPAD.HCL.Visualize
 {
@@ -336,6 +337,67 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
                 return OdTvResult.tvOk;
             });
         }
+        internal void UpdateCrossViewTransformations(OdTvGsViewId view, List<CadPoint3D> locationList, params ulong[] entityHandles)
+        {
+            SetValue(model =>
+            {
+                using var eyeVector = view.Direction(); //(position - target).normalize();
+                using var xAxis = view.CsXVector();
+                using var yAxis = view.UpVector();
+
+                //Get Circle (index = 0) Normal
+                using var circleEntityId = model.findEntity(entityHandles[0]);
+                using var circleEntityObj = circleEntityId.openObject();
+                using var circleGeoIterator = circleEntityObj.getGeometryDataIterator();
+                using var circleGeometryData = circleGeoIterator.getGeometryData();
+                var circleGeometryType = circleGeometryData.getType();
+
+                if (circleGeometryType != OdTv_OdTvGeometryDataType.kPolyline)
+                {
+                    return OdTvResult.tvEmptySubEntity;
+                }
+                using var circlePolyline = circleGeometryData.openAsPolyline();
+                using var circlePointArray = new OdGePoint3dVector();
+                circlePolyline.getPoints(circlePointArray);
+                var pointCount = circlePointArray.Count;
+                using var plane = new OdGePlane(circlePointArray[0], circlePointArray[pointCount/2], circlePointArray[pointCount/4]);
+                using var circleNormal = plane.normal();
+
+                //Project Cross Line Vectors on Circle Surface (index = 1 && 2)
+                for (int index = 1; index < entityHandles.Length; index++)
+                {
+                    using var entityId = model.findEntity(entityHandles[index]);
+                    using var entityObj = entityId.openObject(OdTv_OpenMode.kForWrite);
+                    OdGeVector3d refCamProj = null;
+                    if (index == 1)
+                    {
+                        refCamProj = yAxis.Project(circleNormal, eyeVector);
+                    }
+                    else
+                    {
+                        refCamProj = xAxis.Project(circleNormal, eyeVector);
+                    }
+                    using var geoIterator = entityObj.getGeometryDataIterator();
+                    using var geometryItem = geoIterator.getGeometryData();
+                    var geometryType = geometryItem.getType();
+                    if (geometryType != OdTv_OdTvGeometryDataType.kPolyline)
+                    {
+                        return OdTvResult.tvEmptySubEntity;
+                    }
+                    using var polyline = geometryItem.openAsPolyline();
+                    using var pointArray = new OdGePoint3dVector();
+                    polyline.getPoints(pointArray);
+                    using var crossLineVector = pointArray[1] - pointArray[0];
+                    double angle = crossLineVector.angleTo(refCamProj, circleNormal);
+                    using var modelingMatrix = entityObj.getModelingMatrix();
+                    var entityLocation = locationList[index];
+                    using var rotationMatrix = CadMatrix3D.RotationAtCenter(angle, circleNormal, entityLocation);
+                    using var rotatedModelingMatrix = modelingMatrix.preMultBy(rotationMatrix);
+                    model.setModelingMatrix(entityId, rotatedModelingMatrix, true);
+                }
+                return OdTvResult.tvOk;
+            });
+        }
         public void UpdateScaleOfPoint(List<CadPoint3D> locationList, double scaleFactor)
         {
             SetValue(m =>
@@ -452,6 +514,16 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             });
         }
         #endregion
+
+        public T GetImplementation<T>() where T : class
+        {
+            return _tvModelId as T;
+        }
+
+        public T OpenAs<T>() where T : class
+        {
+            return _tvModelId.openObject() as T;
+        }
     }
 }
 

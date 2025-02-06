@@ -25,6 +25,8 @@ public record CadMatrix3D : CadMathValue<OdGeMatrix3d>
         return matrix3D;
     }
 
+    public static CadMatrix3D Rotation(double angle, CadVector3D vec) => OdGeMatrix3d.rotation(angle, vec.Value);
+    public static CadMatrix3D RotationAtCenter(double angle, CadVector3D vec, CadPoint3D center) => OdGeMatrix3d.rotation(angle, vec.Value, center);
     public static CadMatrix3D Translation(CadVector3D vec) => OdGeMatrix3d.translation(vec.Value);
 
     public static CadMatrix3D ScaleWithCenterPoint(double scale, CadPoint3D center) => OdGeMatrix3d.scaling(scale, center);

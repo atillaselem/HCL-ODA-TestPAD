@@ -15,24 +15,25 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
         protected IHclTooling HclTooling { get; set; }
         public ulong ToolImageHandle { get; set; }
         public Dictionary<VisibleEntityType, ulong> VisibleEntityDict { get; } = [];
+        public Dictionary<VisibleEntityType, ulong> CrossHairDict { get; } = [];
         protected List<CadPoint3D> ToolLocationList { get; } = [];
+        protected List<CadPoint3D> CrossLocationList { get; } = [];
         public void AddLocation(CadPoint3D location)
         {
             ToolLocationList.Add(CadPoint3D.With(location));
         }
-        public virtual void UpdateLocation(CadPoint3D location)
+        public void AddCrossLocation(CadPoint3D location)
         {
-            var tvModel = new TvModel(TvModelId);
-            tvModel.UpdateLocation(location);
+            CrossLocationList.Add(CadPoint3D.With(location));
         }
+
         public virtual void UpdateLocationDelta(CadPoint3D location, CadPoint3D oldLocation)
         {
             var tvModel = new TvModel(TvModelId);
             using var delta = location - oldLocation;
             tvModel.UpdateLocationDelta(delta);
         }
-        public abstract void UpdateOrientation();
-        public abstract void UpdateTransformations(double scaleFactor);
+
         public abstract void UpdateViewTransformation();
         public virtual void ScaleModelAtEntityLevel(double scaleFactor)
         {
@@ -48,6 +49,10 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
         public void AddVisibleEntity(VisibleEntityType type, ulong entityHandleId)
         {
             VisibleEntityDict.Add(type, entityHandleId);
+        }
+        public void AddCrossHairEntity(VisibleEntityType type, ulong entityHandleId)
+        {
+            CrossHairDict.Add(type, entityHandleId);
         }
         #region Disposable HclToolBase
         private bool IsDisposed { get; set; }

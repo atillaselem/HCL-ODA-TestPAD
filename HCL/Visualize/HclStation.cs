@@ -11,16 +11,7 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
         {
             HclTooling = hclTooling;
         }
-        public override void UpdateOrientation()
-        {
-            var tvModel = new TvModel(TvModelId);
-            tvModel.UpdateEntityOrientation(HclTooling.GetViewId(), ToolImageHandle);
-        }
-        public override void UpdateTransformations(double scaleFactor)
-        {
-            ScaleModelAtEntityLevel(scaleFactor);
-            UpdateOrientation();
-        }
+
         public override void Remove()
         {
             var model = new TvModel(TvModelId);

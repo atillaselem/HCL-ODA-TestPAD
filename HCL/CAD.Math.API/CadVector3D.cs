@@ -78,6 +78,7 @@ public record CadVector3D : CadMathValue<OdGeVector3d>
     public double AngleTo(CadVector3D vec, CadVector3D refVector) => Value.angleTo(vec, refVector);
     public double AngleOnPlane(OdGePlanarEnt plane) => Value.angleOnPlane(plane);
     public CadPoint3D AsPoint() => Value.asPoint();
+    public CadVector3D Project(CadVector3D planeNormal, CadVector3D planeDirection) => Value.project(planeNormal, planeDirection);
     #endregion
 
     #region Static Members

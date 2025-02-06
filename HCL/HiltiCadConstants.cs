@@ -1,11 +1,16 @@
 ﻿namespace HCL_ODA_TestPAD.HCL;
+
+using HCL_ODA_TestPAD.Utility;
 using System.Drawing;
+using System.Windows.Media;
+using Color = System.Drawing.Color;
 
 public static class HiltiCadConstants
 {
     //Used for file import so only Body context is imported
     public const string BodyContext = "Body";
     public const string MainContext = "Model";
+    public static string DefaultModelName = "Model";
 }
 
 public static class CadModelConstants
@@ -25,8 +30,8 @@ public static class CadModelConstants
     public static readonly Color StationingLinesColor = Color.FromArgb(25, 175, 55);
     public static readonly Color StationingUnusedLinesColor = Color.FromArgb(unchecked((int)0xFF979598));
 
-    public static readonly Color OverrideColor = Color.FromArgb(125, 125, 125);
-
+    //public static readonly Color OverrideColor = Color.FromArgb(125, 125, 125);
+    public static readonly Color OverrideColor = ResourcesResolver.ResolveResource<SolidColorBrush>("Brushes.CadButton.Border").ToDrawingColor();
     //value from 0 to 255, 255 being fully transparent 
     public static readonly int FaceTransparency = 127;
 

@@ -9,7 +9,7 @@ public class AssemblyHelper
 {
     private const string X32Bit = "(32-bit)";
     private const string X64Bit = "(64-bit)";
-    private const string OdaRel = "[ODA Rel : 25.4]";
+    private const string OdaRel = "[ODA Rel : 25.8]";
     /// <summary>
     /// Call this method at the beginning of the program
     /// </summary>

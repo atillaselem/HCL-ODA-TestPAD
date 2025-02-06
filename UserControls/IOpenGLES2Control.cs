@@ -50,5 +50,7 @@ namespace HCL_ODA_TestPAD.UserControls
         void Zoom(ZoomType type);
         void ShowTool(HclToolType type);
         void SaveAsVsfx(string fileName);
+        void ApplyFillColor();
+        void ShowLayers();
     }
 }

@@ -6,6 +6,7 @@
     xmlns:views="clr-namespace:HCL_ODA_TestPAD.Views"
     xmlns:vms="clr-namespace:HCL_ODA_TestPAD.ViewModels"
     xmlns:vms_base="clr-namespace:HCL_ODA_TestPAD.ViewModels.Base"
+    xmlns:ice="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
     DispatcherUnhandledException="Application_DispatcherUnhandledException">
     <Application.Resources>
         <ResourceDictionary>
@@ -102,6 +103,8 @@
             <BitmapImage x:Key="StationImg" UriSource="pack://application:,,,/Images/HCL/Tools/Station.png" />
             <BitmapImage x:Key="PrismImg" UriSource="pack://application:,,,/Images/HCL/Tools/Prism.png" />
             <BitmapImage x:Key="PointsImg" UriSource="pack://application:,,,/Images/HCL/Tools/Points.png" />
+            <BitmapImage x:Key="FillColorImg" UriSource="pack://application:,,,/Images/HCL/Tools/FillColor.png" />
+            <BitmapImage x:Key="LayersImg" UriSource="pack://application:,,,/Images/HCL/Tools/Layers.png" />
             <!--  Sectioning images  -->
             <BitmapImage x:Key="AddCuttingPlaneX" UriSource="pack://application:,,,/Images/Sectioning/AddCuttingPlaneX.png" />
             <BitmapImage x:Key="AddCuttingPlaneY" UriSource="pack://application:,,,/Images/Sectioning/AddCuttingPlaneY.png" />
@@ -126,6 +129,40 @@
             <!--  Help images  -->
             <BitmapImage x:Key="AboutImg" UriSource="pack://application:,,,/Images/Help/about.png" />
             <BitmapImage x:Key="TabItemClose" UriSource="pack://application:,,,/Images/TabItem/CloseTabItem.png" />
+            
+            <!--  Colors  -->
+            <Color x:Key="Red">#D2051E</Color>
+            <Color x:Key="RedDark">#AB0115</Color>
+            <Color x:Key="RedDarker">#920314</Color>
+
+            <Color x:Key="White">#FFFFFF</Color>
+            <Color x:Key="NeutralMega">#F9F8F8</Color>
+            <Color x:Key="NeutralUltra">#F3F2F0</Color>
+            <Color x:Key="HeavyConcrete20">#e7e5e2</Color>
+            <Color x:Key="Steel20">#DCDCDD</Color>
+            <Color x:Key="Steel40">#BAB9BA</Color>
+            <Color x:Key="Steel60">#979598</Color>
+            <Color x:Key="Steel">#524F53</Color>
+            <Color x:Key="SteelDark">#29282a</Color>
+            <Color x:Key="Black">#000000</Color>
+
+            <Color x:Key="SignalError">#AB0115</Color>
+            <Color x:Key="SignalError.50">#80AB0115</Color>
+            <Color x:Key="SignalSuccess">#19AF37</Color>
+            <Color x:Key="SignalSuccess.25">#4019AF37</Color>
+            <Color x:Key="SignalWarning">#FFAF00</Color>
+
+            <Color x:Key="Blue">#3A5486</Color>
+            <Color x:Key="ScaffoldL2">#83d4a2</Color>
+            <Color x:Key="SandD1">#8F6413</Color>
+            <Color x:Key="RedBright">#FF0624</Color>
+
+            <Color x:Key="Transparent">#00FFFFFF</Color>
+            <Color x:Key="White.50">#80FFFFFF</Color>
+            <Color x:Key="White.75">#C3FFFFFF</Color>
+            <Color x:Key="Black.75">#c3000000</Color>
+
+            <Color x:Key="Selection">#DCDCDD</Color>
 
             <LinearGradientBrush x:Key="exTabControlItemNormalBG" StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Offset="0" Color="#FFFCFDFD" />
@@ -164,6 +201,10 @@
                 <GradientStop Offset="0.0" Color="Azure" />
                 <GradientStop Offset="0.85" Color="LightSteelBlue" />
             </LinearGradientBrush>
+            <SolidColorBrush
+                x:Key="Brushes.CadButton.Border"
+                ice:Freeze="True"
+                Color="{StaticResource Steel60}" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

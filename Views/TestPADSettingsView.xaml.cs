@@ -13,7 +13,6 @@ namespace HCL_ODA_TestPAD.Views
     /// </summary>
     public partial class TestPadSettingsView : UserControl
     {
-        //private readonly ISettingsProvider _trSettings;
         public TestPadSettingsViewModel Vm { get; set; }
         public TestPadSettingsView()
         {

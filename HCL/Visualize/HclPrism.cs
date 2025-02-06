@@ -13,27 +13,12 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
         {
             HclTooling = hclTooling;
         }
-        public override void UpdateOrientation()
-        {
-            var tvModel = new TvModel(TvModelId);
-            tvModel.UpdateEntityOrientation(HclTooling.GetViewId(), VisibleEntityDict.Values.ToArray());
-        }
 
-        public void UpdatePrismVisibility()
-        {
-            var tvModel = new TvModel(TvModelId);
-            tvModel.Show();
-        }
-        public override void UpdateTransformations(double scaleFactor)
-        {
-            ScaleModelAtEntityLevel(scaleFactor);
-            UpdateOrientation();
-            UpdatePrismVisibility();
-        }
         public override void UpdateViewTransformation()
         {
             var tvModel = new TvModel(TvModelId);
             tvModel.UpdateModelViewTransformations(HclTooling.GetViewId(), ToolLocationList, VisibleEntityDict.Values.ToArray());
+            tvModel.UpdateCrossViewTransformations(HclTooling.GetViewId(), CrossLocationList, CrossHairDict.Values.ToArray());
         }
 
         public override void Remove()
@@ -42,6 +27,10 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             model.RemoveModel(HclTooling);
             ToolLocationList.ForEach(p => p.Dispose());
             ToolLocationList.Clear();
+            VisibleEntityDict.Clear();
+            CrossHairDict.Clear();
+            CrossLocationList.ForEach(p => p.Dispose());
+            CrossLocationList.Clear();
             Dispose();
         }
 

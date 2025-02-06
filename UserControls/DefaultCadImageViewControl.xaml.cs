@@ -15,6 +15,7 @@ using System.IO;
 using System.Threading;
 using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.HCL.UserActions.States;
+using HCL_ODA_TestPAD.Views;
 
 namespace HCL_ODA_TestPAD.UserControls;
 
@@ -444,5 +445,23 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
     {
         _vmAdapter.ShowTool(type);
     }
-
+    public void ApplyFillColor()
+    {
+        _vmAdapter.ApplyFillColor();
+    }
+    public void ShowLayers()
+    {
+        var cadLayersView = new CadLayersView();
+        var cadLayersViewModel = new CadLayersViewModel(_serviceFactory);
+        cadLayersView.DataContext = cadLayersViewModel;
+        Window window = new Window
+        {
+            Title = "CAD Layers Panel",
+            Content = cadLayersView,
+            SizeToContent = SizeToContent.WidthAndHeight,
+            ResizeMode = ResizeMode.NoResize,
+            WindowStartupLocation = WindowStartupLocation.CenterScreen
+        };
+        window.Show();
+    }
 }

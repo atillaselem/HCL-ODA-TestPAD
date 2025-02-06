@@ -8,6 +8,12 @@ namespace HCL_ODA_TestPAD.HCL.CAD.Math.API
 {
     internal static class CadMathViewExtensions
     {
+        internal static CadVector3D CsXVector(this OdTvGsViewId @this)
+        {
+            using var view = @this.GsView();
+            using var eyeToWorldMatrix = view?.eyeToWorldMatrix();
+            return eyeToWorldMatrix?.getCsXAxis() ?? CadVector3D.Default;
+        }
         internal static CadVector3D UpVector(this OdTvGsViewId @this)
         {
             using var view = @this.GsView();
@@ -29,7 +35,7 @@ namespace HCL_ODA_TestPAD.HCL.CAD.Math.API
             return direction.Normalize();
         }
 
-        private static CadVector3D DirectionVector(this OdTvGsViewId @this)
+        internal static CadVector3D DirectionVector(this OdTvGsViewId @this)
         {
             using var position = Position(@this);
             using var target = Target(@this);

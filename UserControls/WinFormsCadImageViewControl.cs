@@ -886,6 +886,8 @@ namespace HCL_ODA_TestPAD.UserControls
             this.Cursor = Cursors.Default;
             _mm.StopTransaction(mtr);
         }
+
+
         public uint GetCadDbUnitAsCadFileUnit(OdTvDatabase odTvDatabase)
         {
             //Set model units in the database
@@ -1978,6 +1980,15 @@ namespace HCL_ODA_TestPAD.UserControls
         }
 
         public void SaveAsVsfx(string fileName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ApplyFillColor()
+        {
+            throw new NotImplementedException();
+        }
+        public void ShowLayers()
         {
             throw new NotImplementedException();
         }

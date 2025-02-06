@@ -585,6 +585,7 @@ public class MainWindowViewModel : BindableBase
         key.Close();
 
         ClearRenderArea();
+        ResetAllMenuButtons();
         if (_hclGles2Control == null)
             AddView();
 
@@ -892,6 +893,22 @@ public class MainWindowViewModel : BindableBase
         //_hclGLES2_Control.Focus();
     }
 
+    public void ResetAllMenuButtons()
+    {
+        AppMainWindow.PanBtn.IsChecked = true;
+        AppMainWindow.OrbitBtn.IsChecked = false;
+        AppMainWindow.ZoomToAreaBtn.IsChecked = false;
+        AppMainWindow.PerspectiveBtn.IsChecked = false;
+        AppMainWindow.IsometricBtn.IsChecked = false;
+        AppMainWindow.Wireframe2DBtn.IsChecked = false;
+        AppMainWindow.Wireframe3DBtn.IsChecked = false;
+        AppMainWindow.HiddenLineBtn.IsChecked = false;
+        AppMainWindow.ShadedBtn.IsChecked = false;
+        AppMainWindow.ShadedWithEdgesBtn.IsChecked = false;
+        AppMainWindow.HclToolStationBtn.IsChecked = false;
+        AppMainWindow.HclToolPrismBtn.IsChecked = false;
+        AppMainWindow.HclToolPointsBtn.IsChecked = false;
+    }
     public void SetRenderModeButton(OdTvGsView_RenderMode mode)
     {
         AppMainWindow.Wireframe2DBtn.IsChecked = false;
@@ -987,6 +1004,12 @@ public class MainWindowViewModel : BindableBase
                 break;
             case "Points":
                 _hclGles2Control.ShowTool(HclToolType.Points);
+                break;
+            case "FillColor":
+                _hclGles2Control.ApplyFillColor();
+                break;
+            case "CadLayers":
+                _hclGles2Control.ShowLayers();
                 break;
         }
         //_hclGLES2_Control.Focus();

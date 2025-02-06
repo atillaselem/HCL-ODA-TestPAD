@@ -35,6 +35,8 @@ using System.Security;
 using HCL_ODA_TestPAD.HCL.UserActions.States;
 using HCL_ODA_TestPAD.HCL.Profiler;
 using Microsoft.Extensions.Logging;
+using HCL_ODA_TestPAD.Mvvm;
+using HCL_ODA_TestPAD.Utility;
 
 namespace HCL_ODA_TestPAD.ViewModels;
 public enum VisibleEntityType
@@ -42,7 +44,10 @@ public enum VisibleEntityType
     PrismImageEntity,
     ArrowLineEntity,
     ArrowEntity,
-    StationImageEntity
+    StationImageEntity,
+    PrismCircleEntity,
+    CrossHairFirstEntity,
+    CrossHairSecondEntity
 }
 
 public class HclCadImageViewModel : CadImageTabViewModelBase,
@@ -60,7 +65,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     #endregion
 
     #region Image Bufferring Variables
-    bool _isInitialized, _isFileLoading;
+    bool _isInitialized, _isFileLoading, _isIfc;
     static int _widthResized, _heightResized;
     private CadImageViewModel _cadImageViewModel;
     #endregion
@@ -150,8 +155,8 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     {
         HclPrismBuilder.Dispose(this);
         ShowTool(HclToolType.Prism);
-        //_hclPrism?.UpdateViewTransformation();
-        //UpdateCadView();
+        Zoom(ZoomType.ZoomIn);
+        Zoom(ZoomType.ZoomOut);
     }
 
     private void AddDefaultView()
@@ -447,7 +452,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
             EmitFileLoadedEvents();
 
             _isFileLoading = true;
-
+            _isIfc = taskIsIfc;
             _cadModel.TvGsDeviceId = TvGsDeviceId;
 
             //Zoom(ZoomType.ZoomExtents);
@@ -502,7 +507,21 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         ViewControl?.SetFileLoaded(true, FilePath, (statusText) => ServiceFactory.EventSrv.GetEvent<AppStatusTextChanged>().Publish(statusText));
         ServiceFactory.EventSrv.GetEvent<CadModelLoadedEvent>().Publish(FilePath);
     }
-
+    public OdTvModel GetDefaultModel()
+    {
+        using var odTvDatabase = TvDatabaseId.openObject();
+        using var modelsIterator = odTvDatabase.getModelsIterator();
+        for (; !modelsIterator.done(); modelsIterator.step())
+        {
+            using var odTvModelId = modelsIterator.getModel();
+            var odTvModel = odTvModelId.openObject(OdTv_OpenMode.kForRead);
+            if (!odTvModelId.isNull())
+            {
+                return odTvModel;
+            }
+        }
+        throw new InvalidOperationException("No model found in the database");
+    }
     public uint GetCadDbUnitAsCadFileUnit(OdTvDatabase odTvDatabase)
     {
         //Set model units in the database
@@ -612,7 +631,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
                 dwgPmtrs.setDCRect(new OdTvDCRect(0, (int)_widthResized, (int)_heightResized, 0));
                 dwgPmtrs.setObjectNaming(ServiceFactory.AppSettings.DwgSetObjectNaming);
                 dwgPmtrs.setStoreSourceObjects(ServiceFactory.AppSettings.DwgSetStoreSourceObjects);
-                dwgPmtrs.setFeedbackForChooseCallback(null);
+                dwgPmtrs.setFeedbackForChooseCallback(PCallback);
                 dwgPmtrs.setImportFrozenLayers(ServiceFactory.AppSettings.DwgSetImportFrozenLayers);
                 dwgPmtrs.setClearEmptyObjects(ServiceFactory.AppSettings.DwgSetClearEmptyObjects);
                 dwgPmtrs.setNeedCDATree(ServiceFactory.AppSettings.DwgSetNeedCdaTree);
@@ -623,6 +642,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
                 var tvIfcImportParams = new OdTvIfcImportParams();
                 tvIfcImportParams.setNeedCDATree(ServiceFactory.AppSettings.IfcSetNeedCdaTree);
                 tvIfcImportParams.setNeedCollectPropertiesInCDA(ServiceFactory.AppSettings.IfcSetNeedCollectPropertiesInCda);
+                tvIfcImportParams.setFeedbackForChooseCallback(PCallbackForIfc);
                 isIfc = true;
                 importParams = tvIfcImportParams;
             }
@@ -657,6 +677,10 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         {
             contexts[0].m_bChosen = true;
         }
+    }
+    private static void PCallbackForIfc(OdTvFilerFeedbackForChooseObject argument)
+    {
+
     }
 
     private void Init()
@@ -2319,6 +2343,7 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
         ClearDatabases();
         ViewControl?.SetFileLoaded(false, FilePath, (statusText) => ServiceFactory.EventSrv.GetEvent<AppStatusTextChanged>().Publish(statusText));
         _isFileLoading = false;
+        _isIfc = false;
         ServiceFactory.EventSrv.GetEvent<PrismTypeChangedEvent>().Unsubscribe(OnPrismTypeChanged);
     }
 
@@ -2474,5 +2499,37 @@ public class HclCadImageViewModel : CadImageTabViewModelBase,
     {
         _hclPointContainer?.TogglePointText(showText);
         UpdateCadView();
+    }
+
+    internal void ApplyFillColor()
+    {
+        OverrideEntityColor();
+        UpdateCadView();
+    }
+    private void OverrideEntityColor()
+    {
+        using var defaultModel = GetDefaultModel();
+        HiltiCadConstants.DefaultModelName = defaultModel.getName();
+        using var defaultIt = defaultModel.getEntitiesIterator();
+        var settingsColor = ResourcesResolver.ResolveResource<Color>(ServiceFactory.AppSettings.FillColor.ToString())
+            .ToDrawingColor();
+
+        using var color = new OdTvColorDef(settingsColor.R, settingsColor.G, settingsColor.B);
+        while (!defaultIt.done())
+        {
+            using var entity = defaultIt.getEntity();
+            defaultIt.step();
+            if (entity is null || entity.isNull() || entity.getType() != OdTvEntityId_EntityTypes.kEntity)
+            {
+                continue;
+            }
+            using var entityOpen = entity.openObject(OdTv_OpenMode.kForRead);
+            entityOpen.setColor(color);
+            //for ifc file, apply color to also sub-entity
+            if (_isIfc)
+            {
+                entityOpen.OverrideSubEntityColor(color);
+            }
+        }
     }
 }

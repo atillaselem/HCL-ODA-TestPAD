@@ -4,6 +4,7 @@ using HCL_ODA_TestPAD.HCL.Visualize;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 using ODA.Visualize.TV_Visualize;
 using System.ComponentModel.DataAnnotations;
+using System.Drawing;
 
 namespace HCL_ODA_TestPAD.Settings;
 
@@ -39,6 +40,24 @@ public enum HPLReflector
     ReflectiveSticker,
     SlidingPrism,
     WallPrism
+}
+
+public enum FillColor
+{
+    White,
+    NeutralMega,
+    NeutralUltra,
+    HeavyConcrete20,
+    Steel20,
+    Steel40,
+    Steel60,
+    Steel,
+    SteelDark,
+    Black,
+    Blue,
+    ScaffoldL2,
+    SandD1,
+    RedBright
 }
 
 [CategoryOrder("OpenGLES2 Device", 1)]
@@ -214,6 +233,10 @@ public record AppSettings
     [DisplayName("Point Color")]
     [Description("Color of the points to be created if not random")]
     public PointColor PointColor { get; init; }
+    [Category("HCL CAD Domain")]
+    [DisplayName("Fill Color")]
+    [Description("Color of the entities to be filled with")]
+    public FillColor FillColor { get; init; }
     #endregion
 
     #region HCL Point Optimization

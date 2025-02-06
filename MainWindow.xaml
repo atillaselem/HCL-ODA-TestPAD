@@ -706,6 +706,21 @@
                 <Image Source="{StaticResource PointsImg}" Style="{StaticResource HclImageStyle}" />
             </ToggleButton>
 
+            <Button
+                Command="{Binding HclCommand}"
+                CommandParameter="FillColor"
+                Style="{StaticResource ButtonStyle}"
+                ToolTip="Fill Color">
+                <Image Source="{StaticResource FillColorImg}" Style="{StaticResource HclImageStyle}" />
+            </Button>
+
+            <Button
+                Command="{Binding HclCommand}"
+                CommandParameter="CadLayers"
+                Style="{StaticResource ButtonStyle}"
+                ToolTip="CAD Layers">
+                <Image Source="{StaticResource LayersImg}" Style="{StaticResource HclImageStyle}" />
+            </Button>
         </StackPanel>
 
         <!--  Markup button panel  -->

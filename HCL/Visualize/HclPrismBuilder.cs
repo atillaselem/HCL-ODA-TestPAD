@@ -6,6 +6,7 @@ using HCL_ODA_TestPAD.ViewModels.Base;
 using ODA.Kernel.TD_RootIntegrated;
 using ODA.Visualize.TV_Visualize;
 using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 
@@ -17,7 +18,7 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
         private static IHclTooling _hclTooling;
         private const double PixelFactor = 100;
         private static CadPoint3D _location;
-        private static double s_ArrowLength;
+        private static double _sArrowLength;
         public static HclPrism ShowPrism(IHclTooling hclViewModel, CadPoint3D location)
         {
             _hclTooling = hclViewModel;
@@ -55,6 +56,10 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             _hclPrism.TvModelId = tvDatabase.createModel("Tv_Model_Prism", OdTvModel_Type.kDirect);
             using var odTvGsView = odTvGsViewId.openObject(OdTv_OpenMode.kForWrite);
             odTvGsView.addModel(_hclPrism.TvModelId);
+            using var odTvDeviceId = odTvGsView.device();
+            using var odTvDevice = odTvDeviceId.openObject();
+            odTvDevice.invalidate();
+            odTvDevice.update();
             return _hclPrism;
         }
         private static void AppendArrow()
@@ -89,8 +94,8 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             arrow.IsSliceable = false;
             arrow.LineWeight = LineWeightType.BoldL;
             var reflector = _hclTooling.ServiceFactory.AppSettings.PrismType;
-            s_ArrowLength = scaleFactor * GetArrowLength(reflector);
-            using var arrowLength = upVec.Mul(s_ArrowLength);
+            _sArrowLength = scaleFactor * GetArrowLength(reflector);
+            using var arrowLength = upVec.Mul(_sArrowLength);
 
             using var lineStartPoint = CadPoint3D.With(startLocation);
 
@@ -109,20 +114,23 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             using var geometry = polygon.openObject();
             using var color = new OdTvColorDef(arrow.Color.R, arrow.Color.G, arrow.Color.B);
             geometry.setColor(color);
-            _hclPrism.VisibleEntityDict.Add(VisibleEntityType.ArrowEntity, entityArrow.getDatabaseHandle());
+            _hclPrism.AddVisibleEntity(VisibleEntityType.ArrowEntity, entityArrow.getDatabaseHandle());
             _hclPrism.AddLocation(startLocation);
 
             using var entityArrowLine = tvModel.OpenEntity("ToolPrism_ArrowLine");
             entityArrowLine.setLineWeight(lineWeight);
             using var polyLineGeometryId = entityArrowLine.appendPolyline(arrowLine.StartLoc, arrowLine.EndLoc);
-            var entityHandle = entityArrowLine.getDatabaseHandle();
-            _hclPrism.VisibleEntityDict.Add(VisibleEntityType.ArrowLineEntity, entityHandle);
+            _hclPrism.AddVisibleEntity(VisibleEntityType.ArrowLineEntity, entityArrowLine.getDatabaseHandle());
             _hclPrism.AddLocation(startLocation);
         }
         private static void AppendCircle()
         {
             using var odTvGsViewId = _hclTooling.GetViewId();
             var radius = odTvGsViewId.GetPixelScaleFactorAtViewTarget(PixelFactor);
+
+            //var (extentMin, extentMax) = _hclTooling.GetViewExtent();
+            //radius = extentMin.DistanceTo(extentMax);
+
             using var cadCircle = new CadCircle(radius, _location);
             cadCircle.Normal = CadVector3D.With(0, 0, 1);
             cadCircle.LineWeight = LineWeightType.BoldL;
@@ -130,11 +138,14 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             using var entity = tvModel.OpenEntity("ToolPrism_Circle");
             using var lineWeight = new OdTvLineWeightDef((byte)cadCircle.LineWeight);
             entity.setLineWeight(lineWeight);
+
             using var arc = new OdGeCircArc3d(cadCircle.CenterLoc, cadCircle.Normal, cadCircle.Radius);
             using var points = new OdGePoint3dArray();
             arc.getSamplePoints(60, points);
             points.Add(points.First());
             using var polylineId = entity.appendPolyline(points.Select(p => p).ToArray());
+            _hclPrism.AddCrossHairEntity(VisibleEntityType.PrismCircleEntity, entity.getDatabaseHandle());
+            _hclPrism.AddCrossLocation(_location);
             _hclTooling.LastRadius = radius;
         }
         private static void AppendCrossLines()
@@ -154,17 +165,24 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             using var secondCrossLine = new CadLine(secondLineStartLoc, secondLineEndLoc);
 
             using var lineWeight = new OdTvLineWeightDef((byte)LineWeightType.BoldL);
-
+            var color = Color.FromArgb(0, 255, 0);
+            using var colorDef = new OdTvColorDef(color.R, color.G, color.B);
             var tvModel = new TvModel(_hclPrism.TvModelId);
             using var entityFirstId = tvModel.AppendEntity("ToolPrism_CrossHairFirstLine");
             using var entityFirst = entityFirstId.openObject(OdTv_OpenMode.kForWrite);
             entityFirst.setLineWeight(lineWeight);
+            entityFirst.setColor(colorDef);
             using var lineFirst = entityFirst.appendPolyline(firstCrossLine.StartLoc, firstCrossLine.EndLoc);
+            _hclPrism.AddCrossHairEntity(VisibleEntityType.CrossHairFirstEntity, entityFirst.getDatabaseHandle());
+            _hclPrism.AddCrossLocation(_location);
 
             using var entitySecondId = tvModel.AppendEntity("ToolPrism_CrossHairSecondLine");
             using var entitySecond = entitySecondId.openObject(OdTv_OpenMode.kForWrite);
             entitySecond.setLineWeight(lineWeight);
+            entitySecond.setColor(colorDef);
             using var lineSecond = entitySecond.appendPolyline(secondCrossLine.StartLoc, secondCrossLine.EndLoc);
+            _hclPrism.AddCrossHairEntity(VisibleEntityType.CrossHairSecondEntity, entitySecond.getDatabaseHandle());
+            _hclPrism.AddCrossLocation(_location);
         }
         private static void BuildImage()
         {
@@ -196,7 +214,7 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
             var reflector = _hclTooling.ServiceFactory.AppSettings.PrismType;
 
             //OK : No Z-Axis shift
-            using var originPt = CadPoint3D.With(-width / 2, -height / 2 , s_ArrowLength);
+            using var originPt = CadPoint3D.With(-width / 2, -height / 2 , _sArrowLength);
 
             var cadRasterImage = new CadRasterImage(rasterImage, originPt, xVec, yVec);
             // Create model
@@ -207,7 +225,7 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
 
             using var eyeToWorldMatrix = odTvGsViewId.EyeToWorldMatrix();
             using var viewMatrix = odTvGsViewId.WorldToEyeMatrix();
-            using var shift = CadVector3D.With(-width / 2, height, s_ArrowLength);
+            using var shift = CadVector3D.With(-width / 2, height, _sArrowLength);
             using var transformedShift = shift.TransformWith(eyeToWorldMatrix);
 
             using var viewTransformedShift = transformedShift.TransformWith(viewMatrix);

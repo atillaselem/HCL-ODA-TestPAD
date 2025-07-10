@@ -1,12 +1,15 @@
 ﻿using ODA.Kernel.TD_RootIntegrated;
 using ODA.Visualize.TV_Visualize;
 using System;
+using System.Drawing;
+using HCL_ODA_TestPAD.Settings;
 
 namespace HCL_ODA_TestPAD.HCL.Visualize
 {
     public enum HighlightStyle
     {
-        Red,
+        Default,
+        EntityGeometry,
         Point
     }
     public class TvStyle
@@ -53,21 +56,22 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
 #pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
         }
 
-        public void CreateHighlightStyle(HighlightStyle styleType)
+        public void CreateHighlightStyle(HighlightStyle styleType, HighlightColor highLightColor, HighlightColor faceHighlightColor)
         {
             var styleId = _database.createHighlightStyle(styleType.ToString());
             using var highlightStyle = styleId.openObject(OdTv_OpenMode.kForWrite);
-
-            using var color = new OdTvRGBColorDef(CadModelConstants.HighlightColor.R, CadModelConstants.HighlightColor.G, CadModelConstants.HighlightColor.B);
-            using var faceColor = new OdTvRGBColorDef(CadModelConstants.FaceHighlightColor.R, CadModelConstants.FaceHighlightColor.G, CadModelConstants.FaceHighlightColor.B);
-            var lineWeight = styleType == HighlightStyle.Red ? LineWeightType.BoldS : LineWeightType.Normal;
+            var colorFromName = Color.FromName(highLightColor.ToString());
+            var faceColorFromName = Color.FromName(faceHighlightColor.ToString());
+            using var highColor = new OdTvRGBColorDef(colorFromName.R, colorFromName.G, colorFromName.B);
+            using var faceColor = new OdTvRGBColorDef(faceColorFromName.R, faceColorFromName.G, faceColorFromName.B);
+            var lineWeight = styleType == HighlightStyle.EntityGeometry ? LineWeightType.BoldS : LineWeightType.Normal;
             const uint Entries = (uint)OdTvHighlightStyle_Entry.k2D | (uint)OdTvHighlightStyle_Entry.k3D;
 
-            highlightStyle.setEdgesColor(Entries, color);
+            highlightStyle.setEdgesColor(Entries, highColor);
             highlightStyle.setEdgesLineweight(Entries, (byte)lineWeight);
             highlightStyle.setEdgesVisibility(Entries, true);
             highlightStyle.setEdgesTransparency(Entries, 1);
-            highlightStyle.setFacesColor(Entries, styleType == HighlightStyle.Point ? color : faceColor);
+            highlightStyle.setFacesColor(Entries, styleType == HighlightStyle.Point ? highColor : faceColor);
             highlightStyle.setFacesVisibility(Entries, true);
             highlightStyle.setFacesTransparency(Entries, styleType == HighlightStyle.Point ? (byte)1 : (byte)CadModelConstants.FaceTransparency);
         }
@@ -99,6 +103,14 @@ namespace HCL_ODA_TestPAD.HCL.Visualize
                                                   CadModelConstants.LightColor.B);
 
             viewBackgroundSolid.setColorSolid(lightColorDef);
+        }
+        public void SetHighlightStyle(OdTvGsDeviceId tvDevice, string style)
+        {
+            using var devOpen = tvDevice.openObject(OdTv_OpenMode.kForWrite);
+            using var databaseId = devOpen.getDatabase();
+            using var database = databaseId.openObject(OdTv_OpenMode.kForWrite);
+            using var highlightingStyle = database.findHighlightStyle(style);
+            devOpen.setHighlightStyle(highlightingStyle);
         }
     }
 }

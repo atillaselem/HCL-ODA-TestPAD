@@ -1992,6 +1992,17 @@ namespace HCL_ODA_TestPAD.UserControls
         {
             throw new NotImplementedException();
         }
+
+        public void ToggleSelectionWindow()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnClickSelectionMenu(string parameter)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

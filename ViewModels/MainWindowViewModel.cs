@@ -21,9 +21,39 @@ namespace HCL_ODA_TestPAD.ViewModels;
 
 public class MainWindowViewModel : BindableBase
 {
+    #region Variables
+
     private readonly IServiceFactory _serviceFactory;
     public AppStatusBarViewModel AppStatusBarViewModel { get; set; }
     public OverlayViewModel OverlayViewModel { get; }
+    public MainWindow AppMainWindow { get; set; }
+    private IOpenGles2Control _hclGles2Control;
+    public IOpenGles2Control WpfView
+    {
+        get { return _hclGles2Control; }
+    }
+
+    private WindowsFormsHost _winHost = null;
+
+    private ResourceDictionary _resources = App.Current.Resources;
+
+    public double CurrentPropertiesWidth = 230;
+
+    private static int _numSaveFile = 0;
+
+    [Flags]
+    public enum AppearanceOptions
+    {
+        FpsEnabled = 1,
+        WcsEnabled = 2,
+        UseAnimation = 4,
+        ViewCubeEnabled = 8
+    }
+
+    //private MemoryManager MM = MemoryManager.GetMemoryManager();
+    #endregion
+
+    #region Constructor & Initialization & Shutdown
     public MainWindowViewModel(IServiceFactory serviceFactory,
         AppStatusBarViewModel appStatusBarViewModel, OverlayViewModel overlayViewModel)
     {
@@ -31,8 +61,63 @@ public class MainWindowViewModel : BindableBase
         AppStatusBarViewModel = appStatusBarViewModel;
         OverlayViewModel = overlayViewModel;
     }
+    public void AddView(bool addView = false)
+    {
+        if (_serviceFactory.AppSettings.RenderDevice == RenderDevice.OpenGlBitmap)
+        {
+            _hclGles2Control = new DefaultCadImageViewControl(
+                this, _serviceFactory, OverlayViewModel);
+            _hclGles2Control.AddDefaultViewOnLoad = addView;
+            AppMainWindow.RenderArea.Children.Add((DefaultCadImageViewControl)_hclGles2Control);
+        }
+        else
+        {
+            _hclGles2Control = new WinFormsCadImageViewControl(
+                this, _serviceFactory);
+            _winHost = new WindowsFormsHost();
+            _winHost.Child = (WinFormsCadImageViewControl)_hclGles2Control;
+            AppMainWindow.RenderArea.Children.Add(_winHost);
+        }
+        CadProfiler.TryUseIt();
+    }
+    internal void ClearRenderArea()
+    {
+        if (_hclGles2Control == null) return;
+        if (AppMainWindow.RenderArea.Children.Count > 0)
+        {
+            AppMainWindow.RenderArea.Children.RemoveAt(AppMainWindow.RenderArea.Children.Count - 1);
+        }
+        _hclGles2Control = null;
+        FileIsExist = false;
+    }
 
-    //private MemoryManager MM = MemoryManager.GetMemoryManager();
+    #endregion
+
+    #region Visibilities of Menus
+    public void ResetAllMenuButtons()
+    {
+        AppMainWindow.PanBtn.IsChecked = true;
+        AppMainWindow.OrbitBtn.IsChecked = false;
+        AppMainWindow.ZoomToAreaBtn.IsChecked = false;
+        AppMainWindow.PerspectiveBtn.IsChecked = false;
+        AppMainWindow.IsometricBtn.IsChecked = false;
+        AppMainWindow.Wireframe2DBtn.IsChecked = false;
+        AppMainWindow.Wireframe3DBtn.IsChecked = false;
+        AppMainWindow.HiddenLineBtn.IsChecked = false;
+        AppMainWindow.ShadedBtn.IsChecked = false;
+        AppMainWindow.ShadedWithEdgesBtn.IsChecked = false;
+        AppMainWindow.HclToolStationBtn.IsChecked = false;
+        AppMainWindow.HclToolPrismBtn.IsChecked = false;
+        AppMainWindow.HclToolPointsBtn.IsChecked = false;
+        AppMainWindow.CadSelectionEnableDisableBtn.IsChecked = false;
+        AppMainWindow.CadSelectionBtnMenuItemEntities.IsChecked = true;
+        AppMainWindow.CadSelectionBtnMenuItemGeometries.IsChecked = false;
+        AppMainWindow.CadSelectionBtnMenuItemAutoSelection.IsEnabled = true;
+        AppMainWindow.CadSelectionBtnMenuItemAutoSelection.IsChecked = false;
+        AppMainWindow.CadSelectionBtnMenuItemPoint.IsChecked = true;
+        AppMainWindow.CadSelectionBtnMenuItemWindow.IsChecked = false;
+        AppMainWindow.CadSelectionBtnMenuItemCrossing.IsChecked = false;
+    }
 
     private bool _fileIsExist = false;
     public bool FileIsExist
@@ -143,6 +228,17 @@ public class MainWindowViewModel : BindableBase
         }
     }
 
+    private bool _isCadSelection;
+    public bool IsCadCadSelection
+    {
+        get { return _isCadSelection; }
+        set
+        {
+            _isCadSelection = value;
+            AppMainWindow.CADSelectionPanel.Visibility = _isCadSelection ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
     private bool _isSectioning;
     public bool IsSectioning
     {
@@ -165,22 +261,8 @@ public class MainWindowViewModel : BindableBase
         }
     }
 
-    public MainWindow AppMainWindow { get; set; }
+    #endregion
 
-    private ResourceDictionary _resources = App.Current.Resources;
-
-    public double CurrentPropertiesWidth = 230;
-
-    private static int _numSaveFile = 0;
-
-    [Flags]
-    public enum AppearanceOptions
-    {
-        FpsEnabled = 1,
-        WcsEnabled = 2,
-        UseAnimation = 4,
-        ViewCubeEnabled = 8
-    }
 
     private AppearanceOptions _appearanceOpt = AppearanceOptions.UseAnimation | AppearanceOptions.ViewCubeEnabled;
 
@@ -212,43 +294,6 @@ public class MainWindowViewModel : BindableBase
         }
     }
 
-    private IOpenGles2Control _hclGles2Control;
-    public IOpenGles2Control WpfView
-    {
-        get { return _hclGles2Control; }
-    }
-
-    private WindowsFormsHost _winHost = null;
-    public void AddView(bool addView = false)
-    {
-        if(_serviceFactory.AppSettings.RenderDevice == RenderDevice.OpenGlBitmap)
-        {
-            _hclGles2Control = new DefaultCadImageViewControl(
-                this, _serviceFactory, OverlayViewModel);
-            _hclGles2Control.AddDefaultViewOnLoad = addView;
-            AppMainWindow.RenderArea.Children.Add((DefaultCadImageViewControl)_hclGles2Control);
-        }
-        else
-        {
-            _hclGles2Control = new WinFormsCadImageViewControl(
-                this, _serviceFactory);
-            _winHost = new WindowsFormsHost();
-            _winHost.Child = (WinFormsCadImageViewControl)_hclGles2Control;
-            AppMainWindow.RenderArea.Children.Add(_winHost);
-        }
-        CadProfiler.TryUseIt();
-    }
-
-    internal void ClearRenderArea()
-    {
-        if (_hclGles2Control == null) return;
-        if (AppMainWindow.RenderArea.Children.Count > 0)
-        {
-            AppMainWindow.RenderArea.Children.RemoveAt(AppMainWindow.RenderArea.Children.Count - 1);
-        }
-        _hclGles2Control = null;
-        FileIsExist = false;
-    }
 
     #region Appearance commands
 
@@ -269,12 +314,11 @@ public class MainWindowViewModel : BindableBase
         IsStyle = false;
         IsRegen = false;
         IsHcl = false;
+        IsCadCadSelection = false;
         IsDrawing = false;
         IsMarkup = false;
         IsSectioning = false;
         IsPanels = false;
-        //if (_hclGLES2_Control != null)
-        //    _hclGLES2_Control.OnAppearSectioningPanel(false);
     }
 
     // navigation menu switched command
@@ -288,7 +332,7 @@ public class MainWindowViewModel : BindableBase
     {
         ResetMenuFlags();
         IsNavigation = true;
-        PlayNavRectAnimation(600);
+        PlayNavRectAnimation(700);
     }
 
     // View menu switched command
@@ -302,7 +346,7 @@ public class MainWindowViewModel : BindableBase
     {
         ResetMenuFlags();
         IsView = true;
-        PlayNavRectAnimation(500);
+        PlayNavRectAnimation(600);
     }
 
     // Projection menu switched command
@@ -316,7 +360,7 @@ public class MainWindowViewModel : BindableBase
     {
         ResetMenuFlags();
         IsProjection = true;
-        PlayNavRectAnimation(400);
+        PlayNavRectAnimation(500);
     }
 
     // Style menu switched command
@@ -330,7 +374,7 @@ public class MainWindowViewModel : BindableBase
     {
         ResetMenuFlags();
         IsStyle = true;
-        PlayNavRectAnimation(300);
+        PlayNavRectAnimation(400);
     }
 
     // Markup menu switched command
@@ -372,7 +416,7 @@ public class MainWindowViewModel : BindableBase
     {
         ResetMenuFlags();
         IsRegen = true;
-        PlayNavRectAnimation(200);
+        PlayNavRectAnimation(300);
     }
 
     // Regen menu switched command
@@ -610,8 +654,6 @@ public class MainWindowViewModel : BindableBase
     {
         if (_hclGles2Control == null)
             AddView();
-        //_hclGLES2_Control.CreateNewFile();
-        //_hclGLES2_Control.Focus();
     }
 
     // Save command
@@ -710,8 +752,6 @@ public class MainWindowViewModel : BindableBase
 
         if (dlg.FileName.Length > 0)
             _hclGles2Control.ExportToPdf(dlg.FileName, is2D);
-
-        //_hclGLES2_Control.Focus();
     }
 
     #endregion
@@ -736,9 +776,7 @@ public class MainWindowViewModel : BindableBase
         AppMainWindow.OrbitBtn.IsChecked = false;
         AppMainWindow.ZoomToAreaBtn.IsChecked = false;
         AppMainWindow.PanBtn.IsChecked = true;
-        _hclGles2Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
-        //then raise a click evt
-        //MainWindow.PanBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
         if (AppMainWindow.PanBtn.IsChecked == true)
             _hclGles2Control.Pan();
         else
@@ -758,7 +796,7 @@ public class MainWindowViewModel : BindableBase
     {
         AppMainWindow.PanBtn.IsChecked = false;
         AppMainWindow.ZoomToAreaBtn.IsChecked = false;
-        _hclGles2Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
+        //_hclGles2Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
         if (AppMainWindow.OrbitBtn.IsChecked == true)
             _hclGles2Control.Orbit();
         else
@@ -797,6 +835,11 @@ public class MainWindowViewModel : BindableBase
 
     public void ZoomToAreaCommand_Clicked()
     {
+        if(AppMainWindow.ZoomToAreaBtn.IsChecked == false)
+        {
+            PanCommand_Clicked();
+            return;
+        }
         AppMainWindow.PanBtn.IsChecked = false;
         AppMainWindow.OrbitBtn.IsChecked = false;
         _hclGles2Control.ZoomToArea(AppMainWindow.ZoomToAreaBtn.IsChecked == true);
@@ -855,7 +898,7 @@ public class MainWindowViewModel : BindableBase
 
     #endregion
 
-    #region View settings
+    #region Render commands
 
     // render mode commands
     private RelayCommand _renderModeCommand;
@@ -891,23 +934,6 @@ public class MainWindowViewModel : BindableBase
                 break;
         }
         //_hclGLES2_Control.Focus();
-    }
-
-    public void ResetAllMenuButtons()
-    {
-        AppMainWindow.PanBtn.IsChecked = true;
-        AppMainWindow.OrbitBtn.IsChecked = false;
-        AppMainWindow.ZoomToAreaBtn.IsChecked = false;
-        AppMainWindow.PerspectiveBtn.IsChecked = false;
-        AppMainWindow.IsometricBtn.IsChecked = false;
-        AppMainWindow.Wireframe2DBtn.IsChecked = false;
-        AppMainWindow.Wireframe3DBtn.IsChecked = false;
-        AppMainWindow.HiddenLineBtn.IsChecked = false;
-        AppMainWindow.ShadedBtn.IsChecked = false;
-        AppMainWindow.ShadedWithEdgesBtn.IsChecked = false;
-        AppMainWindow.HclToolStationBtn.IsChecked = false;
-        AppMainWindow.HclToolPrismBtn.IsChecked = false;
-        AppMainWindow.HclToolPointsBtn.IsChecked = false;
     }
     public void SetRenderModeButton(OdTvGsView_RenderMode mode)
     {
@@ -945,6 +971,9 @@ public class MainWindowViewModel : BindableBase
         //_hclGLES2_Control.Focus();
     }
 
+    #endregion
+
+
     // background color command
     private RelayCommand _bgCommand;
     public RelayCommand BackgroundCommand
@@ -960,7 +989,7 @@ public class MainWindowViewModel : BindableBase
         //_hclGLES2_Control.Focus();
     }
 
-    // regen commands
+    #region Regen commands
     private RelayCommand _regenCommand;
     public RelayCommand RegenCommand
     {
@@ -981,10 +1010,11 @@ public class MainWindowViewModel : BindableBase
                 _hclGles2Control.Regen();
                 break;
         }
-        //_hclGLES2_Control.Focus();
     }
+    #endregion
+    // regen commands
 
-#region HCL Commands
+    #region HCL Commands
 
     // HCL commands
     private RelayCommand _hclCommand;
@@ -1009,7 +1039,7 @@ public class MainWindowViewModel : BindableBase
                 _hclGles2Control.ApplyFillColor();
                 break;
             case "CadLayers":
-                _hclGles2Control.ShowLayers();
+                //_hclGles2Control.ShowLayers();
                 break;
         }
         //_hclGLES2_Control.Focus();
@@ -1026,9 +1056,38 @@ public class MainWindowViewModel : BindableBase
     {
         ResetMenuFlags();
         IsHcl = true;
-        PlayNavRectAnimation(100);
+        PlayNavRectAnimation(200);
     }
-#endregion
+    #endregion
+
+    #region CAD Selection
+
+        // HCL commands
+        private RelayCommand _cadSelectionWindowCommand;
+        public RelayCommand CadSelectionCommand
+        {
+            get { return _cadSelectionWindowCommand ?? (_cadSelectionWindowCommand = new RelayCommand(param => CadSelectionWindowCommand_Clicked(param), param => FileIsExist)); }
+        }
+        private void CadSelectionWindowCommand_Clicked(object param)
+        {
+            _hclGles2Control.OnClickSelectionMenu(param.ToString());
+        }
+        // Hcl menu switched command
+        private RelayCommand _cadSelectionMenuCommand;
+        public RelayCommand CadSelectionMenuCommand
+    {
+            get { return _cadSelectionMenuCommand ?? (_cadSelectionMenuCommand = new RelayCommand(param => CadSelectionMenuCommand_Clicked(), param => FileIsExist)); }
+        }
+
+        private void CadSelectionMenuCommand_Clicked()
+        {
+            ResetMenuFlags();
+            IsCadCadSelection = true;
+            PlayNavRectAnimation(100);
+        }
+    #endregion
+
+    #region View commands
     // View commands
     private RelayCommand _viewCommand;
     public RelayCommand ViewCommand
@@ -1073,7 +1132,9 @@ public class MainWindowViewModel : BindableBase
         }
         //_hclGLES2_Control.Focus();
     }
+    #endregion
 
+    #region Projection 
     // Projection commands
     private RelayCommand _projCommand;
     public RelayCommand ProjectionCommand

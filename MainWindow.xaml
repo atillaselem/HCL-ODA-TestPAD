@@ -113,7 +113,13 @@
             <Setter Property="Orientation" Value="Horizontal" />
             <Setter Property="Visibility" Value="Collapsed" />
         </Style>
-
+        <Style x:Key="SelectionToggleButtonImageStyle" TargetType="Image">
+            <Setter Property="Margin" Value="0,5,0,0" />
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
     </Window.Resources>
 
     <Grid x:Name="MainGrid">
@@ -157,6 +163,7 @@
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="100" />
                 <ColumnDefinition Width="100" />
                 <ColumnDefinition Width="100" />
                 <ColumnDefinition Width="100" />
@@ -321,6 +328,20 @@
                 Grid.Column="7"
                 Background="Transparent"
                 BorderThickness="0"
+                Command="{Binding CadSelectionMenuCommand}"
+                Style="{StaticResource SimpleButtonStyle}">
+                <Label
+                    Content="Selection"
+                    FontFamily="Open Sans"
+                    FontSize="19"
+                    Foreground="#C6C9E0" />
+            </Button>
+
+            <Button
+                Grid.Row="0"
+                Grid.Column="8"
+                Background="Transparent"
+                BorderThickness="0"
                 Command="{Binding DrawingMenuCommand}"
                 Style="{StaticResource SimpleButtonStyle}"
                 Visibility="Collapsed">
@@ -333,7 +354,7 @@
 
             <Button
                 Grid.Row="0"
-                Grid.Column="8"
+                Grid.Column="9"
                 Background="Transparent"
                 BorderThickness="0"
                 Command="{Binding MarkupMenuCommand}"
@@ -348,7 +369,7 @@
 
             <Button
                 Grid.Row="0"
-                Grid.Column="9"
+                Grid.Column="10"
                 Background="Transparent"
                 BorderThickness="0"
                 Command="{Binding SectioningMenuCommand}"
@@ -363,7 +384,7 @@
 
             <Button
                 Grid.Row="0"
-                Grid.Column="10"
+                Grid.Column="11"
                 Background="Transparent"
                 BorderThickness="0"
                 Command="{Binding PanelsMenuCommand}"
@@ -380,7 +401,7 @@
                 x:Name="ActiveRect"
                 Grid.Row="1"
                 Grid.Column="0"
-                Grid.ColumnSpan="8"
+                Grid.ColumnSpan="9"
                 Width="100"
                 Height="2"
                 Margin="0,0,500,0"
@@ -714,15 +735,116 @@
                 <Image Source="{StaticResource FillColorImg}" Style="{StaticResource HclImageStyle}" />
             </Button>
 
-            <Button
+            <!--<Button
                 Command="{Binding HclCommand}"
                 CommandParameter="CadLayers"
                 Style="{StaticResource ButtonStyle}"
                 ToolTip="CAD Layers">
                 <Image Source="{StaticResource LayersImg}" Style="{StaticResource HclImageStyle}" />
-            </Button>
+            </Button>-->
         </StackPanel>
 
+        <!--  CAD Selection panel  -->
+        <StackPanel
+            x:Name="CADSelectionPanel"
+            Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="5"
+            Style="{StaticResource MenuStackPanelStyle}">
+
+            <ToggleButton
+                x:Name="CadSelectionEnableDisableBtn"
+                IsChecked="False"
+                Tag="{StaticResource MenuItemSelectionEnable}"
+                Command="{Binding CadSelectionCommand}"
+                CommandParameter="{StaticResource MenuItemSelectionEnable}"
+                Style="{StaticResource ToggleBtnStyle}"
+                ToolTip="{StaticResource MenuItemSelectionDisabledToolTip}">
+                <Image>
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Setter Property="Margin" Value="0,5,0,0" />
+                            <Setter Property="Width" Value="40" />
+                            <Setter Property="Height" Value="40" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=CadSelectionEnableDisableBtn}" Value="False">
+                                    <Setter Property="Source" Value="{StaticResource CadSelectionDisabledImg}" />
+                                    <Setter Property="ToolTip" Value="{StaticResource MenuItemSelectionDisabledToolTip}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=CadSelectionEnableDisableBtn}" Value="True">
+                                    <Setter Property="Source" Value="{StaticResource CadSelectionEnabledImg}" />
+                                    <Setter Property="ToolTip" Value="{StaticResource MenuItemSelectionEnabledToolTip}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </ToggleButton>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+            <ToggleButton
+                x:Name="CadSelectionBtnMenuItemEntities"
+                IsChecked="True"
+                Tag="{StaticResource MenuItemEntities}"
+                Command="{Binding CadSelectionCommand}"
+                CommandParameter="{StaticResource MenuItemEntities}"
+                Style="{StaticResource ToggleBtnStyle}"
+                ToolTip="{StaticResource MenuItemEntitiesTooltip}">
+                <Image Source="{StaticResource CadSelectionLevelEntitiesImg}" Style="{StaticResource SelectionToggleButtonImageStyle}" />
+            </ToggleButton>
+
+            <ToggleButton
+                x:Name="CadSelectionBtnMenuItemGeometries"
+                Tag="{StaticResource MenuItemGeometries}"
+                Command="{Binding CadSelectionCommand}"
+                CommandParameter="{StaticResource MenuItemGeometries}"
+                Style="{StaticResource ToggleBtnStyle}"
+                ToolTip="{StaticResource MenuItemGeometriesTooltip}">
+                <Image Source="{StaticResource CadSelectionLevelGeometriesImg}" Style="{StaticResource SelectionToggleButtonImageStyle}" />
+            </ToggleButton>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+            <ToggleButton
+                x:Name="CadSelectionBtnMenuItemAutoSelection"
+                Command="{Binding CadSelectionCommand}"
+                CommandParameter="{StaticResource MenuItemAutoSelection}"
+                Style="{StaticResource ToggleBtnStyle}"
+                ToolTip="{StaticResource MenuItemAutoSelectionTooltip}">
+                <Image Source="{StaticResource CadSelectionAutoImg}" Style="{StaticResource SelectionToggleButtonImageStyle}" />
+            </ToggleButton>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+            <ToggleButton
+                x:Name="CadSelectionBtnMenuItemPoint"
+                IsChecked="True"
+                Tag="{StaticResource MenuItemPoint}"
+                Command="{Binding CadSelectionCommand}"
+                CommandParameter="{StaticResource MenuItemPoint}"
+                Style="{StaticResource ToggleBtnStyle}"
+                ToolTip="{StaticResource MenuItemPointTooltip}">
+                <Image Source="{StaticResource CadSelectionModelPointImg}" Style="{StaticResource SelectionToggleButtonImageStyle}" />
+            </ToggleButton>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+            <ToggleButton
+                x:Name="CadSelectionBtnMenuItemWindow"
+                Tag="{StaticResource MenuItemWindow}"
+                Command="{Binding CadSelectionCommand}"
+                CommandParameter="{StaticResource MenuItemWindow}"
+                Style="{StaticResource ToggleBtnStyle}"
+                ToolTip="{StaticResource MenuItemWindowTooltip}">
+                <Image Source="{StaticResource CadSelectionModeWindowImg}" Style="{StaticResource SelectionToggleButtonImageStyle}" />
+            </ToggleButton>
+            <ToggleButton
+                x:Name="CadSelectionBtnMenuItemCrossing"
+                Tag="{StaticResource MenuItemCrossing}"
+                Command="{Binding CadSelectionCommand}"
+                CommandParameter="{StaticResource MenuItemCrossing}"
+                Style="{StaticResource ToggleBtnStyle}"
+                ToolTip="{StaticResource MenuItemCrossingTooltip}">
+                <Image Source="{StaticResource CadSelectionModeCrossingImg}" Style="{StaticResource SelectionToggleButtonImageStyle}" />
+            </ToggleButton>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+
+        </StackPanel>
         <!--  Markup button panel  -->
         <StackPanel
             x:Name="MarkupPanel"

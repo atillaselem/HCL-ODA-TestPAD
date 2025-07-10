@@ -4,8 +4,6 @@ using System.Windows.Media;
 using System.Windows;
 using System;
 using HCL_ODA_TestPAD.Settings;
-using Microsoft.Extensions.Logging;
-using HCL_ODA_TestPAD.HCL.Profiler;
 
 namespace HCL_ODA_TestPAD.ViewModels
 {

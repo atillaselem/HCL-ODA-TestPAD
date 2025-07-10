@@ -1,9 +1,7 @@
 ﻿using HCL_ODA_TestPAD.HCL;
-using HCL_ODA_TestPAD.HCL.Profiler;
 using HCL_ODA_TestPAD.Services;
 using Microsoft.Extensions.Logging;
 using Prism.Events;
-using ILogger = Serilog.ILogger;
 
 namespace HCL_ODA_TestPAD.Settings;
 

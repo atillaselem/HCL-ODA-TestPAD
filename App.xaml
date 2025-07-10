@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:HCL_ODA_TestPAD"
+    xmlns:const="clr-namespace:HCL_ODA_TestPAD.HCL"
     xmlns:views="clr-namespace:HCL_ODA_TestPAD.Views"
     xmlns:vms="clr-namespace:HCL_ODA_TestPAD.ViewModels"
     xmlns:vms_base="clr-namespace:HCL_ODA_TestPAD.ViewModels.Base"
@@ -105,6 +106,17 @@
             <BitmapImage x:Key="PointsImg" UriSource="pack://application:,,,/Images/HCL/Tools/Points.png" />
             <BitmapImage x:Key="FillColorImg" UriSource="pack://application:,,,/Images/HCL/Tools/FillColor.png" />
             <BitmapImage x:Key="LayersImg" UriSource="pack://application:,,,/Images/HCL/Tools/Layers.png" />
+            <!--  CAD Selection  -->
+            <BitmapImage x:Key="CadSelectionEnabledImg" UriSource="pack://application:,,,/Images/Selection/selection-Enabled.png" />
+            <BitmapImage x:Key="CadSelectionDisabledImg" UriSource="pack://application:,,,/Images/Selection/selection-Disabled.png" />
+            <BitmapImage x:Key="CadSelectionLevelEntitiesImg" UriSource="pack://application:,,,/Images/Selection/selectLevel-Entity.png" />
+            <BitmapImage x:Key="CadSelectionLevelGeometriesImg" UriSource="pack://application:,,,/Images/Selection/selectLevelGeometries.png" />
+            <BitmapImage x:Key="CadSelectionAutoImg" UriSource="pack://application:,,,/Images/Selection/selectAuto.png" />
+            <BitmapImage x:Key="CadSelectionModelPointImg" UriSource="pack://application:,,,/Images/Selection/selectMode-Point.png" />
+            <BitmapImage x:Key="CadSelectionModeWindowImg" UriSource="pack://application:,,,/Images/Selection/selectMode-Window.png" />
+            <BitmapImage x:Key="CadSelectionModeCrossingImg" UriSource="pack://application:,,,/Images/Selection/selectMode-Crossing.png" />
+            <BitmapImage x:Key="CadSelectionWindowDisabledImg" UriSource="pack://application:,,,/Images/Selection/selectionDisabled.png" />
+            <BitmapImage x:Key="CadSelectionWindowEnabledImg" UriSource="pack://application:,,,/Images/Selection/selectionEnabled.png" />
             <!--  Sectioning images  -->
             <BitmapImage x:Key="AddCuttingPlaneX" UriSource="pack://application:,,,/Images/Sectioning/AddCuttingPlaneX.png" />
             <BitmapImage x:Key="AddCuttingPlaneY" UriSource="pack://application:,,,/Images/Sectioning/AddCuttingPlaneY.png" />
@@ -205,6 +217,27 @@
                 x:Key="Brushes.CadButton.Border"
                 ice:Freeze="True"
                 Color="{StaticResource Steel60}" />
+            <x:Static x:Key="MenuItemToggleSelectionWindowCrossing" Member="const:CadSelectionConstants.ToggleSelectionWindowCrossing" />
+            <x:Static x:Key="MenuItemSelectionEnable" Member="const:CadSelectionConstants.SelectionEnable" />
+            <x:Static x:Key="MenuItemSelectionEnabledToolTip" Member="const:CadSelectionConstants.SelectionEnabledToolTip" />
+            <x:Static x:Key="MenuItemSelectionDisabledToolTip" Member="const:CadSelectionConstants.SelectionDisabledToolTip" />
+            <x:Static x:Key="MenuItemSelectionLevel" Member="const:CadSelectionConstants.SelectionLevel" />
+            <x:Static x:Key="MenuItemEntities" Member="const:CadSelectionConstants.SL_Entities" />
+            <x:Static x:Key="MenuItemEntitiesTooltip" Member="const:CadSelectionConstants.SL_Entities_Tooltip" />
+            <x:Static x:Key="MenuItemGeometries" Member="const:CadSelectionConstants.SL_Geometries" />
+            <x:Static x:Key="MenuItemGeometriesTooltip" Member="const:CadSelectionConstants.SL_Geometries_Tooltip" />
+            <x:Static x:Key="MenuItemVertices" Member="const:CadSelectionConstants.SL_Vertices" />
+            <x:Static x:Key="MenuItemEdges" Member="const:CadSelectionConstants.SL_Edges" />
+            <x:Static x:Key="MenuItemFaces" Member="const:CadSelectionConstants.SL_Faces" />
+            <x:Static x:Key="MenuSelectionMode" Member="const:CadSelectionConstants.SelectionMode" />
+            <x:Static x:Key="MenuItemPoint" Member="const:CadSelectionConstants.SM_Point" />
+            <x:Static x:Key="MenuItemPointTooltip" Member="const:CadSelectionConstants.SM_Point_Tooltip" />
+            <x:Static x:Key="MenuItemWindow" Member="const:CadSelectionConstants.SM_Window" />
+            <x:Static x:Key="MenuItemWindowTooltip" Member="const:CadSelectionConstants.SM_Window_Tooltip" />
+            <x:Static x:Key="MenuItemCrossing" Member="const:CadSelectionConstants.SM_Crossing" />
+            <x:Static x:Key="MenuItemCrossingTooltip" Member="const:CadSelectionConstants.SM_Crossing_Tooltip" />
+            <x:Static x:Key="MenuItemAutoSelection" Member="const:CadSelectionConstants.AutoSelection" />
+            <x:Static x:Key="MenuItemAutoSelectionTooltip" Member="const:CadSelectionConstants.AutoSelection_Tooltip" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

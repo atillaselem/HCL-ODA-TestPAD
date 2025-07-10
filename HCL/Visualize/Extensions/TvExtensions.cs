@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using HCL_ODA_TestPAD.HCL.CAD.Math.API;
-using ODA.Kernel.TD_RootIntegrated;
 using ODA.Visualize.TV_Visualize;
 
 namespace HCL_ODA_TestPAD.HCL.Visualize.Extensions

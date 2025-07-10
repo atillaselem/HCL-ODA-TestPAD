@@ -1,10 +1,9 @@
 using System.ComponentModel;
 using HCL_ODA_TestPAD.HCL.CadUnits;
-using HCL_ODA_TestPAD.HCL.Visualize;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 using ODA.Visualize.TV_Visualize;
 using System.ComponentModel.DataAnnotations;
-using System.Drawing;
+using HCL_ODA_TestPAD.HCL.Tools;
 
 namespace HCL_ODA_TestPAD.Settings;
 
@@ -59,7 +58,18 @@ public enum FillColor
     SandD1,
     RedBright
 }
-
+public enum HighlightColor
+{
+    Red,
+    Green,
+    Blue,
+    Magenta,
+    Yellow,
+    Cyan,
+    Orange,
+    Pink,
+    Purple
+}
 [CategoryOrder("OpenGLES2 Device", 1)]
 [CategoryOrder("Regeneration", 2)]
 [CategoryOrder("Performance", 3)]
@@ -72,7 +82,8 @@ public enum FillColor
 [CategoryOrder("User Interface", 10)] 
 [CategoryOrder("On Start", 11)]
 [CategoryOrder("About App", 12)] 
-[CategoryOrder("Preferences", 13)] 
+[CategoryOrder("Preferences", 13)]
+[CategoryOrder("CAD Selection", 14)]
 
 public record AppSettings
 {
@@ -121,6 +132,16 @@ public record AppSettings
     [DisplayName("Forbid Image Highlight")]
     [Description("Set Forbid Image Highlight")]
     public bool SetForbidImageHighlight { get; init; }
+
+    [Category("OpenGLES2 Device")]
+    [DisplayName("Use Dynamic SubEntity Highlighting")]
+    [Description("Use to increase performance during sub-entity highlighting")]
+    public bool UseDynamicSubEntHighlighting { get; init; } = true;    
+    
+    [Category("OpenGLES2 Device")]
+    [DisplayName("Use Display Post Effects")]
+    [Description("Use to prevent black face flickering of IFC files with Cutting Planes")]
+    public bool UseDisplayPostEffects { get; init; } = true;
     #endregion
 
     #region Regeneration
@@ -178,6 +199,11 @@ public record AppSettings
     [DisplayName("Need CDA Tree")]
     [Description("Set Object Naming")]
     public bool DwgSetNeedCdaTree { get; init; }
+    [Category("DWG & DXF Import Parameters")]
+    [DisplayName("Dwg Line Simplification")]
+    [Description("Used to approach dashed style polygons as single polyline entity")]
+    public OdTvDwgImportParams_PlineSimplification DwgLineSimplification { get; init; } =
+        OdTvDwgImportParams_PlineSimplification.kEnabledRespectPlinegen;
     [Category("DWG & DXF Import Parameters")]
     [DisplayName("Need Collect Properties In CDA")]
     [Description("Set NeedCollectPropertiesInCDA")]
@@ -315,5 +341,20 @@ public record AppSettings
     [Description("Choose mode as HCL to reset custom settings")]
     public SettingsMode SettingsMode { get; init; }
     #endregion
+
+    [Category("CAD Selection")]
+    [DisplayName("Highlight Color")]
+    [Description("Color of the selected entities or geometries")]
+    public HighlightColor HighlightColor { get; init; } = HighlightColor.Red;
+
+    [Category("CAD Selection")]
+    [DisplayName("Face Color")]
+    [Description("Color of the selected face of an entity or a geometry")]
+    public HighlightColor FaceHighlightColor { get; init; } = HighlightColor.Orange;
+
+    [Category("CAD Selection")]
+    [DisplayName("Pick Box Size")]
+    [Description("Size of the pick rectangle when Selection Mode is Point")]
+    public ushort PickBoxSize { get; init; }
 
 }

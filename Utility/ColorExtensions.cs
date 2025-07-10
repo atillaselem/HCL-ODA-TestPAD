@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HCL_ODA_TestPAD.Utility
+﻿namespace HCL_ODA_TestPAD.Utility
 {
     public static class ColorExtensions
     {

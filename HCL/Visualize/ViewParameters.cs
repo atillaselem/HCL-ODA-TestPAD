@@ -2,10 +2,6 @@
 using HCL_ODA_TestPAD.ViewModels.Base;
 using ODA.Visualize.TV_Visualize;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HCL_ODA_TestPAD.HCL.Visualize
 {

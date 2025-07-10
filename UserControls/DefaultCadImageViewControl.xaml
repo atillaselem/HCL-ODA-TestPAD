@@ -15,6 +15,26 @@
             x:Key="Brushes.DragSelect.Border"
             ice:Freeze="True"
             Color="{StaticResource Color.Red}" />
+        <Color x:Key="Color.Blue">#0000FF</Color>
+        <SolidColorBrush
+            x:Key="Brushes.DragSelect.Window.Border"
+            ice:Freeze="True"
+            Color="{StaticResource Color.Blue}" />
+        <Style x:Key="SimpleSysResources" TargetType="{x:Type MenuItem}">
+            <Setter Property = "Background" Value=
+                    "{DynamicResource {x:Static SystemColors.MenuHighlightBrushKey}}"/>
+            <Setter Property = "Foreground" Value=
+                    "{DynamicResource {x:Static SystemColors.MenuTextBrushKey}}"/>
+        </Style>
+        <Style x:Key="Triggers" TargetType="{x:Type MenuItem}">
+            <Style.Triggers>
+                <Trigger Property="MenuItem.IsMouseOver" Value="true">
+                    <Setter Property = "FontSize" Value="16"/>
+                    <Setter Property = "FontStyle" Value="Italic"/>
+                    <Setter Property = "Foreground" Value="Red"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <Grid>
         <Grid x:Name="_cadRenderer">
@@ -29,6 +49,13 @@
             <Border
                 x:Name="dragSelectionBorder"
                 BorderBrush="{StaticResource Brushes.DragSelect.Border}"
+                BorderThickness="3"
+                CornerRadius="1" />
+        </Canvas>
+        <Canvas x:Name="dragSelectionWindow" Visibility="Collapsed">
+            <Border
+                x:Name="dragSelectionWindowBorder"
+                BorderBrush="{StaticResource Brushes.DragSelect.Window.Border}"
                 BorderThickness="3"
                 CornerRadius="1" />
         </Canvas>

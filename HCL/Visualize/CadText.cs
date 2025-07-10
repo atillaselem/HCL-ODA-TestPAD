@@ -1,11 +1,6 @@
 ﻿using HCL_ODA_TestPAD.HCL.CAD.Math.API;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
-using ODA.Kernel.TD_RootIntegrated;
 
 namespace HCL_ODA_TestPAD.HCL.Visualize
 {

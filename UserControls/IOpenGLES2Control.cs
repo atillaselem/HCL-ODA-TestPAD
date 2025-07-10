@@ -52,5 +52,7 @@ namespace HCL_ODA_TestPAD.UserControls
         void SaveAsVsfx(string fileName);
         void ApplyFillColor();
         void ShowLayers();
+        void ToggleSelectionWindow();
+        void OnClickSelectionMenu(string parameter);
     }
 }

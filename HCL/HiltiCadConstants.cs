@@ -1,9 +1,33 @@
 ﻿namespace HCL_ODA_TestPAD.HCL;
 
 using HCL_ODA_TestPAD.Utility;
-using System.Drawing;
 using System.Windows.Media;
 using Color = System.Drawing.Color;
+
+public static class CadSelectionConstants
+{
+    public const string ToggleSelectionWindowCrossing = "ToggleSelectionWindowCrossing";
+    public const string SelectionEnable = "SelectionEnable";
+    public const string SelectionEnabledToolTip = "Selection Enabled";
+    public const string SelectionDisabledToolTip = "Selection Disabled";
+    public const string SelectionLevel = "Selection Level";
+    public const string SL_Entities = "Entities";
+    public const string SL_Entities_Tooltip = "Selection Level - Entities";
+    public const string SL_Geometries = "Geometries";
+    public const string SL_Geometries_Tooltip = "Selection Level - Geometries";
+    public const string SL_Vertices = "Vertices";
+    public const string SL_Edges = "Edges";
+    public const string SL_Faces = "Faces";
+    public const string SelectionMode = "Selection Mode";
+    public const string SM_Point = "Point";
+    public const string SM_Point_Tooltip = "Selection Mode - Point";
+    public const string SM_Window = "Window";
+    public const string SM_Window_Tooltip = "Selection Mode - Window";
+    public const string SM_Crossing = "Crossing";
+    public const string SM_Crossing_Tooltip = "Selection Mode - Crossing";
+    public const string AutoSelection = "Auto Selection";
+    public const string AutoSelection_Tooltip = "Auto Selection - with mode Point";
+}
 
 public static class HiltiCadConstants
 {

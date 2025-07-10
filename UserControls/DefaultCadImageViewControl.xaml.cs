@@ -16,6 +16,10 @@ using System.Threading;
 using HCL_ODA_TestPAD.Mvvm.Events;
 using HCL_ODA_TestPAD.HCL.UserActions.States;
 using HCL_ODA_TestPAD.Views;
+using System.Windows.Controls.Primitives;
+using HCL_ODA_TestPAD.HCL.UserActions;
+using HCL_ODA_TestPAD.Utility;
+using static HCL_ODA_TestPAD.HCL.CadSelectionConstants;
 
 namespace HCL_ODA_TestPAD.UserControls;
 
@@ -44,7 +48,9 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
     }
     public OdTvSectioningOptions SectioningOptions { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     public OdTvDatabaseId TvDatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    
+    private readonly UserSelectionWindow _userSelectionWindow;
+    private bool _isTouchUpSelection;
+
     public DefaultCadImageViewControl(MainWindowViewModel mainWindowVm, IServiceFactory serviceFactory, OverlayViewModel overlayViewModel)
     {
         InitializeComponent();
@@ -60,6 +66,9 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
             _vmAdapter);
         _userActionState = new ActionIdle(_userActionManager);
         _overlayViewModel = overlayViewModel;
+        _userSelectionWindow = new UserSelectionWindow(
+            () => dragSelectionWindow,
+            () => dragSelectionWindowBorder);
     }
 
     private void VisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -137,7 +146,20 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
     protected override void OnMouseDown(MouseButtonEventArgs e)
     {
         ArgumentNullException.ThrowIfNull(e);
-        _userActionState.ExecuteMouseTouchDown(e, this);
+        //If ZoomToArea selected and SelectionMode is Window, then use the userSelectionWindow to handle the mouse event
+        if (e.MiddleButton == MouseButtonState.Pressed 
+            && _userSelectionWindow.IsEnabled)
+        {
+            _userSelectionWindow.HandleMouseTouchDown(e, this);
+            return;
+        }
+        if (_userSelectionWindow.IsEnabled)
+        {
+            // If the userSelectionWindow is enabled, then do not allow any other mouse action.
+            return;
+        }
+
+        _userActionState.ExecuteMouseTouchDown(e, this); 
         if (MainWindowVm.AppMainWindow.HclToolStationBtn.IsChecked != null && MainWindowVm.AppMainWindow.HclToolStationBtn.IsChecked.Value && (e.MiddleButton == MouseButtonState.Pressed))
         {
             _vmAdapter.ChangeStationLocation(e.GetPosition(this));
@@ -146,11 +168,10 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
         {
             _vmAdapter.ChangePrismLocation(e.GetPosition(this));
         }
-        if (_userActionState.ActiveAction is UserInteraction.Orbiting or UserInteraction.ZoomToScale && _serviceFactory.AppSettings.HidePointTextTransformation)
+        else if (_userActionState.ActiveAction is UserInteraction.Orbiting or UserInteraction.ZoomToScale && _serviceFactory.AppSettings.HidePointTextTransformation)
         {
             _vmAdapter.ToggleTextTransformation(false);
         }
-
         ToggleAsyncPbo(true);
     }
 
@@ -163,12 +184,23 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
     protected override void OnMouseMove(MouseEventArgs e)
     {
         ArgumentNullException.ThrowIfNull(e);
-        if (_userActionState.ActiveAction == UserInteraction.ZoomToArea)
+
+        //Drag only for creating Selection Window and return;
+        if (e.MiddleButton == MouseButtonState.Pressed 
+            && _userSelectionWindow.IsEnabled)
+        {
+            _userSelectionWindow.HandleMouseTouchMove(e, this);
+            return;
+        }
+
+        if (e.LeftButton == MouseButtonState.Pressed && _userActionState.ActiveAction == UserInteraction.ZoomToArea)
         {
             using var _ = _vmAdapter.UpdateStatusBarCoordinates(e.GetPosition(this));
         }
-        else if (e.LeftButton != MouseButtonState.Pressed)
+        //Run Auto Select while mouse is hovering on any entity.
+        if (e.LeftButton != MouseButtonState.Pressed && _vmAdapter.AutoSelectWhileHover)
         {
+            _vmAdapter.DoSelection(e.GetPosition(this));
             return;
         }
         _userActionState.ExecuteMouseTouchMove(e, this);
@@ -182,6 +214,25 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
         if (_userActionState.ActiveAction is UserInteraction.Orbiting or UserInteraction.ZoomToScale && _serviceFactory.AppSettings.HidePointTextTransformation)
         {
             _vmAdapter.ToggleTextTransformation(true);
+        }
+        else if (e.ChangedButton == MouseButton.Middle && e.MiddleButton == MouseButtonState.Released
+            && _userSelectionWindow.IsEnabled)
+        {
+            _userSelectionWindow.HandleMouseTouchUp(e, this);
+            DoMouseTouchUpSelection();
+            return;
+        }
+
+        if (_isTouchUpSelection)
+        {
+            _isTouchUpSelection = false;
+            // Do not do selection below unless mouse is used.
+            return;
+        }
+        if (_userActionState.ActiveAction is not UserInteraction.ZoomToArea && e.ChangedButton == MouseButton.Left)
+        {
+            //Selection by Mouse Release is by default.
+            _vmAdapter.DoSelection( e.GetPosition(this));
         }
     }
 
@@ -199,16 +250,50 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
     protected override void OnTouchDown(TouchEventArgs e)
     {
         _actionZoomToScale.ExecuteMouseTouchDown(e, this);
+        if (_userSelectionWindow.IsEnabled)
+        {
+            _userSelectionWindow.HandleMouseTouchDown(e, this);
+        }
     }
     protected override void OnTouchMove(TouchEventArgs e)
     {
         _actionZoomToScale.ExecuteMouseTouchMove(e, this);
         _vmAdapter.UpdateHclZoomTransformations(isPinchZoom: true);
+        //Drag only for creating Selection Window and return;
+        if (_userSelectionWindow.IsEnabled)
+        {
+            _userSelectionWindow.HandleMouseTouchMove(e, this);
+        }
     }
     protected override void OnTouchUp(TouchEventArgs e)
     {
         _actionZoomToScale.ExecuteMouseTouchUp(e, this);
+        if (_userSelectionWindow.IsEnabled)
+        {
+            _userSelectionWindow.HandleMouseTouchUp(e, this);
+            DoMouseTouchUpSelection();
+            _isTouchUpSelection = true;
+        }
     }
+
+    private void DoMouseTouchUpSelection()
+    {
+        _vmAdapter.DoSelection(_userSelectionWindow.SelectionWindowScreenPoints.ToArray());
+        _userSelectionWindow.ClearSelectionPoints();
+        ChangeSelectionModeToPoint();
+    }
+
+    private void ChangeSelectionModeToPoint()
+    {
+        // 1. Disable the userSelectionWindow after selection is done.
+        _userSelectionWindow.IsEnabled = false;
+        // 2. Reset the selection mode to Point to enable other user interactions like Panning, Orbiting etc
+        MainWindowVm.AppMainWindow.CadSelectionBtnMenuItemPoint.IsChecked = true;
+        _vmAdapter.SelectionMode = SM_Point;
+        MainWindowVm.AppMainWindow.CadSelectionBtnMenuItemWindow.IsChecked = false;
+        MainWindowVm.AppMainWindow.CadSelectionBtnMenuItemCrossing.IsChecked = false;
+    }
+
     protected override void OnTouchLeave(TouchEventArgs e)
     {
         _actionZoomToScale!.ExecuteTouchLeave(e, this);
@@ -463,5 +548,164 @@ public partial class DefaultCadImageViewControl : IOpenGles2Control, ICadImageVi
             WindowStartupLocation = WindowStartupLocation.CenterScreen
         };
         window.Show();
+    }
+
+    public void ToggleSelectionWindow()
+    {
+        _userSelectionWindow.IsEnabled = !_userSelectionWindow.IsEnabled;
+    }
+
+    public void OnClickSelectionMenu(string menuSelected)
+    {
+        var stackPanel = MainWindowVm.AppMainWindow.CADSelectionPanel;
+        var btnPrefix = "CadSelectionBtnMenuItem";
+        switch (menuSelected)
+        {
+            case SelectionEnable:
+            {
+                _vmAdapter.SelectionEnabled = !_vmAdapter.SelectionEnabled;
+                break;
+            }
+            case SL_Entities:
+            {
+                if (IsPressedOnSameSelectionLevel(SL_Entities))
+                {
+                    break;
+                }
+                if (WpfHelper.FindChild(stackPanel, child =>
+                        child is ToggleButton
+                        {
+                            Tag: SL_Entities,
+                            IsChecked: true
+                        }) is ToggleButton windowMenu)
+                {
+                    CheckOnMenuItems(false, SL_Geometries);
+                }
+                break;
+            }
+            case SL_Geometries:
+            {
+                if (IsPressedOnSameSelectionLevel(SL_Geometries))
+                {
+                    break;
+                }
+                if (WpfHelper.FindChild(stackPanel, child =>
+                        child is ToggleButton
+                        {
+                            Tag: SL_Geometries,
+                            IsChecked: true
+                        }) is ToggleButton windowMenu)
+                {
+                    CheckOnMenuItems(false, SL_Entities);
+                }
+                break;
+            }
+            case AutoSelection:
+            {
+                _vmAdapter.AutoSelectWhileHover = !_vmAdapter.AutoSelectWhileHover;
+                break;
+            }   
+            case SM_Point:
+            {
+                if (IsPressedOnSameSelectionMode(SM_Point))
+                {
+                    break;
+                }
+                if (WpfHelper.FindChild(stackPanel, child =>
+                child is ToggleButton
+                {
+                    Tag: SM_Point,
+                    IsChecked: true
+                }) is ToggleButton windowMenu)
+                {
+                    ToggleAutoSelection(false, true);
+                    CheckOnMenuItems(false, SM_Window, SM_Crossing);
+                    _userSelectionWindow.IsEnabled = false;
+                }
+                break;
+            }
+            case SM_Window:
+            {
+                if (IsPressedOnSameSelectionMode(SM_Window))
+                {
+                    break;
+                }
+                if (WpfHelper.FindChild(stackPanel, child =>
+                        child is ToggleButton
+                        {
+                            Tag: SM_Window,
+                            IsChecked:true
+                        }) is ToggleButton windowMenu)
+                {
+                    ToggleAutoSelection(false, false);
+                    CheckOnMenuItems(false, SM_Point, SM_Crossing);
+                    _userSelectionWindow.IsEnabled = true;
+                }
+                break;
+            }   
+            case SM_Crossing:
+            {
+                if (IsPressedOnSameSelectionMode(SM_Crossing))
+                {
+                    break;
+                }
+                if (WpfHelper.FindChild(stackPanel, child =>
+                child is ToggleButton
+                {
+                    Tag: SM_Crossing,
+                    IsChecked: true
+                }) is ToggleButton crossingMenu)
+                {
+                    ToggleAutoSelection(false, false);
+                    CheckOnMenuItems(false,  SM_Point, SM_Window);
+                    _userSelectionWindow.IsEnabled = true;
+                }
+                break;
+            }
+        }
+
+        return;
+
+        #region Local Selection Menu Functions
+        bool IsPressedOnSameSelectionLevel(string selectionLevel)
+        {
+            if (_vmAdapter.SelectionLevel == selectionLevel)
+            {
+                CheckOnMenuItems(true, selectionLevel);
+                return true;
+            }
+
+            _vmAdapter.SelectionLevel = selectionLevel;
+            _vmAdapter.SetSelectionLevel();
+            return false;
+        }
+        bool IsPressedOnSameSelectionMode(string selectionMode)
+        {
+            if (_vmAdapter.SelectionMode == selectionMode)
+            {
+                CheckOnMenuItems(true, selectionMode);
+                return true;
+            }
+
+            _vmAdapter.SelectionMode = selectionMode;
+            return false;
+        }
+        void ToggleAutoSelection(bool isChecked, bool isEnabled)
+        {
+            var autoSelectMenu = stackPanel.FindName(btnPrefix + AutoSelection.Replace(" ", "")) as ToggleButton;
+            autoSelectMenu.IsChecked = isChecked;
+            autoSelectMenu.IsEnabled = isEnabled;
+            _vmAdapter.AutoSelectWhileHover = isChecked;
+        }
+        void CheckOnMenuItems(bool isChecked, params string[] menuItems)
+        {
+            foreach (var menuItemName in menuItems)
+            {
+                var menuItem = stackPanel.FindName(btnPrefix + menuItemName.Replace(" ", "")) as ToggleButton;
+                menuItem.IsChecked = isChecked;
+            }
+        }
+        #endregion
+
     }
 }

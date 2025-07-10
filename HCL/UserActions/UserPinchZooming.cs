@@ -8,7 +8,7 @@ using System.Windows.Input;
 using HCL_ODA_TestPAD.HCL.Exceptions;
 using HCL_ODA_TestPAD.HCL.MouseTouch;
 using HCL_ODA_TestPAD.HCL.Profiler;
-using HCL_ODA_TestPAD.HCL.Visualize;
+using HCL_ODA_TestPAD.HCL.Tools;
 using HCL_ODA_TestPAD.Settings;
 using HCL_ODA_TestPAD.ViewModels.Base;
 using ODA.Visualize.TV_Visualize;

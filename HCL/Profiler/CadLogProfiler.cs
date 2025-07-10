@@ -1,7 +1,6 @@
 ﻿// Copyright © 2018 by Hilti Corporation – all rights reserved
 
 using CommonServiceLocator;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 

@@ -12,8 +12,8 @@
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <OutputPath>$(SolutionDir)Build\$(Configuration)\</OutputPath>
     <UseWindowsForms>True</UseWindowsForms>
-    <AssemblyVersion>2025.01.23</AssemblyVersion>
-    <Platforms>x64;x86</Platforms>
+    <AssemblyVersion>2025.07.09</AssemblyVersion>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -21,17 +21,7 @@
     <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
-    <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
-    <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
     <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
   </PropertyGroup>
@@ -137,6 +127,17 @@
     <None Remove="Images\Sectioning\FillCuttingPlane.png" />
     <None Remove="Images\Sectioning\FillCuttingPlaneOff.png" />
     <None Remove="Images\Sectioning\RemoveCuttingPlane.png" />
+    <None Remove="Images\Selection\selectAuto.png" />
+    <None Remove="Images\Selection\selection-Disabled.png" />
+    <None Remove="Images\Selection\selection-Enabled.png" />
+    <None Remove="Images\Selection\selectionDisabled.png" />
+    <None Remove="Images\Selection\selectionEnabled.png" />
+    <None Remove="Images\Selection\SelectionLevelWindow.png" />
+    <None Remove="Images\Selection\selectLevel-Entity.png" />
+    <None Remove="Images\Selection\selectLevelGeometries.png" />
+    <None Remove="Images\Selection\selectMode-Crossing.png" />
+    <None Remove="Images\Selection\selectMode-Point.png" />
+    <None Remove="Images\Selection\selectMode-Window.png" />
     <None Remove="Images\TabItem\CloseTabItem.png" />
     <None Remove="Images\Views\back.png" />
     <None Remove="Images\Views\bottom.png" />
@@ -316,6 +317,17 @@
     <Resource Include="Images\Sectioning\FillCuttingPlane.png" />
     <Resource Include="Images\Sectioning\FillCuttingPlaneOff.png" />
     <Resource Include="Images\Sectioning\RemoveCuttingPlane.png" />
+    <Resource Include="Images\Selection\selectAuto.png" />
+    <Resource Include="Images\Selection\selection-Disabled.png" />
+    <Resource Include="Images\Selection\selection-Enabled.png" />
+    <Resource Include="Images\Selection\selectionDisabled.png" />
+    <Resource Include="Images\Selection\selectionEnabled.png" />
+    <Resource Include="Images\Selection\SelectionLevelWindow.png" />
+    <Resource Include="Images\Selection\selectLevel-Entity.png" />
+    <Resource Include="Images\Selection\selectLevelGeometries.png" />
+    <Resource Include="Images\Selection\selectMode-Crossing.png" />
+    <Resource Include="Images\Selection\selectMode-Point.png" />
+    <Resource Include="Images\Selection\selectMode-Window.png" />
     <Resource Include="Images\TabItem\CloseTabItem.png" />
     <Resource Include="Images\Views\back.png" />
     <Resource Include="Images\Views\bottom.png" />
